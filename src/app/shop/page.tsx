@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { NewBadge } from "@/components/ui/NewBadge";
 import { createClient } from "@/lib/supabase/server";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, isNew } from "@/lib/format";
 import styles from "./shop.module.css";
 
 export const metadata: Metadata = { title: "Shop" };
@@ -12,7 +13,7 @@ export default async function ShopPage() {
   const supabase = await createClient();
   const { data: products } = await supabase
     .from("products")
-    .select("id, name, price_cents, currency, images")
+    .select("id, name, price_cents, currency, images, published_at")
     .eq("is_published", true)
     .order("created_at", { ascending: false });
 
@@ -35,7 +36,9 @@ export default async function ShopPage() {
                   }
                 />
                 <div className={styles.body}>
-                  <span className={styles.name}>{product.name}</span>
+                  <span className={styles.name}>
+                    {product.name} {isNew(product.published_at) && <NewBadge />}
+                  </span>
                   <span className={styles.price}>
                     {formatPrice(product.price_cents, product.currency)}
                   </span>

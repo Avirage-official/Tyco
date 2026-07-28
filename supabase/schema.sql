@@ -453,10 +453,17 @@ create index if not exists product_variants_product_id_idx on public.product_var
 -- service-role/webhook concern. Customers may only ever SELECT/INSERT their
 -- own orders, never UPDATE or DELETE them — otherwise a signed-in customer
 -- could mark their own order "paid" from the browser without paying.
+--
+-- user_id is nullable and ON DELETE SET NULL rather than CASCADE: deleting a
+-- user account (e.g. from the admin panel) should not erase sales records.
+-- customer_email is captured at order time so an order stays identifiable
+-- even after the account behind it is gone, and so the admin orders view
+-- doesn't need service-role access just to show who ordered something.
 -- ----------------------------------------------------------------------------
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users (id) on delete cascade,
+  user_id uuid references auth.users (id) on delete set null,
+  customer_email text,
   status text not null default 'pending',
   currency text not null default 'usd',
   total_cents integer not null default 0,
@@ -466,9 +473,16 @@ create table if not exists public.orders (
   updated_at timestamptz not null default now()
 );
 
+alter table public.orders add column if not exists customer_email text;
 alter table public.orders add column if not exists currency text not null default 'usd';
 alter table public.orders add column if not exists stripe_payment_intent_id text;
 alter table public.orders add column if not exists updated_at timestamptz not null default now();
+
+alter table public.orders alter column user_id drop not null;
+
+alter table public.orders drop constraint if exists orders_user_id_fkey;
+alter table public.orders add constraint orders_user_id_fkey
+  foreign key (user_id) references auth.users (id) on delete set null;
 
 alter table public.orders drop constraint if exists orders_status_check;
 alter table public.orders add constraint orders_status_check

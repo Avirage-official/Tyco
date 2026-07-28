@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { createClient } from "@/lib/supabase/server";
@@ -24,6 +25,7 @@ export default async function AccountPage() {
     .single();
 
   const name = profile?.display_name ?? user.email?.split("@")[0] ?? "you";
+  const { data: isAdmin } = await supabase.rpc("is_admin");
 
   return (
     <>
@@ -38,6 +40,13 @@ export default async function AccountPage() {
             <p className={styles.email}>{user.email}</p>
           </div>
         </div>
+        {isAdmin && (
+          <p style={{ marginBottom: "var(--space-md)" }}>
+            <Link href="/admin" className="eyebrow">
+              Go to admin →
+            </Link>
+          </p>
+        )}
         <SignOutButton />
       </div>
     </>

@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import styles from "../auth.module.css";
 
-export function LoginForm() {
+export function LoginForm({ next }: { next?: string }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +27,8 @@ export function LoginForm() {
       return;
     }
 
-    router.push("/account");
+    const destination = next && next.startsWith("/") && !next.startsWith("//") ? next : "/account";
+    router.push(destination);
     router.refresh();
   }
 

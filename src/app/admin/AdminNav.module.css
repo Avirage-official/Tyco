@@ -1,0 +1,30 @@
+.nav {
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-lg);
+}
+
+.link {
+  position: relative;
+  padding-block: var(--space-sm);
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.linkActive {
+  color: var(--fg);
+}
+
+.linkActive::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+}

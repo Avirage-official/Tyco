@@ -10,7 +10,7 @@ export default async function MusicPage() {
   const supabase = await createClient();
   const { data: tracks } = await supabase
     .from("tracks")
-    .select("id, title, artist, cover_url, audio_url, duration_seconds")
+    .select("id, title, artist, cover_url, audio_url, duration_seconds, published_at")
     .eq("is_published", true)
     .order("release_date", { ascending: false });
 

@@ -1,0 +1,255 @@
+.page {
+  padding-bottom: var(--space-2xl);
+}
+
+.headerRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-lg);
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-bottom: var(--space-xl);
+}
+
+.stat {
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+}
+
+.statLabel {
+  color: var(--fg-muted);
+  font-size: 0.82rem;
+}
+
+/* -- table -------------------------------------------------------- */
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th {
+  text-align: left;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.rowThumb {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.rowTitle {
+  font-weight: 600;
+}
+
+.rowMeta {
+  color: var(--fg-muted);
+  font-size: 0.82rem;
+}
+
+/* -- badges --------------------------------------------------------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.badgePublished {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.badgeDraft {
+  background: var(--surface);
+  color: var(--fg-muted);
+}
+
+.badgeStatus {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* -- actions --------------------------------------------------------- */
+.actions {
+  display: flex;
+  gap: var(--space-2xs);
+  flex-wrap: wrap;
+}
+
+.linkBtn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.linkBtn:hover {
+  text-decoration: underline;
+}
+
+.dangerBtn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.dangerBtn:hover {
+  color: var(--accent);
+}
+
+.empty {
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--fg-muted);
+}
+
+/* -- forms --------------------------------------------------------- */
+.form {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.fieldRow {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 560px) {
+  .fieldRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.input,
+.textarea,
+.select {
+  padding: 0.65rem var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  font: inherit;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 6rem;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.preview {
+  width: 5rem;
+  height: 5rem;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border);
+}
+
+.variantsBlock {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.variantRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: var(--space-2xs);
+  align-items: center;
+}
+
+.error {
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.success {
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+
+.formActions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}

@@ -5,13 +5,19 @@ import styles from "../auth.module.css";
 
 export const metadata: Metadata = { title: "Sign in" };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
+
   return (
     <div className={styles.wrap}>
       <div className={styles.card}>
         <h1 className={styles.title}>Welcome back</h1>
         <p className={styles.subtitle}>Sign in to your Tyco account.</p>
-        <LoginForm />
+        <LoginForm next={next} />
         <p className={styles.switch}>
           New here? <Link href="/signup">Create an account</Link>
         </p>

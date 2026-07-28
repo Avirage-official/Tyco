@@ -40,11 +40,42 @@ deployed on Vercel, backed by Supabase.
   are **not** built yet — "Add to cart" is a stub.
 - `/login`, `/signup`, `/account` — Supabase email/password auth. A
   `profiles` row is created automatically on signup via a DB trigger.
+- `/admin` — content, orders, and user management (see "Admin panel" below).
+  Only visible/reachable if your account is in `public.admins`; everyone
+  else gets redirected before rendering anything.
+
+Anything published in the last two weeks shows an automatic "New" tag on
+`/music`, `/shop`, and `/studio` — no manual step, it's driven off
+`published_at`.
 
 Mobile gets a bottom tab bar (Home / Music / Studio / Shop / Account) so the
 site behaves like an installed app; desktop gets a top nav instead. The
 `manifest.webmanifest` + icons make "Add to Home Screen" produce a real app
 icon and standalone window.
+
+## Admin panel
+
+`/admin` is a real content-management UI, gated by `public.admins` +
+Supabase auth (not a separate hardcoded login) — see "Local setup" below for
+how to grant yourself access.
+
+- **Albums, Tracks, Portfolio, Events, Products** — list, create, edit,
+  publish/unpublish, delete. Cover art / audio / gallery images upload
+  straight from the browser to Supabase Storage (bypassing the Next.js
+  server, so there's no file-size limit from Vercel's function body cap).
+  Products manage their per-size stock (`product_variants`) inline on the
+  same form.
+- **Orders** — every order, who placed it, how many items, total, and a
+  status dropdown (`pending → paid → fulfilled → …`). This is the only
+  place order status changes — customers can never do this themselves.
+- **Users** — every signed-up account, block/unblock, delete. Uses the
+  Supabase **Admin API**, which needs the service-role key
+  (`SUPABASE_SERVICE_ROLE_KEY`) — the only part of the app that does. You
+  can't block or delete your own account from this screen (guards against
+  locking yourself out).
+
+Every admin write re-checks `is_admin()` on the server on every request —
+nothing is trusted just because a page rendered the admin UI once.
 
 ## Local setup
 
@@ -55,7 +86,9 @@ icon and standalone window.
    ```
 
 2. Create a Supabase project, then copy `.env.example` to `.env.local` and
-   fill in the values from **Project Settings → API**:
+   fill in the values from **Project Settings → API** — including the
+   `service_role` secret (`SUPABASE_SERVICE_ROLE_KEY`), needed for the admin
+   panel's user management. It's server-only; never exposed to the browser:
 
    ```bash
    cp .env.example .env.local
@@ -67,20 +100,16 @@ icon and standalone window.
    It creates every table, RLS policy, trigger, and the storage buckets
    (`tracks`, `covers`, `portfolio`, `products`).
 
-4. Grant yourself admin so you can publish content — sign up in the app
-   first (so a `profiles`/`auth.users` row exists), then in the SQL editor:
+4. Grant yourself admin so you can reach `/admin` — sign up in the app first
+   (so a `profiles`/`auth.users` row exists), then in the SQL editor:
 
    ```sql
    insert into public.admins (user_id)
    select id from auth.users where email = 'you@example.com';
    ```
 
-   Content tables (`tracks`, `albums`, `portfolio_items`, `events`,
-   `products`, `product_variants`) are readable by anyone once
-   `is_published = true`, but only rows owned by an admin (i.e. anyone in
-   `public.admins`) can be inserted/updated/deleted — via the Supabase
-   Table Editor for now, or a future in-app admin panel, since the RLS
-   policies already allow it for a signed-in admin session.
+   That's it — sign in and go to `/admin` (there's a link on `/account` too).
+   No separate admin login to configure.
 
 5. Run the dev server:
 
@@ -126,14 +155,12 @@ This pass is the foundation: design system, navigation shell, auth, and a
 real (if empty) Supabase-backed schema for all three verticals. Natural
 next steps, roughly in order:
 
-- Seed real tracks/portfolio/events/products and confirm the empty states
-  give way to real content.
 - Shopping cart + checkout — `orders`/`order_items` and a `stripe_payment_intent_id`
-  column are already there, Stripe is the obvious fit.
-- An actual admin UI in the app itself — the RLS policies already allow an
-  admin session to write content directly, so this is mostly front-end work
-  at this point, not a data-model change.
+  column are already there, and the admin Orders screen can already manage
+  whatever checkout produces. Stripe is the obvious fit.
 - Wire up `play_count`: the `increment_play_count(track_id)` RPC exists and
   is callable by anyone, but nothing calls it yet from the player.
 - Queueing and a persistent player across navigations if the music section
   needs to feel more like a real player and less like a list.
+- The admin panel doesn't paginate long lists yet — fine at foundation
+  scale, worth revisiting once there are hundreds of tracks/products.

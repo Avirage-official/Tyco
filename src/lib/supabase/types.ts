@@ -209,7 +209,8 @@ export interface Database {
       orders: Table<
         {
           id: string;
-          user_id: string;
+          user_id: string | null;
+          customer_email: string | null;
           status: "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
           currency: string;
           total_cents: number;
@@ -220,7 +221,8 @@ export interface Database {
         },
         {
           id?: string;
-          user_id: string;
+          user_id?: string | null;
+          customer_email?: string | null;
           status?: "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
           currency?: string;
           total_cents?: number;

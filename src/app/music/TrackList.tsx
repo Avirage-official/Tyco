@@ -1,7 +1,9 @@
 "use client";
 
 import { IconPause, IconPlay } from "@/components/icons";
+import { NewBadge } from "@/components/ui/NewBadge";
 import { usePlayer, type PlayableTrack } from "@/lib/player/PlayerContext";
+import { isNew } from "@/lib/format";
 import styles from "./page.module.css";
 
 function formatDuration(seconds: number | null) {
@@ -16,7 +18,7 @@ function formatDuration(seconds: number | null) {
 export function TrackList({
   tracks,
 }: {
-  tracks: (PlayableTrack & { duration_seconds: number | null })[];
+  tracks: (PlayableTrack & { duration_seconds: number | null; published_at: string | null })[];
 }) {
   const { current, isPlaying, play } = usePlayer();
 
@@ -41,7 +43,9 @@ export function TrackList({
               aria-hidden
             />
             <span className={styles.meta}>
-              <span className={styles.title}>{track.title}</span>
+              <span className={styles.title}>
+                {track.title} {isNew(track.published_at) && <NewBadge />}
+              </span>
               <span className={styles.sub}>{track.artist}</span>
             </span>
             <span className={styles.duration}>{formatDuration(track.duration_seconds)}</span>
