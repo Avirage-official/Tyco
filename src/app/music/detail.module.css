@@ -1,0 +1,112 @@
+.hero {
+  display: flex;
+  gap: var(--space-lg);
+  align-items: flex-end;
+  padding-block: var(--space-xl) var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.heroCover {
+  width: 180px;
+  height: 180px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+}
+
+.heroCoverRound {
+  border-radius: 50%;
+}
+
+.heroMeta {
+  min-width: 0;
+  padding-bottom: 0.2rem;
+}
+
+.heroTitle {
+  margin-top: 0.3rem;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+}
+
+.heroSub {
+  margin-top: 0.3rem;
+  color: var(--fg-muted);
+}
+
+.heroSub a {
+  color: var(--fg-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.heroActions {
+  margin-top: var(--space-md);
+}
+
+.bio {
+  margin-top: var(--space-md);
+  max-width: 60ch;
+  color: var(--fg-muted);
+}
+
+.quickRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.likedLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.likedLink svg {
+  width: 14px;
+  height: 14px;
+}
+
+.sectionTitle {
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-sm);
+  font-size: 1.2rem;
+}
+
+.albumGrid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  margin-bottom: var(--space-2xl);
+}
+
+.albumCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.albumCover {
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+}
+
+.albumCardTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.albumCardMeta {
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}

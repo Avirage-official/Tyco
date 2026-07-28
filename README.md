@@ -32,8 +32,13 @@ deployed on Vercel, backed by Supabase.
 ## App structure
 
 - `/` — landing page, links into the three pillars below.
-- `/music` — the free streaming catalogue. Has a working (basic) player:
-  tap play on a track and a now-playing bar docks above the bottom nav.
+- `/music` — the free streaming catalogue: browse by album or the full track
+  list, shuffle everything, or jump into `/music/albums/[id]` and
+  `/music/artists/[id]`. A real player: seek/scrub, skip, shuffle, repeat
+  (off/all/one), an inline "Up Next" queue, lock-screen/notification
+  controls via the Media Session API, and Liked Songs (`/music/liked`) for
+  signed-in listeners. Tap the mini player to expand to a full-screen Now
+  Playing view.
 - `/studio` and `/studio/events` — creative/portfolio updates and events
   (past + upcoming), tabbed together under "Studio".
 - `/shop` and `/shop/[id]` — retail product grid and product detail, with
@@ -150,6 +155,10 @@ that track (MP3/FLAC); no need to upgrade Supabase for this alone.
   only `SELECT`/`INSERT` their own orders — status transitions
   (`pending → paid → fulfilled → ...`) are service-role/webhook-only, so a
   signed-in customer can't mark their own order paid from the browser.
+- **`track_likes`** — a listener's saved tracks (`user_id`, `track_id`).
+  Purely self-service: RLS restricts every operation to `auth.uid() = user_id`,
+  verified against a local Postgres instance that one user's likes are
+  invisible to and un-deletable by another.
 
 Every publishable table has `is_published` + `published_at` (auto-stamped by
 a trigger the first time a row is published) and `updated_at` (auto-bumped
@@ -171,9 +180,11 @@ next steps, roughly in order:
 - Shopping cart + checkout — `orders`/`order_items` and a `stripe_payment_intent_id`
   column are already there, and the admin Orders screen can already manage
   whatever checkout produces. Stripe is the obvious fit.
-- Wire up `play_count`: the `increment_play_count(track_id)` RPC exists and
-  is callable by anyone, but nothing calls it yet from the player.
-- Queueing and a persistent player across navigations if the music section
-  needs to feel more like a real player and less like a list.
+- The player state (queue, position, shuffle) doesn't persist across a full
+  page reload — resets are only mid-session. Worth a localStorage restore
+  if that starts to bother listeners.
 - The admin panel doesn't paginate long lists yet — fine at foundation
   scale, worth revisiting once there are hundreds of tracks/products.
+- Play counts increment on every track start, not after a minimum listen
+  duration — fine for now, revisit if you want counts closer to how
+  Spotify/Apple define a "play."

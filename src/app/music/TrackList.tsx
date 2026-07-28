@@ -2,25 +2,30 @@
 
 import { IconPause, IconPlay } from "@/components/icons";
 import { NewBadge } from "@/components/ui/NewBadge";
+import { LikeButton } from "@/components/music/LikeButton";
 import { usePlayer, type PlayableTrack } from "@/lib/player/PlayerContext";
-import { isNew } from "@/lib/format";
+import { formatDuration, isNew } from "@/lib/format";
 import styles from "./page.module.css";
 
-function formatDuration(seconds: number | null) {
-  if (!seconds) return "";
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60)
-    .toString()
-    .padStart(2, "0");
-  return `${m}:${s}`;
-}
+type Track = PlayableTrack & { duration_seconds: number | null; published_at: string | null };
 
 export function TrackList({
   tracks,
+  likedTrackIds = [],
 }: {
-  tracks: (PlayableTrack & { duration_seconds: number | null; published_at: string | null })[];
+  tracks: Track[];
+  likedTrackIds?: string[];
 }) {
-  const { current, isPlaying, play } = usePlayer();
+  const { current, isPlaying, playQueue, toggle } = usePlayer();
+  const likedSet = new Set(likedTrackIds);
+
+  function handlePlayClick(track: Track, index: number) {
+    if (current?.id === track.id) {
+      toggle();
+    } else {
+      playQueue(tracks, index);
+    }
+  }
 
   return (
     <ol className={styles.list}>
@@ -32,7 +37,7 @@ export function TrackList({
             <button
               type="button"
               className={styles.playBtn}
-              onClick={() => play(track)}
+              onClick={() => handlePlayClick(track, i)}
               aria-label={isCurrent && isPlaying ? `Pause ${track.title}` : `Play ${track.title}`}
             >
               {isCurrent && isPlaying ? <IconPause /> : <IconPlay />}
@@ -49,6 +54,7 @@ export function TrackList({
               <span className={styles.sub}>{track.artist}</span>
             </span>
             <span className={styles.duration}>{formatDuration(track.duration_seconds)}</span>
+            <LikeButton trackId={track.id} initiallyLiked={likedSet.has(track.id)} size="sm" />
           </li>
         );
       })}

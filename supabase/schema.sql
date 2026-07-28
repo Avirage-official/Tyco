@@ -297,6 +297,28 @@ $$;
 grant execute on function public.increment_play_count(uuid) to anon, authenticated;
 
 -- ----------------------------------------------------------------------------
+-- track_likes — a signed-in listener's saved tracks ("Liked Songs"). Purely
+-- user-owned: no admin policy needed, nobody manages this on anyone's behalf.
+-- ----------------------------------------------------------------------------
+create table if not exists public.track_likes (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  track_id uuid not null references public.tracks (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, track_id)
+);
+
+alter table public.track_likes enable row level security;
+
+drop policy if exists "users manage their own likes" on public.track_likes;
+create policy "users manage their own likes"
+  on public.track_likes for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create index if not exists track_likes_user_id_idx on public.track_likes (user_id);
+create index if not exists track_likes_track_id_idx on public.track_likes (track_id);
+
+-- ----------------------------------------------------------------------------
 -- portfolio_items — creative work & studio updates
 -- ----------------------------------------------------------------------------
 create table if not exists public.portfolio_items (

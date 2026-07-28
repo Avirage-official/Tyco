@@ -1,0 +1,282 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  animation: rise var(--dur) var(--ease);
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 1;
+}
+
+.collapseBtn {
+  width: 2.4rem;
+  height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-muted);
+}
+
+.collapseBtn:hover {
+  color: var(--fg);
+}
+
+.topLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 var(--space-lg) var(--space-xl);
+  max-width: 480px;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.cover {
+  width: min(78vw, 340px);
+  height: min(78vw, 340px);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  margin-top: var(--space-sm);
+}
+
+.meta {
+  width: 100%;
+  margin-top: var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.title {
+  font-size: 1.4rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.artist {
+  margin-top: 0.2rem;
+  color: var(--fg-muted);
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* -- scrubber ----------------------------------------------------------- */
+.scrubber {
+  width: 100%;
+  margin-top: var(--space-lg);
+}
+
+.range {
+  width: 100%;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  appearance: none;
+  background: var(--border);
+  cursor: pointer;
+}
+
+.range::-webkit-slider-thumb {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+}
+
+.range::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+}
+
+.times {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* -- transport ------------------------------------------------------------ */
+.transport {
+  width: 100%;
+  margin-top: var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.transportBtn {
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.transportBtn:hover {
+  color: var(--fg);
+}
+
+.transportBtn.active {
+  color: var(--accent);
+}
+
+.transportBtn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.repeatWrap {
+  position: relative;
+}
+
+.repeatOneBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  background: var(--accent);
+  color: var(--on-accent);
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playBtn {
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  background: var(--fg);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playBtn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.skipBtn svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* -- queue ------------------------------------------------------------- */
+.queue {
+  width: 100%;
+  margin-top: var(--space-2xl);
+}
+
+.queueHeader {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.queueRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-block: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.queueRowMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.queueTitle {
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queueArtist {
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queueRemove {
+  flex-shrink: 0;
+  color: var(--fg-muted);
+  width: 1.8rem;
+  height: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.queueRemove:hover {
+  color: var(--accent);
+}
+
+.queueRemove svg {
+  width: 15px;
+  height: 15px;
+}
+
+.queueEmpty {
+  color: var(--fg-muted);
+  font-size: 0.88rem;
+}

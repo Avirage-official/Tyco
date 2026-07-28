@@ -274,6 +274,10 @@ export interface Database {
           created_at?: string;
         }
       >;
+      track_likes: Table<
+        { user_id: string; track_id: string; created_at: string },
+        { user_id: string; track_id: string; created_at?: string }
+      >;
     };
     Views: Record<string, never>;
     Functions: {
