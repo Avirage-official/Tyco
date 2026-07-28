@@ -1,0 +1,15 @@
+.header {
+  padding-block: var(--space-xl) var(--space-lg);
+}
+
+.title {
+  margin-top: var(--space-xs);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+}
+
+.desc {
+  margin-top: var(--space-sm);
+  max-width: 42ch;
+  color: var(--fg-muted);
+  font-size: 1.02rem;
+}

@@ -1,0 +1,72 @@
+.grid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-raised);
+}
+
+.cardMedia {
+  aspect-ratio: 4 / 3;
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+}
+
+.cardBody {
+  padding: var(--space-sm);
+}
+
+.cardCategory {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.cardTitle {
+  margin-top: 0.3rem;
+  font-size: 1.05rem;
+}
+
+.eventsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.eventRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding-block: var(--space-md);
+  border-bottom: 1px solid var(--border);
+}
+
+.eventDate {
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.eventMeta {
+  flex: 1;
+}
+
+.eventTitle {
+  font-size: 1.1rem;
+}
+
+.eventLocation {
+  color: var(--fg-muted);
+  font-size: 0.88rem;
+  margin-top: 0.2rem;
+}

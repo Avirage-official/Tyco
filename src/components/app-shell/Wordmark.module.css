@@ -1,0 +1,24 @@
+.mark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.15em;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.4rem;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+.mark em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.dot {
+  width: 0.34rem;
+  height: 0.34rem;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateY(-0.55em);
+}

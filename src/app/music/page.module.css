@@ -1,0 +1,77 @@
+.list {
+  padding-bottom: var(--space-2xl);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-block: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.index {
+  width: 1.6rem;
+  text-align: center;
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+}
+
+.playBtn {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.playBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.playBtn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.cover {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.duration {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}

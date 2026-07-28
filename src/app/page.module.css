@@ -1,0 +1,133 @@
+.hero {
+  padding-block: var(--space-2xl) var(--space-xl);
+  position: relative;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(60% 50% at 15% 0%, var(--accent-soft), transparent 70%);
+}
+
+.eyebrowRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.eyebrowRow .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.title {
+  margin-top: var(--space-md);
+  font-size: clamp(2.6rem, 7vw, 5.2rem);
+  max-width: 16ch;
+}
+
+.title em {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.lede {
+  margin-top: var(--space-md);
+  max-width: 48ch;
+  font-size: 1.15rem;
+  color: var(--fg-muted);
+}
+
+.actions {
+  margin-top: var(--space-lg);
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.pillars {
+  padding-block: var(--space-xl) var(--space-2xl);
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.card {
+  position: relative;
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+.card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.cardIcon {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.cardIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.cardTitle {
+  font-size: 1.4rem;
+}
+
+.cardDesc {
+  color: var(--fg-muted);
+  font-size: 0.96rem;
+  flex: 1;
+}
+
+.cardLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.cardLink svg {
+  width: 16px;
+  height: 16px;
+}
+
+.strip {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--ink);
+  color: var(--paper);
+  padding-block: var(--space-lg);
+  overflow: hidden;
+}
+
+.stripInner {
+  display: flex;
+  gap: var(--space-lg);
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.4rem;
+  opacity: 0.85;
+}
