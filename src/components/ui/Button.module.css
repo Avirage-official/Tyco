@@ -40,13 +40,13 @@
 }
 
 .ink {
-  background: var(--ink);
-  color: var(--paper);
-  border: 1px solid var(--ink);
+  background: var(--fg);
+  color: var(--bg);
+  border: 1px solid var(--fg);
 }
 
 .ink:hover {
-  background: var(--ink-soft);
+  background: var(--fg-muted);
 }
 
 .full {

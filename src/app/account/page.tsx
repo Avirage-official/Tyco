@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { LinkButton } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "./SignOutButton";
 import styles from "./page.module.css";
@@ -25,7 +25,7 @@ export default async function AccountPage() {
     .single();
 
   const name = profile?.display_name ?? user.email?.split("@")[0] ?? "you";
-  const { data: isAdmin } = await supabase.rpc("is_admin");
+  const { data: isAdmin, error: adminCheckError } = await supabase.rpc("is_admin");
 
   return (
     <>
@@ -41,10 +41,15 @@ export default async function AccountPage() {
           </div>
         </div>
         {isAdmin && (
-          <p style={{ marginBottom: "var(--space-md)" }}>
-            <Link href="/admin" className="eyebrow">
-              Go to admin →
-            </Link>
+          <div style={{ marginBottom: "var(--space-md)" }}>
+            <LinkButton href="/admin" variant="ink">
+              Go to admin
+            </LinkButton>
+          </div>
+        )}
+        {adminCheckError && (
+          <p className={styles.email} style={{ marginBottom: "var(--space-md)" }}>
+            Admin check failed: {adminCheckError.message}
           </p>
         )}
         <SignOutButton />

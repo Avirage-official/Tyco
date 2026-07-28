@@ -6,8 +6,8 @@
   width: 4rem;
   height: 4rem;
   border-radius: 50%;
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--accent);
+  color: var(--on-accent);
   display: flex;
   align-items: center;
   justify-content: center;

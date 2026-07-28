@@ -17,9 +17,9 @@ deployed on Vercel, backed by Supabase.
 ## Design system
 
 - **Palette**: warm black (`--ink`), deep/bright red (`--red*`), cream white
-  (`--paper*`). Tokens are in `src/app/globals.css`. The cream background is
-  fixed — deliberately no `prefers-color-scheme: dark` override, so the look
-  doesn't flip to black on devices set to dark mode.
+  (`--paper*`). Tokens are in `src/app/globals.css`. Black is the fixed
+  background — deliberately no `prefers-color-scheme` override, so the look
+  doesn't change based on the visitor's system theme.
 - **Type**: Fraunces (display/serif, warm and a little wonky at large sizes)
   paired with Work Sans (body). Deliberately not Inter/Geist/Space
   Grotesk — those read as generic "AI app" defaults.

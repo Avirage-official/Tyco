@@ -15,15 +15,15 @@
   --red-bright: #d8402f;       /* hover / highlight */
 
   /* -- semantic --------------------------------------------------------- */
-  --bg: var(--paper);
-  --bg-raised: #ffffff;
-  --surface: var(--paper-dim);
-  --border: var(--paper-line);
-  --fg: var(--ink);
-  --fg-muted: #5b5348;
-  --accent: var(--red);
-  --accent-strong: var(--red-deep);
-  --accent-soft: rgba(179, 36, 27, 0.12);
+  --bg: var(--ink);
+  --bg-raised: var(--ink-soft);
+  --surface: var(--ink-soft);
+  --border: #423b34;
+  --fg: var(--paper);
+  --fg-muted: #b8ac96;
+  --accent: var(--red-bright);
+  --accent-strong: var(--red);
+  --accent-soft: rgba(216, 64, 47, 0.18);
   --on-accent: var(--paper);
   --on-ink: var(--paper);
 
@@ -53,11 +53,11 @@
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --dur: 220ms;
 
-  color-scheme: light;
+  color-scheme: dark;
 }
 
-/* Deliberately no @media (prefers-color-scheme: dark) override — the cream
-   background is the brand, not a light theme that flips on some devices. */
+/* Deliberately no @media (prefers-color-scheme: dark/light) override — black
+   is the brand background, fixed regardless of the visitor's system theme. */
 
 /* -- reset ---------------------------------------------------------------- */
 * {

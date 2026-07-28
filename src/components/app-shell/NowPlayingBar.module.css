@@ -9,9 +9,9 @@
   gap: var(--space-sm);
   height: 4rem;
   padding-inline: var(--space-sm);
-  background: var(--ink);
-  color: var(--paper);
-  border-top: 1px solid var(--red-deep);
+  background: var(--bg-raised);
+  color: var(--fg);
+  border-top: 1px solid var(--border);
 }
 
 @media (min-width: 860px) {
@@ -45,7 +45,7 @@
 
 .artist {
   font-size: 0.76rem;
-  color: #b8ac96;
+  color: var(--fg-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
