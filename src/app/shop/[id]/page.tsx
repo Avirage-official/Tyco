@@ -13,12 +13,20 @@ export default async function ProductPage({
   const supabase = await createClient();
   const { data: product } = await supabase
     .from("products")
-    .select("id, name, description, price_cents, currency, images, sizes, stock")
+    .select("id, name, description, price_cents, currency, images")
     .eq("id", id)
     .eq("is_published", true)
     .single();
 
   if (!product) notFound();
+
+  const { data: variants } = await supabase
+    .from("product_variants")
+    .select("id, size, stock")
+    .eq("product_id", id)
+    .order("size", { ascending: true });
+
+  const inStock = (variants ?? []).some((v) => v.stock > 0);
 
   return (
     <div className={`container ${styles.detail}`}>
@@ -34,19 +42,21 @@ export default async function ProductPage({
           </h1>
           <p className={styles.detailPrice}>{formatPrice(product.price_cents, product.currency)}</p>
           {product.description && <p className={styles.detailDesc}>{product.description}</p>}
-          {product.sizes && product.sizes.length > 0 && (
+          {variants && variants.length > 0 && (
             <div className={styles.sizes}>
-              {product.sizes.map((size) => (
-                <span key={size} className={styles.size}>
-                  {size}
+              {variants.map((variant) => (
+                <span
+                  key={variant.id}
+                  className={variant.stock > 0 ? styles.size : `${styles.size} ${styles.sizeSoldOut}`}
+                >
+                  {variant.size}
+                  {variant.stock <= 0 && " · sold out"}
                 </span>
               ))}
             </div>
           )}
           <div style={{ marginTop: "var(--space-lg)" }}>
-            <Button disabled={product.stock <= 0}>
-              {product.stock > 0 ? "Add to cart" : "Sold out"}
-            </Button>
+            <Button disabled={!inStock}>{inStock ? "Add to cart" : "Sold out"}</Button>
           </div>
         </div>
       </div>

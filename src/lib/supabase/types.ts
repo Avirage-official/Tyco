@@ -22,22 +22,48 @@ type Table<Row, Insert, Update = Partial<Insert>> = {
 export interface Database {
   public: {
     Tables: {
+      admins: Table<
+        { user_id: string; created_at: string },
+        { user_id: string; created_at?: string }
+      >;
       profiles: Table<
         {
           id: string;
           username: string | null;
           display_name: string | null;
           avatar_url: string | null;
-          is_admin: boolean;
           created_at: string;
+          updated_at: string;
         },
         {
           id: string;
           username?: string | null;
           display_name?: string | null;
           avatar_url?: string | null;
-          is_admin?: boolean;
           created_at?: string;
+          updated_at?: string;
+        }
+      >;
+      albums: Table<
+        {
+          id: string;
+          title: string;
+          cover_url: string | null;
+          release_date: string | null;
+          is_published: boolean;
+          published_at: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          title: string;
+          cover_url?: string | null;
+          release_date?: string | null;
+          is_published?: boolean;
+          published_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
         }
       >;
       tracks: Table<
@@ -45,7 +71,7 @@ export interface Database {
           id: string;
           title: string;
           artist: string;
-          album: string | null;
+          album_id: string | null;
           cover_url: string | null;
           audio_url: string;
           duration_seconds: number | null;
@@ -53,13 +79,15 @@ export interface Database {
           release_date: string | null;
           play_count: number;
           is_published: boolean;
+          published_at: string | null;
           created_at: string;
+          updated_at: string;
         },
         {
           id?: string;
           title: string;
           artist?: string;
-          album?: string | null;
+          album_id?: string | null;
           cover_url?: string | null;
           audio_url: string;
           duration_seconds?: number | null;
@@ -67,7 +95,9 @@ export interface Database {
           release_date?: string | null;
           play_count?: number;
           is_published?: boolean;
+          published_at?: string | null;
           created_at?: string;
+          updated_at?: string;
         }
       >;
       portfolio_items: Table<
@@ -78,9 +108,12 @@ export interface Database {
           category: string | null;
           cover_url: string | null;
           media_url: string | null;
+          media_type: "image" | "video" | null;
+          images: string[];
           is_published: boolean;
           published_at: string | null;
           created_at: string;
+          updated_at: string;
         },
         {
           id?: string;
@@ -89,9 +122,12 @@ export interface Database {
           category?: string | null;
           cover_url?: string | null;
           media_url?: string | null;
+          media_type?: "image" | "video" | null;
+          images?: string[];
           is_published?: boolean;
           published_at?: string | null;
           created_at?: string;
+          updated_at?: string;
         }
       >;
       events: Table<
@@ -104,7 +140,9 @@ export interface Database {
           cover_url: string | null;
           ticket_url: string | null;
           is_published: boolean;
+          published_at: string | null;
           created_at: string;
+          updated_at: string;
         },
         {
           id?: string;
@@ -115,7 +153,9 @@ export interface Database {
           cover_url?: string | null;
           ticket_url?: string | null;
           is_published?: boolean;
+          published_at?: string | null;
           created_at?: string;
+          updated_at?: string;
         }
       >;
       products: Table<
@@ -126,11 +166,11 @@ export interface Database {
           price_cents: number;
           currency: string;
           images: string[];
-          sizes: string[];
           category: string | null;
-          stock: number;
           is_published: boolean;
+          published_at: string | null;
           created_at: string;
+          updated_at: string;
         },
         {
           id?: string;
@@ -139,52 +179,87 @@ export interface Database {
           price_cents: number;
           currency?: string;
           images?: string[];
-          sizes?: string[];
           category?: string | null;
-          stock?: number;
           is_published?: boolean;
+          published_at?: string | null;
           created_at?: string;
+          updated_at?: string;
+        }
+      >;
+      product_variants: Table<
+        {
+          id: string;
+          product_id: string;
+          size: string;
+          sku: string | null;
+          stock: number;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          product_id: string;
+          size: string;
+          sku?: string | null;
+          stock?: number;
+          created_at?: string;
+          updated_at?: string;
         }
       >;
       orders: Table<
         {
           id: string;
           user_id: string;
-          status: string;
+          status: "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
+          currency: string;
           total_cents: number;
           shipping_address: Json | null;
+          stripe_payment_intent_id: string | null;
           created_at: string;
+          updated_at: string;
         },
         {
           id?: string;
           user_id: string;
-          status?: string;
+          status?: "pending" | "paid" | "fulfilled" | "cancelled" | "refunded";
+          currency?: string;
           total_cents?: number;
           shipping_address?: Json | null;
+          stripe_payment_intent_id?: string | null;
           created_at?: string;
+          updated_at?: string;
         }
       >;
       order_items: Table<
         {
           id: string;
           order_id: string;
-          product_id: string;
+          variant_id: string;
           quantity: number;
           unit_price_cents: number;
-          size: string | null;
+          created_at: string;
         },
         {
           id?: string;
           order_id: string;
-          product_id: string;
+          variant_id: string;
           quantity?: number;
           unit_price_cents: number;
-          size?: string | null;
+          created_at?: string;
         }
       >;
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      is_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      increment_play_count: {
+        Args: { track_id: string };
+        Returns: undefined;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

@@ -94,3 +94,10 @@
   border-radius: var(--radius-pill);
   font-size: 0.85rem;
 }
+
+.sizeSoldOut {
+  color: var(--fg-muted);
+  border-color: var(--border);
+  text-decoration: line-through;
+  opacity: 0.6;
+}

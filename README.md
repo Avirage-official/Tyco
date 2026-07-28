@@ -35,8 +35,9 @@ deployed on Vercel, backed by Supabase.
   tap play on a track and a now-playing bar docks above the bottom nav.
 - `/studio` and `/studio/events` — creative/portfolio updates and events
   (past + upcoming), tabbed together under "Studio".
-- `/shop` and `/shop/[id]` — retail product grid and product detail. Cart
-  and checkout are **not** built yet — "Add to cart" is a stub.
+- `/shop` and `/shop/[id]` — retail product grid and product detail, with
+  per-size stock (sold-out sizes show as struck through). Cart and checkout
+  are **not** built yet — "Add to cart" is a stub.
 - `/login`, `/signup`, `/account` — Supabase email/password auth. A
   `profiles` row is created automatically on signup via a DB trigger.
 
@@ -61,11 +62,27 @@ icon and standalone window.
    ```
 
 3. Apply the schema: open the Supabase SQL editor and run the contents of
-   `supabase/schema.sql`. It creates all tables, row-level security
-   policies, the auto-profile trigger, and the storage buckets
+   `supabase/schema.sql`. It's idempotent — safe to re-run any time the file
+   changes, including on a project that already has an older version applied.
+   It creates every table, RLS policy, trigger, and the storage buckets
    (`tracks`, `covers`, `portfolio`, `products`).
 
-4. Run the dev server:
+4. Grant yourself admin so you can publish content — sign up in the app
+   first (so a `profiles`/`auth.users` row exists), then in the SQL editor:
+
+   ```sql
+   insert into public.admins (user_id)
+   select id from auth.users where email = 'you@example.com';
+   ```
+
+   Content tables (`tracks`, `albums`, `portfolio_items`, `events`,
+   `products`, `product_variants`) are readable by anyone once
+   `is_published = true`, but only rows owned by an admin (i.e. anyone in
+   `public.admins`) can be inserted/updated/deleted — via the Supabase
+   Table Editor for now, or a future in-app admin panel, since the RLS
+   policies already allow it for a signed-in admin session.
+
+5. Run the dev server:
 
    ```bash
    npm run dev
@@ -73,11 +90,28 @@ icon and standalone window.
 
    Open [http://localhost:3000](http://localhost:3000).
 
-Content (tracks, portfolio items, events, products) is read from Supabase
-with `is_published = true` as the only public policy — for now, publish
-content via the Supabase Table Editor or a service-role script. An admin
-UI for managing content is a natural next step, not part of this
-foundation pass.
+## Data model
+
+`supabase/schema.sql` is the source of truth; the short version:
+
+- **`admins`** — allow-list of user IDs that can write content. Deliberately
+  has no client-facing policies at all (not even for admins themselves) —
+  only the service role can grant/revoke it, so it can't be self-escalated
+  into from a signed-in session the way a flag on `profiles` could be.
+- **`albums`** → **`tracks`** (`album_id`, nullable — singles don't need one).
+- **`portfolio_items`**, **`events`** — creative updates and past/upcoming
+  events; "past" vs "upcoming" is derived from `event_date` at query time.
+- **`products`** → **`product_variants`** (one row per size, its own stock —
+  so "Medium is sold out, Large isn't" is representable).
+- **`orders`** → **`order_items`** (line items pin `unit_price_cents` at
+  order time and reference a specific `product_variants` row). Customers can
+  only `SELECT`/`INSERT` their own orders — status transitions
+  (`pending → paid → fulfilled → ...`) are service-role/webhook-only, so a
+  signed-in customer can't mark their own order paid from the browser.
+
+Every publishable table has `is_published` + `published_at` (auto-stamped by
+a trigger the first time a row is published) and `updated_at` (auto-bumped
+on every update).
 
 ## Deploying
 
@@ -94,8 +128,12 @@ next steps, roughly in order:
 
 - Seed real tracks/portfolio/events/products and confirm the empty states
   give way to real content.
-- Shopping cart + checkout (Stripe is the obvious fit) for the shop.
-- An admin area (or just enable authenticated writes via RLS) so content
-  doesn't have to go through the Supabase dashboard.
-- Play counts, queueing, and a persistent player across navigations if the
-  music section needs to feel more like a real player and less like a list.
+- Shopping cart + checkout — `orders`/`order_items` and a `stripe_payment_intent_id`
+  column are already there, Stripe is the obvious fit.
+- An actual admin UI in the app itself — the RLS policies already allow an
+  admin session to write content directly, so this is mostly front-end work
+  at this point, not a data-model change.
+- Wire up `play_count`: the `increment_play_count(track_id)` RPC exists and
+  is callable by anyone, but nothing calls it yet from the player.
+- Queueing and a persistent player across navigations if the music section
+  needs to feel more like a real player and less like a list.
