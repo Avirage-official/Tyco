@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/admin/require-admin";
 
 export type AlbumInput = {
   title: string;
+  artist_id: string | null;
   cover_url: string | null;
   release_date: string | null;
 };

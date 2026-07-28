@@ -6,13 +6,16 @@ export default async function EditTrackPage({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const { supabase } = await requireAdmin();
 
-  const [{ data: track }, { data: albums }] = await Promise.all([
+  const [{ data: track }, { data: albums }, { data: artists }] = await Promise.all([
     supabase
       .from("tracks")
-      .select("id, title, artist, album_id, cover_url, audio_url, duration_seconds, track_number, release_date")
+      .select(
+        "id, title, artist_id, album_id, cover_url, audio_url, duration_seconds, track_number, release_date"
+      )
       .eq("id", id)
       .single(),
     supabase.from("albums").select("id, title").order("title"),
+    supabase.from("artists").select("id, name").order("name"),
   ]);
 
   if (!track) notFound();
@@ -20,7 +23,7 @@ export default async function EditTrackPage({ params }: { params: Promise<{ id: 
   return (
     <div>
       <h2 style={{ marginBottom: "var(--space-md)" }}>Edit track</h2>
-      <TrackForm track={track} albums={albums ?? []} />
+      <TrackForm track={track} albums={albums ?? []} artists={artists ?? []} />
     </div>
   );
 }

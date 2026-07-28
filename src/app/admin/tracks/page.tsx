@@ -6,15 +6,17 @@ import styles from "../admin.module.css";
 
 export default async function AdminTracksPage() {
   const { supabase } = await requireAdmin();
-  const [{ data: tracks }, { data: albums }] = await Promise.all([
+  const [{ data: tracks }, { data: albums }, { data: artists }] = await Promise.all([
     supabase
       .from("tracks")
-      .select("id, title, artist, cover_url, album_id, is_published")
+      .select("id, title, artist_id, cover_url, album_id, is_published")
       .order("created_at", { ascending: false }),
     supabase.from("albums").select("id, title"),
+    supabase.from("artists").select("id, name"),
   ]);
 
   const albumTitleById = new Map((albums ?? []).map((a) => [a.id, a.title]));
+  const artistNameById = new Map((artists ?? []).map((a) => [a.id, a.name]));
 
   return (
     <div>
@@ -50,7 +52,9 @@ export default async function AdminTracksPage() {
                   </td>
                   <td>
                     <div className={styles.rowTitle}>{track.title}</div>
-                    <div className={styles.rowMeta}>{track.artist}</div>
+                    <div className={styles.rowMeta}>
+                      {track.artist_id ? artistNameById.get(track.artist_id) ?? "—" : "—"}
+                    </div>
                   </td>
                   <td className={styles.rowMeta}>
                     {track.album_id ? albumTitleById.get(track.album_id) ?? "—" : "Single"}

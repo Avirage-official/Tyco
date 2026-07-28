@@ -8,11 +8,20 @@ export const metadata: Metadata = { title: "Music" };
 
 export default async function MusicPage() {
   const supabase = await createClient();
-  const { data: tracks } = await supabase
-    .from("tracks")
-    .select("id, title, artist, cover_url, audio_url, duration_seconds, published_at")
-    .eq("is_published", true)
-    .order("release_date", { ascending: false });
+  const [{ data: tracks }, { data: artists }] = await Promise.all([
+    supabase
+      .from("tracks")
+      .select("id, title, artist_id, cover_url, audio_url, duration_seconds, published_at")
+      .eq("is_published", true)
+      .order("release_date", { ascending: false }),
+    supabase.from("artists").select("id, name"),
+  ]);
+
+  const artistNameById = new Map((artists ?? []).map((a) => [a.id, a.name]));
+  const tracksWithArtist = (tracks ?? []).map((track) => ({
+    ...track,
+    artist: (track.artist_id && artistNameById.get(track.artist_id)) || "Tyco",
+  }));
 
   return (
     <>
@@ -22,8 +31,8 @@ export default async function MusicPage() {
         description="Every track we've put out, free to stream — no account, no paywall."
       />
       <div className="container">
-        {tracks && tracks.length > 0 ? (
-          <TrackList tracks={tracks} />
+        {tracksWithArtist.length > 0 ? (
+          <TrackList tracks={tracksWithArtist} />
         ) : (
           <EmptyState
             title="The catalogue is warming up"

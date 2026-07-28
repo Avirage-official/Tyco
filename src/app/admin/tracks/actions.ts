@@ -5,7 +5,7 @@ import { requireAdmin } from "@/lib/admin/require-admin";
 
 export type TrackInput = {
   title: string;
-  artist: string;
+  artist_id: string | null;
   album_id: string | null;
   cover_url: string | null;
   audio_url: string;
@@ -24,6 +24,14 @@ export async function createTrack(input: TrackInput) {
   const { error } = await supabase.from("tracks").insert(input);
   if (error) throw new Error(error.message);
   revalidateTracks();
+}
+
+export async function createTracksBulk(inputs: TrackInput[]) {
+  const { supabase } = await requireAdmin();
+  const { error } = await supabase.from("tracks").insert(inputs);
+  if (error) throw new Error(error.message);
+  revalidateTracks();
+  revalidatePath("/admin/albums");
 }
 
 export async function updateTrack(id: string, input: TrackInput) {

@@ -10,7 +10,7 @@ import styles from "../admin.module.css";
 type Track = {
   id: string;
   title: string;
-  artist: string;
+  artist_id: string | null;
   album_id: string | null;
   cover_url: string | null;
   audio_url: string;
@@ -22,13 +22,15 @@ type Track = {
 export function TrackForm({
   track,
   albums,
+  artists,
 }: {
   track?: Track;
   albums: { id: string; title: string }[];
+  artists: { id: string; name: string }[];
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(track?.title ?? "");
-  const [artist, setArtist] = useState(track?.artist ?? "Tyco");
+  const [artistId, setArtistId] = useState(track?.artist_id ?? "");
   const [albumId, setAlbumId] = useState(track?.album_id ?? "");
   const [trackNumber, setTrackNumber] = useState(track?.track_number?.toString() ?? "");
   const [durationSeconds, setDurationSeconds] = useState(track?.duration_seconds?.toString() ?? "");
@@ -62,7 +64,7 @@ export function TrackForm({
 
       const input: TrackInput = {
         title,
-        artist,
+        artist_id: artistId || null,
         album_id: albumId || null,
         cover_url: finalCoverUrl,
         audio_url: finalAudioUrl,
@@ -104,13 +106,19 @@ export function TrackForm({
           <label className={styles.label} htmlFor="artist">
             Artist
           </label>
-          <input
+          <select
             id="artist"
-            className={styles.input}
-            required
-            value={artist}
-            onChange={(e) => setArtist(e.target.value)}
-          />
+            className={styles.select}
+            value={artistId}
+            onChange={(e) => setArtistId(e.target.value)}
+          >
+            <option value="">— No artist set —</option>
+            {artists.map((artist) => (
+              <option key={artist.id} value={artist.id}>
+                {artist.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

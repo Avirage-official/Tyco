@@ -17,8 +17,9 @@ deployed on Vercel, backed by Supabase.
 ## Design system
 
 - **Palette**: warm black (`--ink`), deep/bright red (`--red*`), cream white
-  (`--paper*`). Tokens are in `src/app/globals.css`; dark mode remaps the
-  same tokens rather than introducing new ones.
+  (`--paper*`). Tokens are in `src/app/globals.css`. The cream background is
+  fixed — deliberately no `prefers-color-scheme: dark` override, so the look
+  doesn't flip to black on devices set to dark mode.
 - **Type**: Fraunces (display/serif, warm and a little wonky at large sizes)
   paired with Work Sans (body). Deliberately not Inter/Geist/Space
   Grotesk — those read as generic "AI app" defaults.
@@ -59,12 +60,18 @@ icon and standalone window.
 Supabase auth (not a separate hardcoded login) — see "Local setup" below for
 how to grant yourself access.
 
-- **Albums, Tracks, Portfolio, Events, Products** — list, create, edit,
-  publish/unpublish, delete. Cover art / audio / gallery images upload
-  straight from the browser to Supabase Storage (bypassing the Next.js
-  server, so there's no file-size limit from Vercel's function body cap).
-  Products manage their per-size stock (`product_variants`) inline on the
-  same form.
+- **Artists, Albums, Tracks, Portfolio, Events, Products** — list, create,
+  edit, publish/unpublish, delete. Cover art / audio / gallery images
+  upload straight from the browser to Supabase Storage (bypassing the
+  Next.js server, so there's no file-size limit from Vercel's function
+  body cap). Products manage their per-size stock (`product_variants`)
+  inline on the same form.
+- **Bulk track upload** — from an album's row in `/admin/albums`, "Add
+  tracks" lets you select every audio file for that album at once. Title
+  and track number are guessed from each filename (editable before
+  submitting), duration is read from the file automatically, and
+  artist/cover/release date are inherited from the album. Singles still go
+  through the regular "New track" form one at a time.
 - **Orders** — every order, who placed it, how many items, total, and a
   status dropdown (`pending → paid → fulfilled → …`). This is the only
   place order status changes — customers can never do this themselves.
@@ -76,6 +83,11 @@ how to grant yourself access.
 
 Every admin write re-checks `is_admin()` on the server on every request —
 nothing is trusted just because a page rendered the admin UI once.
+
+**Supabase free tier caps individual files at 50MB.** Uploads go per track,
+not per album, so a normal 3–5 min WAV song is usually fine — only very
+long or very high-res tracks risk hitting it. If one does, compress just
+that track (MP3/FLAC); no need to upgrade Supabase for this alone.
 
 ## Local setup
 
@@ -98,7 +110,7 @@ nothing is trusted just because a page rendered the admin UI once.
    `supabase/schema.sql`. It's idempotent — safe to re-run any time the file
    changes, including on a project that already has an older version applied.
    It creates every table, RLS policy, trigger, and the storage buckets
-   (`tracks`, `covers`, `portfolio`, `products`).
+   (`tracks`, `covers`, `portfolio`, `products`, `artists`).
 
 4. Grant yourself admin so you can reach `/admin` — sign up in the app first
    (so a `profiles`/`auth.users` row exists), then in the SQL editor:
@@ -127,7 +139,8 @@ nothing is trusted just because a page rendered the admin UI once.
   has no client-facing policies at all (not even for admins themselves) —
   only the service role can grant/revoke it, so it can't be self-escalated
   into from a signed-in session the way a flag on `profiles` could be.
-- **`albums`** → **`tracks`** (`album_id`, nullable — singles don't need one).
+- **`artists`** → **`albums`** → **`tracks`** (`artist_id` on both albums and
+  tracks; `album_id` on tracks is nullable — singles don't need one).
 - **`portfolio_items`**, **`events`** — creative updates and past/upcoming
   events; "past" vs "upcoming" is derived from `event_date` at query time.
 - **`products`** → **`product_variants`** (one row per size, its own stock —

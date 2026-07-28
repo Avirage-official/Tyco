@@ -122,12 +122,53 @@ create trigger on_auth_user_created
   for each row execute procedure public.handle_new_user();
 
 -- ----------------------------------------------------------------------------
+-- artists — the roster. A real entity (not free text) since Tyco can
+-- release music on behalf of more than one act.
+-- ----------------------------------------------------------------------------
+create table if not exists public.artists (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  bio text,
+  photo_url text,
+  is_published boolean not null default false,
+  published_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.artists enable row level security;
+
+drop policy if exists "published artists are public" on public.artists;
+create policy "published artists are public"
+  on public.artists for select
+  using (is_published = true);
+
+drop policy if exists "admins manage artists" on public.artists;
+create policy "admins manage artists"
+  on public.artists for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_artists_updated_at on public.artists;
+create trigger set_artists_updated_at
+  before update on public.artists
+  for each row execute function public.set_updated_at();
+
+drop trigger if exists set_artists_published_at on public.artists;
+create trigger set_artists_published_at
+  before insert or update on public.artists
+  for each row execute function public.set_published_at();
+
+create index if not exists artists_published_idx on public.artists (is_published);
+
+-- ----------------------------------------------------------------------------
 -- albums — a real entity rather than free text on tracks, so releases can
 -- carry their own cover art, release date, and track ordering.
 -- ----------------------------------------------------------------------------
 create table if not exists public.albums (
   id uuid primary key default gen_random_uuid(),
   title text not null,
+  artist_id uuid references public.artists (id) on delete set null,
   cover_url text,
   release_date date,
   is_published boolean not null default false,
@@ -135,6 +176,8 @@ create table if not exists public.albums (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.albums add column if not exists artist_id uuid references public.artists (id) on delete set null;
 
 alter table public.albums enable row level security;
 
@@ -161,6 +204,7 @@ create trigger set_albums_published_at
 
 create index if not exists albums_published_release_date_idx
   on public.albums (is_published, release_date desc);
+create index if not exists albums_artist_id_idx on public.albums (artist_id);
 
 -- ----------------------------------------------------------------------------
 -- tracks — the free music catalogue. album_id is nullable: singles don't
@@ -169,7 +213,7 @@ create index if not exists albums_published_release_date_idx
 create table if not exists public.tracks (
   id uuid primary key default gen_random_uuid(),
   title text not null,
-  artist text not null default 'Tyco',
+  artist_id uuid references public.artists (id) on delete set null,
   album_id uuid references public.albums (id) on delete set null,
   cover_url text,
   audio_url text not null,
@@ -183,7 +227,12 @@ create table if not exists public.tracks (
   updated_at timestamptz not null default now()
 );
 
+-- Migrates the old free-text `artist` column to artist_id. Assumes no real
+-- track data predates this — reasonable pre-launch (same caveat as the
+-- order_items.variant_id migration earlier).
 alter table public.tracks drop column if exists album;
+alter table public.tracks drop column if exists artist;
+alter table public.tracks add column if not exists artist_id uuid references public.artists (id) on delete set null;
 alter table public.tracks add column if not exists album_id uuid references public.albums (id) on delete set null;
 alter table public.tracks add column if not exists published_at timestamptz;
 alter table public.tracks add column if not exists updated_at timestamptz not null default now();
@@ -231,6 +280,7 @@ create trigger set_tracks_published_at
 create index if not exists tracks_published_release_date_idx
   on public.tracks (is_published, release_date desc);
 create index if not exists tracks_album_id_idx on public.tracks (album_id);
+create index if not exists tracks_artist_id_idx on public.tracks (artist_id);
 
 -- Lets the player bump play_count without granting raw UPDATE on tracks to
 -- anon/authenticated clients.
@@ -600,16 +650,17 @@ values
   ('tracks', 'tracks', true),
   ('covers', 'covers', true),
   ('portfolio', 'portfolio', true),
-  ('products', 'products', true)
+  ('products', 'products', true),
+  ('artists', 'artists', true)
 on conflict (id) do nothing;
 
 drop policy if exists "public read for tyco buckets" on storage.objects;
 create policy "public read for tyco buckets"
   on storage.objects for select
-  using (bucket_id in ('tracks', 'covers', 'portfolio', 'products'));
+  using (bucket_id in ('tracks', 'covers', 'portfolio', 'products', 'artists'));
 
 drop policy if exists "admins manage tyco bucket objects" on storage.objects;
 create policy "admins manage tyco bucket objects"
   on storage.objects for all
-  using (bucket_id in ('tracks', 'covers', 'portfolio', 'products') and public.is_admin())
-  with check (bucket_id in ('tracks', 'covers', 'portfolio', 'products') and public.is_admin());
+  using (bucket_id in ('tracks', 'covers', 'portfolio', 'products', 'artists') and public.is_admin())
+  with check (bucket_id in ('tracks', 'covers', 'portfolio', 'products', 'artists') and public.is_admin());

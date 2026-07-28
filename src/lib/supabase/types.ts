@@ -44,10 +44,33 @@ export interface Database {
           updated_at?: string;
         }
       >;
+      artists: Table<
+        {
+          id: string;
+          name: string;
+          bio: string | null;
+          photo_url: string | null;
+          is_published: boolean;
+          published_at: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          name: string;
+          bio?: string | null;
+          photo_url?: string | null;
+          is_published?: boolean;
+          published_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        }
+      >;
       albums: Table<
         {
           id: string;
           title: string;
+          artist_id: string | null;
           cover_url: string | null;
           release_date: string | null;
           is_published: boolean;
@@ -58,6 +81,7 @@ export interface Database {
         {
           id?: string;
           title: string;
+          artist_id?: string | null;
           cover_url?: string | null;
           release_date?: string | null;
           is_published?: boolean;
@@ -70,7 +94,7 @@ export interface Database {
         {
           id: string;
           title: string;
-          artist: string;
+          artist_id: string | null;
           album_id: string | null;
           cover_url: string | null;
           audio_url: string;
@@ -86,7 +110,7 @@ export interface Database {
         {
           id?: string;
           title: string;
-          artist?: string;
+          artist_id?: string | null;
           album_id?: string | null;
           cover_url?: string | null;
           audio_url: string;

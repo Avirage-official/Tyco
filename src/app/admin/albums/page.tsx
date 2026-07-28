@@ -7,10 +7,15 @@ import styles from "../admin.module.css";
 
 export default async function AdminAlbumsPage() {
   const { supabase } = await requireAdmin();
-  const { data: albums } = await supabase
-    .from("albums")
-    .select("id, title, cover_url, release_date, is_published")
-    .order("created_at", { ascending: false });
+  const [{ data: albums }, { data: artists }] = await Promise.all([
+    supabase
+      .from("albums")
+      .select("id, title, artist_id, cover_url, release_date, is_published")
+      .order("created_at", { ascending: false }),
+    supabase.from("artists").select("id, name"),
+  ]);
+
+  const artistNameById = new Map((artists ?? []).map((a) => [a.id, a.name]));
 
   return (
     <div>
@@ -30,6 +35,7 @@ export default async function AdminAlbumsPage() {
               <tr>
                 <th></th>
                 <th>Title</th>
+                <th>Artist</th>
                 <th>Release date</th>
                 <th>Status</th>
                 <th></th>
@@ -45,6 +51,9 @@ export default async function AdminAlbumsPage() {
                     />
                   </td>
                   <td className={styles.rowTitle}>{album.title}</td>
+                  <td className={styles.rowMeta}>
+                    {album.artist_id ? artistNameById.get(album.artist_id) ?? "—" : "—"}
+                  </td>
                   <td className={styles.rowMeta}>{formatDate(album.release_date)}</td>
                   <td>
                     <PublishBadge isPublished={album.is_published} />
@@ -53,6 +62,9 @@ export default async function AdminAlbumsPage() {
                     <div className={styles.actions}>
                       <Link href={`/admin/albums/${album.id}`} className={styles.linkBtn}>
                         Edit
+                      </Link>
+                      <Link href={`/admin/albums/${album.id}/tracks`} className={styles.linkBtn}>
+                        Add tracks
                       </Link>
                       <form action={toggleAlbumPublish.bind(null, album.id, !album.is_published)}>
                         <button type="submit" className={styles.linkBtn}>
