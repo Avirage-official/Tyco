@@ -9,7 +9,7 @@ export default async function AdminTracksPage() {
   const [{ data: tracks }, { data: albums }, { data: artists }] = await Promise.all([
     supabase
       .from("tracks")
-      .select("id, title, artist_id, cover_url, album_id, is_published")
+      .select("id, title, artist_id, cover_url, album_id, genre, is_published")
       .order("created_at", { ascending: false }),
     supabase.from("albums").select("id, title"),
     supabase.from("artists").select("id, name"),
@@ -37,6 +37,7 @@ export default async function AdminTracksPage() {
                 <th></th>
                 <th>Title</th>
                 <th>Album</th>
+                <th>Genre</th>
                 <th>Status</th>
                 <th></th>
               </tr>
@@ -59,6 +60,7 @@ export default async function AdminTracksPage() {
                   <td className={styles.rowMeta}>
                     {track.album_id ? albumTitleById.get(track.album_id) ?? "—" : "Single"}
                   </td>
+                  <td className={styles.rowMeta}>{track.genre ?? "—"}</td>
                   <td>
                     <PublishBadge isPublished={track.is_published} />
                   </td>

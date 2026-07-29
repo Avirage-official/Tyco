@@ -220,6 +220,7 @@ create table if not exists public.tracks (
   duration_seconds integer,
   track_number integer,
   release_date date,
+  genre text,
   play_count bigint not null default 0,
   is_published boolean not null default false,
   published_at timestamptz,
@@ -236,6 +237,7 @@ alter table public.tracks add column if not exists artist_id uuid references pub
 alter table public.tracks add column if not exists album_id uuid references public.albums (id) on delete set null;
 alter table public.tracks add column if not exists published_at timestamptz;
 alter table public.tracks add column if not exists updated_at timestamptz not null default now();
+alter table public.tracks add column if not exists genre text;
 
 alter table public.tracks drop constraint if exists tracks_duration_positive;
 alter table public.tracks add constraint tracks_duration_positive
@@ -281,6 +283,7 @@ create index if not exists tracks_published_release_date_idx
   on public.tracks (is_published, release_date desc);
 create index if not exists tracks_album_id_idx on public.tracks (album_id);
 create index if not exists tracks_artist_id_idx on public.tracks (artist_id);
+create index if not exists tracks_genre_idx on public.tracks (genre) where genre is not null;
 
 -- Lets the player bump play_count without granting raw UPDATE on tracks to
 -- anon/authenticated clients.

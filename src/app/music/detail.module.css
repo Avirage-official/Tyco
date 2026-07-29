@@ -110,3 +110,62 @@
   font-size: 0.78rem;
   color: var(--fg-muted);
 }
+
+.artistsRow {
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  padding-bottom: var(--space-2xs);
+  margin-bottom: var(--space-2xl);
+}
+
+.artistCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 92px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.artistPhoto {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+}
+
+.artistName {
+  font-size: 0.8rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.genreChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: var(--space-2xl);
+}
+
+.genreChip {
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--fg);
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.genreChip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}

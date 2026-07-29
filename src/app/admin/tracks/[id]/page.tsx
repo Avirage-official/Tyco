@@ -10,7 +10,7 @@ export default async function EditTrackPage({ params }: { params: Promise<{ id: 
     supabase
       .from("tracks")
       .select(
-        "id, title, artist_id, album_id, cover_url, audio_url, duration_seconds, track_number, release_date"
+        "id, title, artist_id, album_id, cover_url, audio_url, duration_seconds, track_number, release_date, genre"
       )
       .eq("id", id)
       .single(),

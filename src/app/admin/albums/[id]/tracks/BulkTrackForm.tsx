@@ -48,6 +48,7 @@ function readDuration(file: File): Promise<number | null> {
 export function BulkTrackForm({ album, nextTrackNumber }: { album: Album; nextTrackNumber: number }) {
   const router = useRouter();
   const [rows, setRows] = useState<Row[]>([]);
+  const [genre, setGenre] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
@@ -95,6 +96,7 @@ export function BulkTrackForm({ album, nextTrackNumber }: { album: Album; nextTr
           duration_seconds: row.durationSeconds,
           track_number: row.trackNumber,
           release_date: album.release_date,
+          genre: genre || null,
         });
         setProgress((p) => (p ? { ...p, done: p.done + 1 } : p));
       }
@@ -123,6 +125,29 @@ export function BulkTrackForm({ album, nextTrackNumber }: { album: Album; nextTr
           multiple
           onChange={(e) => handleFiles(e.target.files)}
         />
+      </div>
+
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="genre">
+          Genre (applies to every track in this batch, optional)
+        </label>
+        <input
+          id="genre"
+          className={styles.input}
+          list="genre-suggestions"
+          value={genre}
+          onChange={(e) => setGenre(e.target.value)}
+        />
+        <datalist id="genre-suggestions">
+          <option value="Afrobeat" />
+          <option value="Hip-Hop" />
+          <option value="R&B" />
+          <option value="Pop" />
+          <option value="Electronic" />
+          <option value="Soul" />
+          <option value="Alternative" />
+          <option value="Jazz" />
+        </datalist>
       </div>
 
       {rows.length > 0 && (

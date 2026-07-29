@@ -32,13 +32,13 @@ deployed on Vercel, backed by Supabase.
 ## App structure
 
 - `/` — landing page, links into the three pillars below.
-- `/music` — the free streaming catalogue: browse by album or the full track
-  list, shuffle everything, or jump into `/music/albums/[id]` and
-  `/music/artists/[id]`. A real player: seek/scrub, skip, shuffle, repeat
-  (off/all/one), an inline "Up Next" queue, lock-screen/notification
-  controls via the Media Session API, and Liked Songs (`/music/liked`) for
-  signed-in listeners. Tap the mini player to expand to a full-screen Now
-  Playing view.
+- `/music` — the free streaming catalogue: browse by artist, genre, album,
+  or the full track list; shuffle everything; or jump into
+  `/music/artists/[id]`, `/music/albums/[id]`, and `/music/genres/[genre]`.
+  A real player: seek/scrub, skip, shuffle, repeat (off/all/one), an inline
+  "Up Next" queue, lock-screen/notification controls via the Media Session
+  API, and Liked Songs (`/music/liked`) for signed-in listeners. Tap the
+  mini player to expand to a full-screen Now Playing view.
 - `/studio` and `/studio/events` — creative/portfolio updates and events
   (past + upcoming), tabbed together under "Studio".
 - `/shop` and `/shop/[id]` — retail product grid and product detail, with
@@ -146,6 +146,8 @@ that track (MP3/FLAC); no need to upgrade Supabase for this alone.
   into from a signed-in session the way a flag on `profiles` could be.
 - **`artists`** → **`albums`** → **`tracks`** (`artist_id` on both albums and
   tracks; `album_id` on tracks is nullable — singles don't need one).
+  `tracks.genre` is free text, not an enum — the music page derives its
+  browsable genre list from whatever values are actually in use.
 - **`portfolio_items`**, **`events`** — creative updates and past/upcoming
   events; "past" vs "upcoming" is derived from `event_date` at query time.
 - **`products`** → **`product_variants`** (one row per size, its own stock —

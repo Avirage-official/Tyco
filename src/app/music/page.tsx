@@ -16,7 +16,9 @@ export default async function MusicPage() {
   const [{ data: tracks }, { data: albums }, { data: artists }, likedTrackIds] = await Promise.all([
     supabase
       .from("tracks")
-      .select("id, title, artist_id, album_id, cover_url, audio_url, duration_seconds, published_at")
+      .select(
+        "id, title, artist_id, album_id, cover_url, audio_url, duration_seconds, published_at, genre"
+      )
       .eq("is_published", true)
       .order("release_date", { ascending: false }),
     supabase
@@ -24,7 +26,7 @@ export default async function MusicPage() {
       .select("id, title, artist_id, cover_url, release_date")
       .eq("is_published", true)
       .order("release_date", { ascending: false }),
-    supabase.from("artists").select("id, name"),
+    supabase.from("artists").select("id, name, photo_url").eq("is_published", true).order("name"),
     getLikedTrackIds(supabase),
   ]);
 
@@ -33,6 +35,9 @@ export default async function MusicPage() {
     ...track,
     artist: (track.artist_id && artistNameById.get(track.artist_id)) || "Tyco",
   }));
+
+  const genres = Array.from(new Set((tracks ?? []).map((t) => t.genre).filter(Boolean))) as string[];
+  genres.sort((a, b) => a.localeCompare(b));
 
   return (
     <>
@@ -50,9 +55,47 @@ export default async function MusicPage() {
           </Link>
         </div>
 
+        {artists && artists.length > 0 && (
+          <>
+            <h2 className={styles.sectionTitle}>
+              Artists
+            </h2>
+            <div className={styles.artistsRow}>
+              {artists.map((artist) => (
+                <Link key={artist.id} href={`/music/artists/${artist.id}`} className={styles.artistCard}>
+                  <div
+                    className={styles.artistPhoto}
+                    style={artist.photo_url ? { backgroundImage: `url(${artist.photo_url})` } : undefined}
+                  />
+                  <span className={styles.artistName}>{artist.name}</span>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+
+        {genres.length > 0 && (
+          <>
+            <h2 className={styles.sectionTitle}>
+              Genres
+            </h2>
+            <div className={styles.genreChips}>
+              {genres.map((genre) => (
+                <Link
+                  key={genre}
+                  href={`/music/genres/${encodeURIComponent(genre)}`}
+                  className={styles.genreChip}
+                >
+                  {genre}
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+
         {albums && albums.length > 0 && (
           <>
-            <h2 className={styles.sectionTitle} style={{ marginTop: 0 }}>
+            <h2 className={styles.sectionTitle}>
               Albums
             </h2>
             <div className={styles.albumGrid}>

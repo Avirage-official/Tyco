@@ -17,6 +17,7 @@ type Track = {
   duration_seconds: number | null;
   track_number: number | null;
   release_date: string | null;
+  genre: string | null;
 };
 
 export function TrackForm({
@@ -35,6 +36,7 @@ export function TrackForm({
   const [trackNumber, setTrackNumber] = useState(track?.track_number?.toString() ?? "");
   const [durationSeconds, setDurationSeconds] = useState(track?.duration_seconds?.toString() ?? "");
   const [releaseDate, setReleaseDate] = useState(track?.release_date ?? "");
+  const [genre, setGenre] = useState(track?.genre ?? "");
   const coverUrl = track?.cover_url ?? null;
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const audioUrl = track?.audio_url ?? "";
@@ -71,6 +73,7 @@ export function TrackForm({
         duration_seconds: durationSeconds ? Number(durationSeconds) : null,
         track_number: trackNumber ? Number(trackNumber) : null,
         release_date: releaseDate || null,
+        genre: genre || null,
       };
 
       if (track) {
@@ -170,17 +173,41 @@ export function TrackForm({
         </div>
       </div>
 
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="release_date">
-          Release date
-        </label>
-        <input
-          id="release_date"
-          type="date"
-          className={styles.input}
-          value={releaseDate ?? ""}
-          onChange={(e) => setReleaseDate(e.target.value)}
-        />
+      <div className={styles.fieldRow}>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="release_date">
+            Release date
+          </label>
+          <input
+            id="release_date"
+            type="date"
+            className={styles.input}
+            value={releaseDate ?? ""}
+            onChange={(e) => setReleaseDate(e.target.value)}
+          />
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="genre">
+            Genre
+          </label>
+          <input
+            id="genre"
+            className={styles.input}
+            list="genre-suggestions"
+            value={genre}
+            onChange={(e) => setGenre(e.target.value)}
+          />
+          <datalist id="genre-suggestions">
+            <option value="Afrobeat" />
+            <option value="Hip-Hop" />
+            <option value="R&B" />
+            <option value="Pop" />
+            <option value="Electronic" />
+            <option value="Soul" />
+            <option value="Alternative" />
+            <option value="Jazz" />
+          </datalist>
+        </div>
       </div>
 
       <div className={styles.field}>

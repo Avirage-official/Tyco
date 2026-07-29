@@ -12,6 +12,7 @@ export type TrackInput = {
   duration_seconds: number | null;
   track_number: number | null;
   release_date: string | null;
+  genre: string | null;
 };
 
 function revalidateTracks() {
