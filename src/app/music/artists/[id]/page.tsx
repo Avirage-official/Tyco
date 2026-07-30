@@ -25,7 +25,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
 
   const { data: artist } = await supabase
     .from("artists")
-    .select("id, name, bio, photo_url")
+    .select("id, name, bio, photo_url, video_url")
     .eq("id", id)
     .eq("is_published", true)
     .single();
@@ -54,10 +54,22 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
   return (
     <div className="container">
       <div className={styles.hero}>
-        <div
-          className={`${styles.heroCover} ${styles.heroCoverRound}`}
-          style={artist.photo_url ? { backgroundImage: `url(${artist.photo_url})` } : undefined}
-        />
+        {artist.video_url ? (
+          <video
+            className={`${styles.heroCover} ${styles.heroCoverRound}`}
+            src={artist.video_url}
+            poster={artist.photo_url ?? undefined}
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        ) : (
+          <div
+            className={`${styles.heroCover} ${styles.heroCoverRound}`}
+            style={artist.photo_url ? { backgroundImage: `url(${artist.photo_url})` } : undefined}
+          />
+        )}
         <div className={styles.heroMeta}>
           <p className="eyebrow">Artist</p>
           <h1 className={styles.heroTitle}>{artist.name}</h1>

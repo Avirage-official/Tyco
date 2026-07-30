@@ -50,6 +50,7 @@ export interface Database {
           name: string;
           bio: string | null;
           photo_url: string | null;
+          video_url: string | null;
           is_published: boolean;
           published_at: string | null;
           created_at: string;
@@ -60,6 +61,7 @@ export interface Database {
           name: string;
           bio?: string | null;
           photo_url?: string | null;
+          video_url?: string | null;
           is_published?: boolean;
           published_at?: string | null;
           created_at?: string;

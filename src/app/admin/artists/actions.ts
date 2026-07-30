@@ -7,6 +7,7 @@ export type ArtistInput = {
   name: string;
   bio: string | null;
   photo_url: string | null;
+  video_url: string | null;
 };
 
 function revalidateArtists() {

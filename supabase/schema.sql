@@ -130,11 +130,14 @@ create table if not exists public.artists (
   name text not null,
   bio text,
   photo_url text,
+  video_url text,
   is_published boolean not null default false,
   published_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.artists add column if not exists video_url text;
 
 alter table public.artists enable row level security;
 

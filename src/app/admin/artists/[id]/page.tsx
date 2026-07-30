@@ -7,7 +7,7 @@ export default async function EditArtistPage({ params }: { params: Promise<{ id:
   const { supabase } = await requireAdmin();
   const { data: artist } = await supabase
     .from("artists")
-    .select("id, name, bio, photo_url")
+    .select("id, name, bio, photo_url, video_url")
     .eq("id", id)
     .single();
 

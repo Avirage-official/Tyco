@@ -219,6 +219,7 @@
   background: var(--surface);
   background-size: cover;
   background-position: center;
+  object-fit: cover;
   border: 1px solid var(--border);
 }
 

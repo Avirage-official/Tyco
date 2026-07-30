@@ -38,7 +38,11 @@ deployed on Vercel, backed by Supabase.
   A real player: seek/scrub, skip, shuffle, repeat (off/all/one), an inline
   "Up Next" queue, lock-screen/notification controls via the Media Session
   API, and Liked Songs (`/music/liked`) for signed-in listeners. Tap the
-  mini player to expand to a full-screen Now Playing view.
+  mini player to expand to a full-screen Now Playing view. Artist pages are
+  full pages (not a modal) — they stack more sensibly with the full-screen
+  player, get shareable URLs, and give room for a real profile: bio,
+  albums, singles, and an optional short muted looping video in place of
+  the static photo.
 - `/studio` and `/studio/events` — creative/portfolio updates and events
   (past + upcoming), tabbed together under "Studio".
 - `/shop` and `/shop/[id]` — retail product grid and product detail, with
@@ -92,7 +96,10 @@ nothing is trusted just because a page rendered the admin UI once.
 **Supabase free tier caps individual files at 50MB.** Uploads go per track,
 not per album, so a normal 3–5 min WAV song is usually fine — only very
 long or very high-res tracks risk hitting it. If one does, compress just
-that track (MP3/FLAC); no need to upgrade Supabase for this alone.
+that track (MP3/FLAC); no need to upgrade Supabase for this alone. Video is
+the one place this is worth watching more closely — keep an artist's
+profile loop short (5–15s) and compressed; it's a much bigger file than a
+photo for the same number of seconds.
 
 ## Local setup
 
