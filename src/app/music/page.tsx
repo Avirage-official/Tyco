@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { IconHeart } from "@/components/icons";
 import { createClient } from "@/lib/supabase/server";
 import { getLikedTrackIds } from "@/lib/music/liked";
-import { TrackList } from "./TrackList";
-import { PlayTracksButton } from "./PlayTracksButton";
-import styles from "./detail.module.css";
+import { MusicTabs } from "./MusicTabs";
+import { MusicBrowse } from "./MusicBrowse";
 
 export const metadata: Metadata = { title: "Music" };
 
@@ -39,6 +36,8 @@ export default async function MusicPage() {
   const genres = Array.from(new Set((tracks ?? []).map((t) => t.genre).filter(Boolean))) as string[];
   genres.sort((a, b) => a.localeCompare(b));
 
+  const isEmpty = tracksWithArtist.length === 0 && (albums ?? []).length === 0 && (artists ?? []).length === 0;
+
   return (
     <>
       <PageHeader
@@ -47,81 +46,20 @@ export default async function MusicPage() {
         description="Every track we've put out, free to stream — no account, no paywall."
       />
       <div className="container">
-        <div className={styles.quickRow}>
-          <PlayTracksButton tracks={tracksWithArtist} label="Shuffle all" shuffle variant="ghost" />
-          <Link href="/music/liked" className={`eyebrow ${styles.likedLink}`}>
-            <IconHeart />
-            Liked Songs
-          </Link>
-        </div>
-
-        {artists && artists.length > 0 && (
-          <>
-            <h2 className={styles.sectionTitle}>
-              Artists
-            </h2>
-            <div className={styles.artistsRow}>
-              {artists.map((artist) => (
-                <Link key={artist.id} href={`/music/artists/${artist.id}`} className={styles.artistCard}>
-                  <div
-                    className={styles.artistPhoto}
-                    style={artist.photo_url ? { backgroundImage: `url(${artist.photo_url})` } : undefined}
-                  />
-                  <span className={styles.artistName}>{artist.name}</span>
-                </Link>
-              ))}
-            </div>
-          </>
-        )}
-
-        {genres.length > 0 && (
-          <>
-            <h2 className={styles.sectionTitle}>
-              Genres
-            </h2>
-            <div className={styles.genreChips}>
-              {genres.map((genre) => (
-                <Link
-                  key={genre}
-                  href={`/music/genres/${encodeURIComponent(genre)}`}
-                  className={styles.genreChip}
-                >
-                  {genre}
-                </Link>
-              ))}
-            </div>
-          </>
-        )}
-
-        {albums && albums.length > 0 && (
-          <>
-            <h2 className={styles.sectionTitle}>
-              Albums
-            </h2>
-            <div className={styles.albumGrid}>
-              {albums.map((album) => (
-                <Link key={album.id} href={`/music/albums/${album.id}`} className={styles.albumCard}>
-                  <div
-                    className={styles.albumCover}
-                    style={album.cover_url ? { backgroundImage: `url(${album.cover_url})` } : undefined}
-                  />
-                  <span className={styles.albumCardTitle}>{album.title}</span>
-                  <span className={styles.albumCardMeta}>
-                    {(album.artist_id && artistNameById.get(album.artist_id)) || "Tyco"}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </>
-        )}
-
-        {tracksWithArtist.length > 0 && <h2 className={styles.sectionTitle}>All tracks</h2>}
-        {tracksWithArtist.length > 0 ? (
-          <TrackList tracks={tracksWithArtist} likedTrackIds={likedTrackIds} />
-        ) : (
+        <MusicTabs />
+        {isEmpty ? (
           <EmptyState
             title="The catalogue is warming up"
             description="Tracks published in Supabase will show up here automatically, ready to stream."
+          />
+        ) : (
+          <MusicBrowse
+            tracks={tracksWithArtist}
+            albums={albums ?? []}
+            artists={artists ?? []}
+            genres={genres}
+            likedTrackIds={likedTrackIds}
+            artistNameById={artistNameById}
           />
         )}
       </div>

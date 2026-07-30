@@ -282,6 +282,23 @@ export interface Database {
         { user_id: string; track_id: string; created_at: string },
         { user_id: string; track_id: string; created_at?: string }
       >;
+      artist_follows: Table<
+        { user_id: string; artist_id: string; created_at: string },
+        { user_id: string; artist_id: string; created_at?: string }
+      >;
+      playlists: Table<
+        { id: string; user_id: string; name: string; created_at: string; updated_at: string },
+        { id?: string; user_id: string; name: string; created_at?: string; updated_at?: string }
+      >;
+      playlist_tracks: Table<
+        { playlist_id: string; track_id: string; position: number; added_at: string },
+        {
+          playlist_id: string;
+          track_id: string;
+          position?: number;
+          added_at?: string;
+        }
+      >;
     };
     Views: Record<string, never>;
     Functions: {

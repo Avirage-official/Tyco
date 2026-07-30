@@ -75,3 +75,23 @@
   color: var(--fg-muted);
   font-variant-numeric: tabular-nums;
 }
+
+.removeBtn {
+  flex-shrink: 0;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-muted);
+}
+
+.removeBtn:hover {
+  color: var(--accent);
+}
+
+.removeBtn svg {
+  width: 13px;
+  height: 13px;
+}

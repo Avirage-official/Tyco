@@ -325,6 +325,89 @@ create index if not exists track_likes_user_id_idx on public.track_likes (user_i
 create index if not exists track_likes_track_id_idx on public.track_likes (track_id);
 
 -- ----------------------------------------------------------------------------
+-- artist_follows — a signed-in listener's followed artists. Same shape and
+-- ownership model as track_likes.
+-- ----------------------------------------------------------------------------
+create table if not exists public.artist_follows (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  artist_id uuid not null references public.artists (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, artist_id)
+);
+
+alter table public.artist_follows enable row level security;
+
+drop policy if exists "users manage their own follows" on public.artist_follows;
+create policy "users manage their own follows"
+  on public.artist_follows for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create index if not exists artist_follows_user_id_idx on public.artist_follows (user_id);
+create index if not exists artist_follows_artist_id_idx on public.artist_follows (artist_id);
+
+-- ----------------------------------------------------------------------------
+-- playlists / playlist_tracks — a signed-in listener's own playlists.
+-- Private by nature (no "public playlist" concept yet): every operation is
+-- scoped to auth.uid() = user_id, either directly on playlists or via the
+-- owning playlist for playlist_tracks. No admin policy — nobody manages a
+-- listener's playlist on their behalf.
+-- ----------------------------------------------------------------------------
+create table if not exists public.playlists (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  name text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.playlists enable row level security;
+
+drop policy if exists "users manage their own playlists" on public.playlists;
+create policy "users manage their own playlists"
+  on public.playlists for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop trigger if exists set_playlists_updated_at on public.playlists;
+create trigger set_playlists_updated_at
+  before update on public.playlists
+  for each row execute function public.set_updated_at();
+
+create index if not exists playlists_user_id_idx on public.playlists (user_id);
+
+create table if not exists public.playlist_tracks (
+  playlist_id uuid not null references public.playlists (id) on delete cascade,
+  track_id uuid not null references public.tracks (id) on delete cascade,
+  position integer not null default 0,
+  added_at timestamptz not null default now(),
+  primary key (playlist_id, track_id)
+);
+
+alter table public.playlist_tracks enable row level security;
+
+drop policy if exists "users manage tracks on their own playlists" on public.playlist_tracks;
+create policy "users manage tracks on their own playlists"
+  on public.playlist_tracks for all
+  using (
+    exists (
+      select 1 from public.playlists
+      where playlists.id = playlist_tracks.playlist_id
+      and playlists.user_id = auth.uid()
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.playlists
+      where playlists.id = playlist_tracks.playlist_id
+      and playlists.user_id = auth.uid()
+    )
+  );
+
+create index if not exists playlist_tracks_playlist_id_idx on public.playlist_tracks (playlist_id);
+create index if not exists playlist_tracks_track_id_idx on public.playlist_tracks (track_id);
+
+-- ----------------------------------------------------------------------------
 -- portfolio_items — creative work & studio updates
 -- ----------------------------------------------------------------------------
 create table if not exists public.portfolio_items (

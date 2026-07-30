@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/server";
 import { getLikedTrackIds } from "@/lib/music/liked";
+import { getFollowedArtistIds } from "@/lib/music/follows";
 import { TrackList } from "../../TrackList";
 import { PlayTracksButton } from "../../PlayTracksButton";
+import { FollowButton } from "@/components/music/FollowButton";
 import styles from "../../detail.module.css";
 
 export async function generateMetadata({
@@ -32,7 +34,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
 
   if (!artist) notFound();
 
-  const [{ data: albums }, { data: tracks }, likedTrackIds] = await Promise.all([
+  const [{ data: albums }, { data: tracks }, likedTrackIds, followedArtistIds] = await Promise.all([
     supabase
       .from("albums")
       .select("id, title, cover_url, release_date")
@@ -46,6 +48,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
       .eq("is_published", true)
       .order("release_date", { ascending: false }),
     getLikedTrackIds(supabase),
+    getFollowedArtistIds(supabase),
   ]);
 
   const allTracks = (tracks ?? []).map((track) => ({ ...track, artist: artist.name, artist_id: artist.id }));
@@ -75,6 +78,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
           <h1 className={styles.heroTitle}>{artist.name}</h1>
           <div className={styles.heroActions}>
             <PlayTracksButton tracks={allTracks} label="Play" />
+            <FollowButton artistId={artist.id} initiallyFollowing={followedArtistIds.includes(artist.id)} />
           </div>
         </div>
       </div>

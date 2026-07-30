@@ -32,17 +32,27 @@ deployed on Vercel, backed by Supabase.
 ## App structure
 
 - `/` — landing page, links into the three pillars below.
-- `/music` — the free streaming catalogue: browse by artist, genre, album,
-  or the full track list; shuffle everything; or jump into
-  `/music/artists/[id]`, `/music/albums/[id]`, and `/music/genres/[genre]`.
+- `/music` — the free streaming catalogue, split into two tabs. **Browse**:
+  an instant client-side search bar (artists, albums, tracks, genres — no
+  extra request, it filters what's already loaded) sitting above the usual
+  browse-by-artist/genre/album/full-track-list view; shuffle everything, or
+  jump into `/music/artists/[id]`, `/music/albums/[id]`, and
+  `/music/genres/[genre]`. **Library** (`/music/library`, signed-in only):
+  Liked Songs, your playlists, and the artists you follow, all in one place.
   A real player: seek/scrub, skip, shuffle, repeat (off/all/one), an inline
   "Up Next" queue, lock-screen/notification controls via the Media Session
   API, and Liked Songs (`/music/liked`) for signed-in listeners. Tap the
   mini player to expand to a full-screen Now Playing view. Artist pages are
   full pages (not a modal) — they stack more sensibly with the full-screen
   player, get shareable URLs, and give room for a real profile: bio,
-  albums, singles, and an optional short muted looping video in place of
-  the static photo.
+  albums, singles, a Follow button, and an optional short muted looping
+  video in place of the static photo.
+- **Playlists** — create, rename, and delete your own playlists
+  (`/music/playlists/[id]`); add any track to one or more playlists from the
+  `+` button next to it in any track list, or pull it back out from inside
+  the playlist itself. All owner-scoped through RLS — no server code
+  involved, the browser talks to Supabase directly and the database enforces
+  who can see and change what.
 - `/studio` and `/studio/events` — creative/portfolio updates and events
   (past + upcoming), tabbed together under "Studio".
 - `/shop` and `/shop/[id]` — retail product grid and product detail, with
@@ -61,7 +71,9 @@ Anything published in the last two weeks shows an automatic "New" tag on
 Mobile gets a bottom tab bar (Home / Music / Studio / Shop / Account) so the
 site behaves like an installed app; desktop gets a top nav instead. The
 `manifest.webmanifest` + icons make "Add to Home Screen" produce a real app
-icon and standalone window.
+icon and standalone window. A site-wide footer sits under every page's
+content with the wordmark, tagline, and a second set of links to the four
+sections.
 
 ## Admin panel
 
@@ -168,6 +180,13 @@ photo for the same number of seconds.
   Purely self-service: RLS restricts every operation to `auth.uid() = user_id`,
   verified against a local Postgres instance that one user's likes are
   invisible to and un-deletable by another.
+- **`artist_follows`** — same shape and same RLS pattern as `track_likes`,
+  for artists instead of tracks.
+- **`playlists`** → **`playlist_tracks`** — a listener's own playlists.
+  `playlists` is scoped `auth.uid() = user_id`; `playlist_tracks` has no
+  `user_id` of its own, so its policy checks ownership via an `exists`
+  join to the parent playlist. No admin policy on either — nobody manages
+  another listener's playlists, including admins.
 
 Every publishable table has `is_published` + `published_at` (auto-stamped by
 a trigger the first time a row is published) and `updated_at` (auto-bumped

@@ -170,3 +170,42 @@ export function IconHeart(props: IconProps) {
     </svg>
   );
 }
+
+export function IconSearch(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="10.8" cy="10.8" r="6.3" />
+      <path d="M19.5 19.5 15.4 15.4" />
+      <circle cx="10.8" cy="10.8" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function IconPlus(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 5.5v13" />
+      <path d="M5.5 12h13" />
+    </svg>
+  );
+}
+
+export function IconCheck(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M5 12.5 9.5 17 19 6.5" />
+    </svg>
+  );
+}
+
+export function IconPlaylist(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 6.5h11" />
+      <path d="M4 12h11" />
+      <path d="M4 17.5h6" />
+      <circle cx="18.5" cy="15.5" r="2.5" />
+      <path d="M21 15.5V6l-3 .8" />
+    </svg>
+  );
+}

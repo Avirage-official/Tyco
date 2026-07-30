@@ -1,0 +1,28 @@
+.tabs {
+  display: flex;
+  gap: var(--space-lg);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-lg);
+}
+
+.tab {
+  position: relative;
+  padding-block: var(--space-sm);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--fg-muted);
+}
+
+.tabActive {
+  color: var(--fg);
+}
+
+.tabActive::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+}

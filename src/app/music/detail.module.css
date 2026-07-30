@@ -45,6 +45,9 @@
 
 .heroActions {
   margin-top: var(--space-md);
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
 }
 
 .bio {
@@ -169,4 +172,126 @@
 .genreChip:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.libraryCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+  margin-bottom: var(--space-2xl);
+  transition: border-color var(--dur) var(--ease);
+}
+
+.libraryCard:hover {
+  border-color: var(--accent);
+}
+
+.libraryCardIcon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.libraryCardIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.libraryCardTitle {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.libraryCardMeta {
+  font-size: 0.82rem;
+  color: var(--fg-muted);
+}
+
+.playlistGrid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  margin-bottom: var(--space-2xl);
+}
+
+.playlistCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.playlistCover {
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-muted);
+}
+
+.playlistCover svg {
+  width: 28px;
+  height: 28px;
+}
+
+.playlistCardTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playlistCardMeta {
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
+
+.newPlaylistCover {
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-muted);
+  font-size: 1.8rem;
+  background: none;
+  width: 100%;
+}
+
+.newPlaylistCover:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.newPlaylistForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.newPlaylistInput {
+  height: 2.4rem;
+  padding-inline: 0.6rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.newPlaylistInput:focus {
+  outline: none;
 }
