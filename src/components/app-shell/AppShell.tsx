@@ -4,6 +4,7 @@ import { BottomNav } from "./BottomNav";
 import { NowPlayingBar } from "./NowPlayingBar";
 import { NowPlayingFull } from "./NowPlayingFull";
 import { Footer } from "./Footer";
+import { PageTransition } from "./PageTransition";
 import styles from "./AppShell.module.css";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -11,7 +12,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <PlayerProvider>
       <TopNav />
       <main className={styles.main}>
-        {children}
+        <PageTransition>{children}</PageTransition>
         <Footer />
       </main>
       <NowPlayingBar />

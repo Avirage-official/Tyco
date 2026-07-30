@@ -12,11 +12,18 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--bg-raised);
-  transition: border-color var(--dur) var(--ease);
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
 }
 
 .card:hover {
   border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+}
+
+.card:active {
+  transform: translateY(-1px) scale(0.98);
 }
 
 .media {

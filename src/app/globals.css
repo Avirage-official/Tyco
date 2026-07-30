@@ -168,3 +168,24 @@ h4 {
   white-space: nowrap;
   border: 0;
 }
+
+/* Shared micro-interaction for any clickable card — lifts on hover, settles
+   on press. Add alongside a component's own class: `${styles.card} lift`. */
+.lift {
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+
+.lift:hover {
+  transform: translateY(-4px);
+}
+
+.lift:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift:hover,
+  .lift:active {
+    transform: none;
+  }
+}

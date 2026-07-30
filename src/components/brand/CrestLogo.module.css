@@ -1,0 +1,255 @@
+.crest {
+  --crest-cream: var(--paper);
+  --crest-white: #fbf6ea;
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: visible;
+}
+
+/* -- ring ------------------------------------------------------------ */
+
+.ring circle {
+  fill: none;
+  stroke: var(--fg-muted);
+  stroke-width: 1;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  opacity: 0.55;
+}
+
+.playing .ring circle {
+  animation: ringDraw 700ms var(--ease) both;
+}
+
+.playing .ring circle:nth-of-type(2) {
+  animation-delay: 100ms;
+}
+
+@keyframes ringDraw {
+  from {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 0.55;
+  }
+}
+
+/* -- dots -------------------------------------------------------------- */
+
+.dots circle {
+  fill: var(--fg-muted);
+}
+
+.playing .dots circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dotPop 400ms var(--ease-bounce) both;
+  animation-delay: 1.35s;
+}
+
+.playing .dots circle:nth-of-type(2) {
+  animation-delay: 1.39s;
+}
+.playing .dots circle:nth-of-type(3) {
+  animation-delay: 1.43s;
+}
+.playing .dots circle:nth-of-type(4) {
+  animation-delay: 1.47s;
+}
+.playing .dots circle:nth-of-type(5) {
+  animation-delay: 1.51s;
+}
+.playing .dots circle:nth-of-type(6) {
+  animation-delay: 1.55s;
+}
+
+@keyframes dotPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* -- ring text ----------------------------------------------------------- */
+
+.ringText text {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+}
+
+.ringTextTop text {
+  font-size: 15px;
+  fill: var(--accent-strong);
+  font-weight: 700;
+}
+
+.ringTextLeft text,
+.ringTextRight text,
+.ringTextBottom text {
+  font-size: 10.5px;
+  fill: var(--fg-muted);
+}
+
+.playing .ringText {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: textFadeIn 450ms var(--ease) both;
+}
+
+.playing .ringTextTop {
+  animation-delay: 1.05s;
+}
+.playing .ringTextLeft,
+.playing .ringTextRight {
+  animation-delay: 1.15s;
+}
+.playing .ringTextBottom {
+  animation-delay: 1.25s;
+}
+
+@keyframes textFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* -- crown --------------------------------------------------------------- */
+
+.crown path {
+  fill: var(--accent-strong);
+}
+
+.crown .crownDot {
+  fill: var(--ink);
+}
+
+.playing .crown {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: crownDrop 550ms var(--ease-bounce) both;
+  animation-delay: 500ms;
+}
+
+@keyframes crownDrop {
+  0% {
+    transform: translateY(-26px) scale(0.75);
+    opacity: 0;
+  }
+  65% {
+    transform: translateY(4px) scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* -- shield -------------------------------------------------------------- */
+
+.shieldLeft {
+  fill: var(--crest-cream);
+}
+
+.shieldRight {
+  fill: var(--crest-white);
+}
+
+.playing .shieldLeft,
+.playing .shieldRight {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation-duration: 500ms;
+  animation-timing-function: var(--ease);
+  animation-fill-mode: both;
+  animation-delay: 650ms;
+}
+
+.playing .shieldLeft {
+  animation-name: shieldInLeft;
+}
+
+.playing .shieldRight {
+  animation-name: shieldInRight;
+}
+
+@keyframes shieldInLeft {
+  0% {
+    transform: translateX(-36px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shieldInRight {
+  0% {
+    transform: translateX(36px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* -- letterform T ---------------------------------------------------- */
+
+.letterT {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 76px;
+  fill: var(--ink);
+  text-anchor: middle;
+}
+
+.playing .letterT {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: letterPop 500ms var(--ease-bounce) both;
+  animation-delay: 950ms;
+}
+
+@keyframes letterPop {
+  0% {
+    transform: scale(0.4) rotate(-10deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08) rotate(2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playing .ring circle,
+  .playing .dots circle,
+  .playing .ringText,
+  .playing .crown,
+  .playing .shieldLeft,
+  .playing .shieldRight,
+  .playing .letterT {
+    animation: none;
+  }
+}

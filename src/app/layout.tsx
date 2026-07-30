@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Work_Sans } from "next/font/google";
 import { AppShell } from "@/components/app-shell/AppShell";
+import { SplashScreen } from "@/components/brand/SplashScreen";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -47,6 +48,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fraunces.variable} ${workSans.variable}`}>
       <body>
+        <SplashScreen />
         <AppShell>{children}</AppShell>
       </body>
     </html>

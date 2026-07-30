@@ -7,7 +7,15 @@
   align-items: center;
   gap: var(--space-sm);
   padding-block: var(--space-sm);
+  padding-inline: 0.4rem;
+  margin-inline: -0.4rem;
   border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: background var(--dur) var(--ease);
+}
+
+.row:hover {
+  background: var(--bg-raised);
 }
 
 .index {

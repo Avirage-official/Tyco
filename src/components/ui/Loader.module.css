@@ -1,0 +1,47 @@
+.spinner {
+  display: block;
+  overflow: visible;
+}
+
+.track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 2.5;
+}
+
+.orbit {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spin 1000ms linear infinite;
+}
+
+.arc {
+  fill: none;
+  stroke: var(--accent-strong);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 0.24 1;
+}
+
+.dot {
+  fill: var(--accent-strong);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.page {
+  min-height: min(60vh, 480px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit {
+    animation-duration: 2200ms;
+  }
+}

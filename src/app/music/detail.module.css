@@ -92,6 +92,15 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  transition: transform var(--dur) var(--ease);
+}
+
+.albumCard:hover {
+  transform: translateY(-4px);
+}
+
+.albumCard:active {
+  transform: translateY(-1px) scale(0.97);
 }
 
 .albumCover {
@@ -131,6 +140,15 @@
   width: 92px;
   flex-shrink: 0;
   text-align: center;
+  transition: transform var(--dur) var(--ease);
+}
+
+.artistCard:hover {
+  transform: translateY(-4px);
+}
+
+.artistCard:active {
+  transform: translateY(-1px) scale(0.97);
 }
 
 .artistPhoto {
@@ -186,8 +204,17 @@
   transition: border-color var(--dur) var(--ease);
 }
 
+.libraryCard {
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
 .libraryCard:hover {
   border-color: var(--accent);
+  transform: translateY(-3px);
+}
+
+.libraryCard:active {
+  transform: translateY(-1px) scale(0.99);
 }
 
 .libraryCardIcon {
@@ -228,6 +255,15 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  transition: transform var(--dur) var(--ease);
+}
+
+.playlistCard:hover {
+  transform: translateY(-4px);
+}
+
+.playlistCard:active {
+  transform: translateY(-1px) scale(0.97);
 }
 
 .playlistCover {

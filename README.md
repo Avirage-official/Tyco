@@ -28,6 +28,33 @@ deployed on Vercel, backed by Supabase.
 - App icon / favicon / manifest icons are generated in code with `next/og`
   (`src/app/icon.tsx`, `apple-icon.tsx`, `web-icon-192/512`), no image
   assets to keep in sync.
+- **Crest logo** (`src/components/brand/CrestLogo.tsx`) — the crown/shield/T
+  mark, hand-built as SVG (ring text on `<textPath>` arcs computed from a
+  small polar-coordinate helper in `src/lib/geometry.ts`, not traced from a
+  raster image). Takes a `playing` prop that turns on a staggered draw-in
+  animation (ring → crown → shield halves → the T → ring text → dots);
+  without it, the mark just renders in its final state. Swap in a real
+  vector export later by replacing the path data — the animation choreography
+  and component API stay the same.
+- **Splash screen** (`src/components/brand/SplashScreen.tsx`) — plays the
+  full animated crest once per browser session (gated on `sessionStorage`,
+  not `localStorage`, so it replays on a fresh session but not on every
+  internal navigation), then fades out. Mounted once in the root layout.
+- **Loading states**: a small shared `Loader`/`PageLoader`
+  (`src/components/ui/Loader.tsx`) — an orbiting-arc mark in the brand's
+  red, not a generic spinner import — wired into a `loading.tsx` in every
+  top-level route segment (`/`, `/music`, `/studio`, `/shop`, `/admin`,
+  `/account`, `/login`+`/signup`), so any nested route that doesn't define
+  its own loading state inherits one automatically.
+- **Page transitions**: `PageTransition` (`src/components/app-shell/`)
+  re-keys its children by pathname so every route change replays a short
+  fade/rise-in — no animation library, just a CSS keyframe retriggered by
+  a React remount. Wired once into `AppShell`, so new pages get it for free.
+- **Micro-interactions**: a shared `.lift` utility class in `globals.css`
+  plus hover/active rules baked directly into the shared card styles
+  (album/artist/playlist/library cards, product cards, the home page's
+  pillar cards) — a small rise on hover, a settle on tap. Everything
+  motion-related respects `prefers-reduced-motion`.
 
 ## App structure
 
