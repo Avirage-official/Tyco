@@ -1,0 +1,134 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding-block: var(--space-lg) var(--space-2xl);
+  max-width: 640px;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-sm);
+}
+
+.orderId {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.orderDate {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+
+.status {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  color: var(--fg-muted);
+}
+
+.status_paid {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.status_fulfilled {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--bg);
+}
+
+.status_cancelled,
+.status_refunded {
+  color: var(--fg-muted);
+  text-decoration: line-through;
+}
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.itemCover {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.itemMeta {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.itemName {
+  font-size: 0.88rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemSize {
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
+
+.itemQty {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  flex-shrink: 0;
+}
+
+.itemPrice {
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 4.5rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.total {
+  font-weight: 700;
+}

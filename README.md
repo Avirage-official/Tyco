@@ -100,6 +100,9 @@ deployed on Vercel, backed by Supabase.
   setup.
 - `/login`, `/signup`, `/account` — Supabase email/password auth. A
   `profiles` row is created automatically on signup via a DB trigger.
+  `/account/orders` lists a signed-in customer's own past orders (status,
+  items, totals) — reads through the normal RLS-scoped client, no special
+  access needed since customers can already `SELECT` their own orders.
 - `/admin` — content, orders, and user management (see "Admin panel" below).
   Only visible/reachable if your account is in `public.admins`; everyone
   else gets redirected before rendering anything.
@@ -249,7 +252,9 @@ correction once you run a real test — check the Vercel function logs for
   customer's own RLS policies only allow `SELECT`/`INSERT` on their own
   orders — but checkout also needs to work for guests (no session to satisfy
   `auth.uid() = user_id`), so the checkout server action writes through the
-  service-role client instead, after re-validating price and stock itself.
+  service-role client instead, after re-validating price and stock itself —
+  it still reads the caller's session separately to attach `user_id` when
+  they're signed in, so the order shows up in their `/account/orders` later.
   Status transitions (`pending → paid → fulfilled → ...`) are always
   service-role/webhook-only — no path lets a customer mark their own order
   paid from the browser. `orders.revolut_order_id` and the

@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { createRevolutOrder } from "@/lib/checkout/revolut";
 
 export type CheckoutLine = { variantId: string; quantity: number };
@@ -13,6 +14,15 @@ export async function startCheckout(lines: CheckoutLine[], email: string) {
   if (!trimmedEmail || !trimmedEmail.includes("@")) {
     throw new Error("Enter a valid email so we can send your receipt.");
   }
+
+  // Read the signed-in session (if any) from the regular, cookie-aware
+  // client — the service-role client below has no session context of its
+  // own, but an order still needs to be linkable back to an account for
+  // order history to find it.
+  const sessionClient = await createClient();
+  const {
+    data: { user },
+  } = await sessionClient.auth.getUser();
 
   const supabase = createAdminClient();
 
@@ -63,6 +73,7 @@ export async function startCheckout(lines: CheckoutLine[], email: string) {
   const { data: order, error: orderError } = await supabase
     .from("orders")
     .insert({
+      user_id: user?.id ?? null,
       customer_email: trimmedEmail,
       status: "pending",
       currency,
