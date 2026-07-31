@@ -67,14 +67,6 @@
   }
 }
 
-.detailMedia {
-  aspect-ratio: 3 / 4;
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  background-size: cover;
-  background-position: center;
-}
-
 .detailPrice {
   margin-top: var(--space-2xs);
   font-size: 1.3rem;

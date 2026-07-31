@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
+import { Gallery } from "./Gallery";
 import styles from "../shop.module.css";
 
 export default async function ProductPage({
@@ -31,10 +32,7 @@ export default async function ProductPage({
   return (
     <div className={`container ${styles.detail}`}>
       <div className={styles.detailGrid}>
-        <div
-          className={styles.detailMedia}
-          style={product.images?.[0] ? { backgroundImage: `url(${product.images[0]})` } : undefined}
-        />
+        <Gallery images={product.images ?? []} alt={product.name} />
         <div>
           <p className="eyebrow">Shop</p>
           <h1 style={{ marginTop: "0.4rem", fontSize: "clamp(1.8rem, 4vw, 2.6rem)" }}>

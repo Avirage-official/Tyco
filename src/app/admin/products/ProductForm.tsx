@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { uploadToBucket } from "@/lib/supabase/upload";
 import { Button } from "@/components/ui/Button";
 import { createProduct, updateProduct, type ProductInput, type VariantInput } from "./actions";
 import styles from "../admin.module.css";
+
+const MAX_IMAGES = 5;
 
 type Product = {
   id: string;
@@ -28,13 +30,47 @@ export function ProductForm({
   const [description, setDescription] = useState(product?.description ?? "");
   const [price, setPrice] = useState(product ? (product.price_cents / 100).toFixed(2) : "");
   const [category, setCategory] = useState(product?.category ?? "");
-  const images = product?.images ?? [];
+  const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [variants, setVariants] = useState<VariantInput[]>(
     initialVariants && initialVariants.length > 0 ? initialVariants : [{ size: "", stock: 0 }]
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const remainingSlots = MAX_IMAGES - images.length - imageFiles.length;
+
+  const previewUrls = useMemo(
+    () => imageFiles.map((file) => URL.createObjectURL(file)),
+    [imageFiles]
+  );
+
+  useEffect(() => {
+    return () => previewUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, [previewUrls]);
+
+  function handleFilesSelected(fileList: FileList | null) {
+    const files = Array.from(fileList ?? []).slice(0, Math.max(0, remainingSlots));
+    setImageFiles((prev) => [...prev, ...files]);
+  }
+
+  function removeExistingImage(index: number) {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function moveExistingImage(index: number, direction: -1 | 1) {
+    setImages((prev) => {
+      const next = [...prev];
+      const target = index + direction;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  }
+
+  function removePendingFile(index: number) {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+  }
 
   function updateVariant(index: number, patch: Partial<VariantInput>) {
     setVariants((prev) => prev.map((v, i) => (i === index ? { ...v, ...patch } : v)));
@@ -141,15 +177,81 @@ export function ProductForm({
 
       <div className={styles.field}>
         <label className={styles.label} htmlFor="images">
-          Images {images.length > 0 && `(${images.length} already uploaded)`}
+          Photos ({images.length + imageFiles.length} / {MAX_IMAGES})
         </label>
-        <input
-          id="images"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => setImageFiles(Array.from(e.target.files ?? []))}
-        />
+        <p className={styles.hint}>
+          The first photo is the cover shown in the shop grid. Reorder with the arrows.
+        </p>
+
+        {(images.length > 0 || previewUrls.length > 0) && (
+          <div className={styles.imageGrid}>
+            {images.map((url, i) => (
+              <div key={url} className={styles.imageThumb}>
+                <div className={styles.preview} style={{ backgroundImage: `url(${url})` }} />
+                {i === 0 && <span className={styles.coverBadge}>Cover</span>}
+                <div className={styles.imageThumbControls}>
+                  <button
+                    type="button"
+                    className={styles.imageThumbBtn}
+                    onClick={() => moveExistingImage(i, -1)}
+                    disabled={i === 0}
+                    aria-label="Move earlier"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.imageThumbBtn}
+                    onClick={() => moveExistingImage(i, 1)}
+                    disabled={i === images.length - 1}
+                    aria-label="Move later"
+                  >
+                    →
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.imageThumbBtn}
+                    onClick={() => removeExistingImage(i)}
+                    aria-label="Remove photo"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+            {previewUrls.map((url, i) => (
+              <div key={url} className={styles.imageThumb}>
+                <div className={styles.preview} style={{ backgroundImage: `url(${url})` }} />
+                {images.length === 0 && i === 0 && <span className={styles.coverBadge}>Cover</span>}
+                <div className={styles.imageThumbControls}>
+                  <button
+                    type="button"
+                    className={styles.imageThumbBtn}
+                    onClick={() => removePendingFile(i)}
+                    aria-label="Remove photo"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {remainingSlots > 0 ? (
+          <input
+            id="images"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => {
+              handleFilesSelected(e.target.files);
+              e.target.value = "";
+            }}
+          />
+        ) : (
+          <p className={styles.hint}>Remove a photo to add another — {MAX_IMAGES} max.</p>
+        )}
       </div>
 
       <div className={styles.field}>

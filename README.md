@@ -83,8 +83,10 @@ deployed on Vercel, backed by Supabase.
 - `/studio` and `/studio/events` — creative/portfolio updates and events
   (past + upcoming), tabbed together under "Studio".
 - `/shop` and `/shop/[id]` — retail product grid and product detail, with
-  per-size stock (sold-out sizes show as struck through). Cart and checkout
-  are **not** built yet — "Add to cart" is a stub.
+  per-size stock (sold-out sizes show as struck through) and up to 5 photos
+  per product in a swipeable gallery (`Gallery.tsx` — hand-rolled scroll-snap
+  + dots + arrows, no carousel library). Cart and checkout are **not** built
+  yet — "Add to cart" is a stub.
 - `/login`, `/signup`, `/account` — Supabase email/password auth. A
   `profiles` row is created automatically on signup via a DB trigger.
 - `/admin` — content, orders, and user management (see "Admin panel" below).

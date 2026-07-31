@@ -239,6 +239,54 @@
   align-items: center;
 }
 
+.imageGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.imageThumb {
+  position: relative;
+  width: 5rem;
+}
+
+.imageThumbControls {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+
+.imageThumbBtn {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+  padding: 0.1rem 0.3rem;
+}
+
+.imageThumbBtn:hover {
+  color: var(--accent);
+}
+
+.coverBadge {
+  position: absolute;
+  top: -0.4rem;
+  left: -0.4rem;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-pill);
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
+
 .error {
   font-size: 0.85rem;
   color: var(--accent);
