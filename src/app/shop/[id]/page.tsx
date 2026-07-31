@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
 import { Gallery } from "./Gallery";
+import { AddToCartForm } from "./AddToCartForm";
 import styles from "../shop.module.css";
 
 export default async function ProductPage({
@@ -27,8 +27,6 @@ export default async function ProductPage({
     .eq("product_id", id)
     .order("size", { ascending: true });
 
-  const inStock = (variants ?? []).some((v) => v.stock > 0);
-
   return (
     <div className={`container ${styles.detail}`}>
       <div className={styles.detailGrid}>
@@ -40,22 +38,14 @@ export default async function ProductPage({
           </h1>
           <p className={styles.detailPrice}>{formatPrice(product.price_cents, product.currency)}</p>
           {product.description && <p className={styles.detailDesc}>{product.description}</p>}
-          {variants && variants.length > 0 && (
-            <div className={styles.sizes}>
-              {variants.map((variant) => (
-                <span
-                  key={variant.id}
-                  className={variant.stock > 0 ? styles.size : `${styles.size} ${styles.sizeSoldOut}`}
-                >
-                  {variant.size}
-                  {variant.stock <= 0 && " · sold out"}
-                </span>
-              ))}
-            </div>
-          )}
-          <div style={{ marginTop: "var(--space-lg)" }}>
-            <Button disabled={!inStock}>{inStock ? "Add to cart" : "Sold out"}</Button>
-          </div>
+          <AddToCartForm
+            productId={product.id}
+            productName={product.name}
+            priceCents={product.price_cents}
+            currency={product.currency}
+            coverUrl={product.images?.[0] ?? null}
+            variants={variants ?? []}
+          />
         </div>
       </div>
     </div>

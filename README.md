@@ -85,8 +85,19 @@ deployed on Vercel, backed by Supabase.
 - `/shop` and `/shop/[id]` — retail product grid and product detail, with
   per-size stock (sold-out sizes show as struck through) and up to 5 photos
   per product in a swipeable gallery (`Gallery.tsx` — hand-rolled scroll-snap
-  + dots + arrows, no carousel library). Cart and checkout are **not** built
-  yet — "Add to cart" is a stub.
+  + dots + arrows, no carousel library). Pick a size and quantity, add to
+  cart.
+- `/cart` — client-side cart (React context + localStorage, same pattern as
+  the music player's queue) — nothing touches the database until checkout.
+  Works for guests; no account required. Checkout re-validates every price
+  and stock level server-side (never trusts the cart's own numbers), writes
+  a `pending` order, and redirects to a Revolut-hosted checkout page.
+  `/checkout/confirmation` is where the customer lands afterward; the
+  webhook at `/api/webhooks/revolut` is the actual source of truth for
+  "did this get paid" — it verifies Revolut's signature, flips the order to
+  `paid`, and decrements stock atomically (clamped at zero, so a retried
+  webhook delivery can never oversell). See "Payments (Revolut)" below for
+  setup.
 - `/login`, `/signup`, `/account` — Supabase email/password auth. A
   `profiles` row is created automatically on signup via a DB trigger.
 - `/admin` — content, orders, and user management (see "Admin panel" below).
@@ -141,6 +152,39 @@ that track (MP3/FLAC); no need to upgrade Supabase for this alone. Video is
 the one place this is worth watching more closely — keep an artist's
 profile loop short (5–15s) and compressed; it's a much bigger file than a
 photo for the same number of seconds.
+
+## Payments (Revolut)
+
+Checkout uses Revolut's Merchant API (Orders + Hosted Checkout Page), not a
+client-side widget — the server creates the order, the customer pays on a
+Revolut-hosted page, and a webhook is what actually confirms payment.
+
+1. **Get sandbox keys**: Revolut Business dashboard → Merchant account →
+   Developer → API keys. Start with sandbox, not live.
+2. **Set env vars** (see `.env.example`): `REVOLUT_API_BASE_URL`,
+   `REVOLUT_SECRET_KEY`.
+3. **Register the webhook**: same dashboard → Webhooks → add
+   `https://<your-domain>/api/webhooks/revolut`, subscribe to
+   `ORDER_COMPLETED`, `ORDER_AUTHORISED`, `ORDER_CANCELLED`,
+   `ORDER_PAYMENT_DECLINED`, `ORDER_PAYMENT_FAILED`, then copy the signing
+   secret into `REVOLUT_WEBHOOK_SIGNING_SECRET`.
+4. **Test a full checkout** in sandbox (test card numbers are in Revolut's
+   docs under Testing) before switching `REVOLUT_API_BASE_URL` and the two
+   secrets to their live equivalents.
+
+Order matching is done via `merchant_order_ext_ref`, which is always our own
+`orders.id` — the webhook trusts that field, not any Revolut-side order id,
+so it doesn't depend on exactly which field name a given API version uses
+for its own identifier.
+
+**Honest caveat**: this was built against Revolut's documented API shape
+researched separately (this dev environment can't reach
+`developer.revolut.com` to double-check field names directly), and it's
+never been exercised against a real Revolut sandbox request. The pinned
+`Revolut-Api-Version` in `src/lib/checkout/revolut.ts` and the webhook
+payload field-paths it reads are the two things most likely to need a small
+correction once you run a real test — check the Vercel function logs for
+`/api/webhooks/revolut` on the first live attempt.
 
 ## Local setup
 
@@ -201,10 +245,16 @@ photo for the same number of seconds.
 - **`products`** → **`product_variants`** (one row per size, its own stock —
   so "Medium is sold out, Large isn't" is representable).
 - **`orders`** → **`order_items`** (line items pin `unit_price_cents` at
-  order time and reference a specific `product_variants` row). Customers can
-  only `SELECT`/`INSERT` their own orders — status transitions
-  (`pending → paid → fulfilled → ...`) are service-role/webhook-only, so a
-  signed-in customer can't mark their own order paid from the browser.
+  order time and reference a specific `product_variants` row). A signed-in
+  customer's own RLS policies only allow `SELECT`/`INSERT` on their own
+  orders — but checkout also needs to work for guests (no session to satisfy
+  `auth.uid() = user_id`), so the checkout server action writes through the
+  service-role client instead, after re-validating price and stock itself.
+  Status transitions (`pending → paid → fulfilled → ...`) are always
+  service-role/webhook-only — no path lets a customer mark their own order
+  paid from the browser. `orders.revolut_order_id` and the
+  `decrement_variant_stock()` RPC (atomic, clamped at zero) exist
+  specifically for the webhook handler.
 - **`track_likes`** — a listener's saved tracks (`user_id`, `track_id`).
   Purely self-service: RLS restricts every operation to `auth.uid() = user_id`,
   verified against a local Postgres instance that one user's likes are
@@ -234,9 +284,12 @@ This pass is the foundation: design system, navigation shell, auth, and a
 real (if empty) Supabase-backed schema for all three verticals. Natural
 next steps, roughly in order:
 
-- Shopping cart + checkout — `orders`/`order_items` and a `stripe_payment_intent_id`
-  column are already there, and the admin Orders screen can already manage
-  whatever checkout produces. Stripe is the obvious fit.
+- Cart + checkout are built (Revolut) but never exercised against a real
+  Revolut sandbox request from this environment — see "Payments (Revolut)"
+  for the one real test that still needs doing.
+- The cart is per-device (localStorage) — a customer switching phones or
+  browsers starts a fresh cart. Fine for now; would need a `cart_items`
+  table tied to a signed-in account to change.
 - The player state (queue, position, shuffle) doesn't persist across a full
   page reload — resets are only mid-session. Worth a localStorage restore
   if that starts to bother listeners.

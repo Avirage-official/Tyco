@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { CartLink } from "@/components/cart/CartLink";
 import { Wordmark } from "./Wordmark";
 import { isActive, navItems } from "./nav-items";
 import styles from "./TopNav.module.css";
@@ -28,6 +29,8 @@ export function TopNav() {
             );
           })}
         </nav>
+        <span className={styles.spacer} />
+        <CartLink />
       </div>
     </header>
   );

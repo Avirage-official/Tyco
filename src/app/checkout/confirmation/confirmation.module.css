@@ -1,0 +1,28 @@
+.wrap {
+  max-width: 480px;
+  padding-block: var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.title {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+}
+
+.desc {
+  color: var(--fg-muted);
+  max-width: 46ch;
+}
+
+.total {
+  margin-top: var(--space-md);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.orderId {
+  font-size: 0.82rem;
+  color: var(--fg-muted);
+  margin-bottom: var(--space-md);
+}

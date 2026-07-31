@@ -244,6 +244,7 @@ export interface Database {
           total_cents: number;
           shipping_address: Json | null;
           stripe_payment_intent_id: string | null;
+          revolut_order_id: string | null;
           created_at: string;
           updated_at: string;
         },
@@ -256,6 +257,7 @@ export interface Database {
           total_cents?: number;
           shipping_address?: Json | null;
           stripe_payment_intent_id?: string | null;
+          revolut_order_id?: string | null;
           created_at?: string;
           updated_at?: string;
         }
@@ -308,6 +310,10 @@ export interface Database {
       };
       increment_play_count: {
         Args: { track_id: string };
+        Returns: undefined;
+      };
+      decrement_variant_stock: {
+        Args: { p_variant_id: string; p_quantity: number };
         Returns: undefined;
       };
     };

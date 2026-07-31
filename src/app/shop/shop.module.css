@@ -92,6 +92,16 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
   font-size: 0.85rem;
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.size:not(:disabled):hover {
+  border-color: var(--accent);
+}
+
+.sizeSelected {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .sizeSoldOut {
@@ -99,4 +109,39 @@
   border-color: var(--border);
   text-decoration: line-through;
   opacity: 0.6;
+}
+
+.cartRow {
+  margin-top: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.qtyStepper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.qtyStepper button {
+  font-size: 1rem;
+  font-weight: 600;
+  width: 1.2rem;
+  color: var(--fg);
+}
+
+.qtyStepper button:disabled {
+  color: var(--fg-muted);
+}
+
+.qtyStepper span {
+  min-width: 1.2rem;
+  text-align: center;
+  font-size: 0.9rem;
 }

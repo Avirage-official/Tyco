@@ -1,0 +1,139 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  padding-block: var(--space-lg) var(--space-2xl);
+  max-width: 640px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-block: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.cover {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.meta {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.size {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+
+.qtyStepper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.75rem;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.qtyStepper button {
+  font-size: 1rem;
+  font-weight: 600;
+  width: 1rem;
+}
+
+.qtyStepper span {
+  min-width: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.price {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 4.5rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.remove {
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  flex-shrink: 0;
+}
+
+.remove:hover {
+  color: var(--accent);
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-lg);
+}
+
+.subtotalRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.emailField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.emailLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.emailInput {
+  height: 2.85rem;
+  padding-inline: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  font: inherit;
+}
+
+.emailInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.error {
+  font-size: 0.85rem;
+  color: var(--accent);
+}

@@ -609,6 +609,22 @@ create trigger set_product_variants_updated_at
 
 create index if not exists product_variants_product_id_idx on public.product_variants (product_id);
 
+-- decrement_variant_stock — called only from the checkout webhook handler
+-- (service role) once a payment is confirmed. Clamps at zero so a retried
+-- webhook delivery can never oversell into negative stock.
+create or replace function public.decrement_variant_stock(p_variant_id uuid, p_quantity integer)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.product_variants
+  set stock = greatest(0, stock - p_quantity)
+  where id = p_variant_id;
+$$;
+
+grant execute on function public.decrement_variant_stock(uuid, integer) to service_role;
+
 -- ----------------------------------------------------------------------------
 -- orders — status transitions (pending -> paid -> fulfilled -> ...) are a
 -- service-role/webhook concern. Customers may only ever SELECT/INSERT their
@@ -637,7 +653,11 @@ create table if not exists public.orders (
 alter table public.orders add column if not exists customer_email text;
 alter table public.orders add column if not exists currency text not null default 'usd';
 alter table public.orders add column if not exists stripe_payment_intent_id text;
+alter table public.orders add column if not exists revolut_order_id text;
 alter table public.orders add column if not exists updated_at timestamptz not null default now();
+
+create unique index if not exists orders_revolut_order_id_idx
+  on public.orders (revolut_order_id) where revolut_order_id is not null;
 
 alter table public.orders alter column user_id drop not null;
 
