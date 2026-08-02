@@ -58,13 +58,21 @@ deployed on Vercel, backed by Supabase.
 
 ## App structure
 
-- `/` — landing page: mission narrative (the manifesto behind the three
-  pillars) plus a live "what's next" spotlight — the soonest upcoming
-  published event if there is one, otherwise the latest published album —
-  pulled straight from Supabase, hidden entirely when neither exists. Links
-  into the three pillars below. The installed PWA's `start_url` points at
-  `/music` instead of here, so opening it from a home screen goes straight
-  to the catalogue rather than replaying the pitch every launch.
+- `/` — branches on auth state. **Signed out**: a one-page marketing site —
+  full-bleed looping background video behind the hero, the mission
+  narrative (the manifesto behind the three pillars), and a live
+  "what's next" spotlight — the soonest upcoming published event if there
+  is one, otherwise the latest published album — pulled straight from
+  Supabase, hidden entirely when neither exists. Links into the three
+  pillars below, plus sign in/sign up. Drop the hero clip at
+  `public/video/home-hero.mp4` (autoplays muted/looped, hidden entirely
+  under `prefers-reduced-motion: reduce`). **Signed in**: a personal
+  dashboard — latest release, next event, a "coming next" project teaser
+  and a mission-fund progress bar (both editable from `/admin/settings`,
+  hidden when empty), plus shortcuts to Liked Songs, playlists, order
+  history, and followed artists. The installed PWA's `start_url` points
+  back at `/`, since it now routes every visitor to the right place on its
+  own.
 - `/music` — the free streaming catalogue, split into two tabs. **Browse**:
   an instant client-side search bar (artists, albums, tracks, genres — no
   extra request, it filters what's already loaded) sitting above the usual
@@ -145,6 +153,11 @@ how to grant yourself access.
 - **Orders** — every order, who placed it, how many items, total, and a
   status dropdown (`pending → paid → fulfilled → …`). This is the only
   place order status changes — customers can never do this themselves.
+- **Homepage** (`/admin/settings`) — edits the one `site_settings` row:
+  the "coming next" project teaser (title, description, image — blank
+  title hides the card) and the mission fund progress bar (raised/goal in
+  USD — a zero goal hides the bar). Both render on the signed-in dashboard
+  at `/`.
 - **Users** — every signed-up account, block/unblock, delete. Uses the
   Supabase **Admin API**, which needs the service-role key
   (`SUPABASE_SERVICE_ROLE_KEY`) — the only part of the app that does. You
@@ -277,6 +290,11 @@ correction once you run a real test — check the Vercel function logs for
   `user_id` of its own, so its policy checks ownership via an `exists`
   join to the parent playlist. No admin policy on either — nobody manages
   another listener's playlists, including admins.
+- **`site_settings`** — a singleton row (`id` is always `true`, enforced by
+  a check constraint) holding the homepage's editable bits: the "coming
+  next" project teaser and the mission fund raised/goal amounts. Publicly
+  readable, admin-writable, same as everything else — edited from
+  `/admin/settings`.
 
 Every publishable table has `is_published` + `published_at` (auto-stamped by
 a trigger the first time a row is published) and `updated_at` (auto-bumped

@@ -301,6 +301,26 @@ export interface Database {
           added_at?: string;
         }
       >;
+      site_settings: Table<
+        {
+          id: boolean;
+          next_project_title: string | null;
+          next_project_body: string | null;
+          next_project_image_url: string | null;
+          mission_raised_cents: number;
+          mission_goal_cents: number;
+          updated_at: string;
+        },
+        {
+          id?: boolean;
+          next_project_title?: string | null;
+          next_project_body?: string | null;
+          next_project_image_url?: string | null;
+          mission_raised_cents?: number;
+          mission_goal_cents?: number;
+          updated_at?: string;
+        }
+      >;
     };
     Views: Record<string, never>;
     Functions: {

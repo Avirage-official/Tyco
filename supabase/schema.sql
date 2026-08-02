@@ -771,6 +771,53 @@ create index if not exists order_items_order_id_idx on public.order_items (order
 create index if not exists order_items_variant_id_idx on public.order_items (variant_id);
 
 -- ----------------------------------------------------------------------------
+-- site_settings — a single row of homepage content the admin can edit
+-- without a deploy: the next-project teaser and the mission fund progress
+-- bar. Singleton by construction (id is always `true`), so there's never
+-- an ambiguous "which row" to query.
+-- ----------------------------------------------------------------------------
+create table if not exists public.site_settings (
+  id boolean primary key default true,
+  next_project_title text,
+  next_project_body text,
+  next_project_image_url text,
+  mission_raised_cents integer not null default 0,
+  mission_goal_cents integer not null default 0,
+  updated_at timestamptz not null default now(),
+  constraint site_settings_singleton check (id)
+);
+
+insert into public.site_settings (id)
+values (true)
+on conflict (id) do nothing;
+
+alter table public.site_settings drop constraint if exists site_settings_raised_non_negative;
+alter table public.site_settings add constraint site_settings_raised_non_negative
+  check (mission_raised_cents >= 0);
+
+alter table public.site_settings drop constraint if exists site_settings_goal_non_negative;
+alter table public.site_settings add constraint site_settings_goal_non_negative
+  check (mission_goal_cents >= 0);
+
+alter table public.site_settings enable row level security;
+
+drop policy if exists "site settings are public" on public.site_settings;
+create policy "site settings are public"
+  on public.site_settings for select
+  using (true);
+
+drop policy if exists "admins manage site settings" on public.site_settings;
+create policy "admins manage site settings"
+  on public.site_settings for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_site_settings_updated_at on public.site_settings;
+create trigger set_site_settings_updated_at
+  before update on public.site_settings
+  for each row execute function public.set_updated_at();
+
+-- ----------------------------------------------------------------------------
 -- Storage buckets referenced by the app, plus the RLS policies storage.objects
 -- actually needs — creating a public bucket alone does not grant upload
 -- access; without an explicit policy nothing (not even a future admin

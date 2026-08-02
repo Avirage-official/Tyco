@@ -2,7 +2,7 @@ import Link from "next/link";
 import { formatDate } from "@/lib/format";
 import styles from "./Spotlight.module.css";
 
-type SpotlightProps =
+export type SpotlightProps =
   | {
       kind: "event";
       href: string;
