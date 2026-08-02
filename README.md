@@ -58,7 +58,13 @@ deployed on Vercel, backed by Supabase.
 
 ## App structure
 
-- `/` — landing page, links into the three pillars below.
+- `/` — landing page: mission narrative (the manifesto behind the three
+  pillars) plus a live "what's next" spotlight — the soonest upcoming
+  published event if there is one, otherwise the latest published album —
+  pulled straight from Supabase, hidden entirely when neither exists. Links
+  into the three pillars below. The installed PWA's `start_url` points at
+  `/music` instead of here, so opening it from a home screen goes straight
+  to the catalogue rather than replaying the pitch every launch.
 - `/music` — the free streaming catalogue, split into two tabs. **Browse**:
   an instant client-side search bar (artists, albums, tracks, genres — no
   extra request, it filters what's already loaded) sitting above the usual

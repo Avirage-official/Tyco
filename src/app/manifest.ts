@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Tyco",
     description:
       "Free music, the studio journal, and the shop — Tyco as an app on your phone.",
-    start_url: "/",
+    start_url: "/music",
     display: "standalone",
     background_color: "#100e0d",
     theme_color: "#100e0d",
