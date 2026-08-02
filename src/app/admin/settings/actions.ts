@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import type { AboutSlide } from "@/lib/supabase/types";
 
 export type SiteSettingsInput = {
   next_project_title: string | null;
@@ -9,6 +10,7 @@ export type SiteSettingsInput = {
   next_project_image_url: string | null;
   mission_raised_cents: number;
   mission_goal_cents: number;
+  about_gallery: AboutSlide[];
 };
 
 export async function updateSiteSettings(input: SiteSettingsInput) {
@@ -17,4 +19,5 @@ export async function updateSiteSettings(input: SiteSettingsInput) {
   if (error) throw new Error(error.message);
   revalidatePath("/admin/settings");
   revalidatePath("/");
+  revalidatePath("/about");
 }

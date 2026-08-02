@@ -58,21 +58,25 @@ deployed on Vercel, backed by Supabase.
 
 ## App structure
 
-- `/` — branches on auth state. **Signed out**: a one-page marketing site —
-  full-bleed looping background video behind the hero, the mission
-  narrative (the manifesto behind the three pillars), and a live
-  "what's next" spotlight — the soonest upcoming published event if there
-  is one, otherwise the latest published album — pulled straight from
-  Supabase, hidden entirely when neither exists. Links into the three
-  pillars below, plus sign in/sign up. Drop the hero clip at
+- `/` — branches on auth state. **Signed out**: a minimal landing page —
+  full-bleed looping background video behind the hero statement, a live
+  "what's next" spotlight (soonest upcoming published event, otherwise the
+  latest published album, hidden entirely when neither exists), sign
+  in/sign up/about-us buttons, a quiet Music/Studio/Shop link row, and a
+  "who we are" slideshow of photos and short clips underneath (hidden
+  entirely when none are set). Drop the hero clip at
   `public/video/home-hero.mp4` (autoplays muted/looped, hidden entirely
-  under `prefers-reduced-motion: reduce`). **Signed in**: a personal
-  dashboard — latest release, next event, a "coming next" project teaser
-  and a mission-fund progress bar (both editable from `/admin/settings`,
-  hidden when empty), plus shortcuts to Liked Songs, playlists, order
-  history, and followed artists. The installed PWA's `start_url` points
-  back at `/`, since it now routes every visitor to the right place on its
-  own.
+  under `prefers-reduced-motion: reduce`); the slideshow's slides are
+  managed from `/admin/settings`. **Signed in**: a personal dashboard —
+  latest release, next event, a "coming next" project teaser and a
+  mission-fund progress bar (both editable from `/admin/settings`, hidden
+  when empty), plus shortcuts to Liked Songs, playlists, order history,
+  and followed artists. The installed PWA's `start_url` points back at
+  `/`, since it now routes every visitor to the right place on its own.
+- `/about` — the company story: who TYCO is, what the collective does, and
+  the same three-pillar explore cards as before. Static copy, no database
+  reads — reachable from the top nav, the footer, and the "About us"
+  button on the front page.
 - `/music` — the free streaming catalogue, split into two tabs. **Browse**:
   an instant client-side search bar (artists, albums, tracks, genres — no
   extra request, it filters what's already loaded) sitting above the usual
@@ -154,10 +158,13 @@ how to grant yourself access.
   status dropdown (`pending → paid → fulfilled → …`). This is the only
   place order status changes — customers can never do this themselves.
 - **Homepage** (`/admin/settings`) — edits the one `site_settings` row:
-  the "coming next" project teaser (title, description, image — blank
-  title hides the card) and the mission fund progress bar (raised/goal in
-  USD — a zero goal hides the bar). Both render on the signed-in dashboard
-  at `/`.
+  the front-page slideshow (up to 8 photos/clips, upload straight from the
+  browser, reorder with the arrows — empty just hides the slideshow), the
+  "coming next" project teaser (title, description, image — blank title
+  hides the card), and the mission fund progress bar (raised/goal in USD —
+  a zero goal hides the bar). The teaser and mission bar render on the
+  signed-in dashboard at `/`; the slideshow renders on the signed-out
+  landing page.
 - **Users** — every signed-up account, block/unblock, delete. Uses the
   Supabase **Admin API**, which needs the service-role key
   (`SUPABASE_SERVICE_ROLE_KEY`) — the only part of the app that does. You
@@ -292,9 +299,10 @@ correction once you run a real test — check the Vercel function logs for
   another listener's playlists, including admins.
 - **`site_settings`** — a singleton row (`id` is always `true`, enforced by
   a check constraint) holding the homepage's editable bits: the "coming
-  next" project teaser and the mission fund raised/goal amounts. Publicly
-  readable, admin-writable, same as everything else — edited from
-  `/admin/settings`.
+  next" project teaser, the mission fund raised/goal amounts, and
+  `about_gallery` (an ordered jsonb array of `{url, type}`, `type` being
+  `"image"` or `"video"`) for the front-page slideshow. Publicly readable,
+  admin-writable, same as everything else — edited from `/admin/settings`.
 
 Every publishable table has `is_published` + `published_at` (auto-stamped by
 a trigger the first time a row is published) and `updated_at` (auto-bumped

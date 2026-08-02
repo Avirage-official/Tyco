@@ -123,6 +123,10 @@ export default async function Home() {
     return <Dashboard {...dashboardData} />;
   }
 
-  const { release, event } = await getSpotlight(supabase);
-  return <Marketing spotlight={event ?? release} />;
+  const [{ release, event }, { data: settings }] = await Promise.all([
+    getSpotlight(supabase),
+    supabase.from("site_settings").select("about_gallery").eq("id", true).maybeSingle(),
+  ]);
+
+  return <Marketing spotlight={event ?? release} slides={settings?.about_gallery ?? []} />;
 }

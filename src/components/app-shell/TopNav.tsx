@@ -28,6 +28,13 @@ export function TopNav() {
               </Link>
             );
           })}
+          <Link
+            href="/about"
+            className={pathname === "/about" ? `${styles.link} ${styles.linkActive}` : styles.link}
+            aria-current={pathname === "/about" ? "page" : undefined}
+          >
+            About
+          </Link>
         </nav>
         <span className={styles.spacer} />
         <CartLink />

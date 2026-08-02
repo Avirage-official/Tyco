@@ -772,9 +772,11 @@ create index if not exists order_items_variant_id_idx on public.order_items (var
 
 -- ----------------------------------------------------------------------------
 -- site_settings — a single row of homepage content the admin can edit
--- without a deploy: the next-project teaser and the mission fund progress
--- bar. Singleton by construction (id is always `true`), so there's never
--- an ambiguous "which row" to query.
+-- without a deploy: the next-project teaser, the mission fund progress
+-- bar, and the front-page "who we are" slideshow (about_gallery — an
+-- ordered jsonb array of {url, type} where type is "image" or "video").
+-- Singleton by construction (id is always `true`), so there's never an
+-- ambiguous "which row" to query.
 -- ----------------------------------------------------------------------------
 create table if not exists public.site_settings (
   id boolean primary key default true,
@@ -783,9 +785,12 @@ create table if not exists public.site_settings (
   next_project_image_url text,
   mission_raised_cents integer not null default 0,
   mission_goal_cents integer not null default 0,
+  about_gallery jsonb not null default '[]'::jsonb,
   updated_at timestamptz not null default now(),
   constraint site_settings_singleton check (id)
 );
+
+alter table public.site_settings add column if not exists about_gallery jsonb not null default '[]'::jsonb;
 
 insert into public.site_settings (id)
 values (true)
@@ -829,16 +834,17 @@ values
   ('covers', 'covers', true),
   ('portfolio', 'portfolio', true),
   ('products', 'products', true),
-  ('artists', 'artists', true)
+  ('artists', 'artists', true),
+  ('about', 'about', true)
 on conflict (id) do nothing;
 
 drop policy if exists "public read for tyco buckets" on storage.objects;
 create policy "public read for tyco buckets"
   on storage.objects for select
-  using (bucket_id in ('tracks', 'covers', 'portfolio', 'products', 'artists'));
+  using (bucket_id in ('tracks', 'covers', 'portfolio', 'products', 'artists', 'about'));
 
 drop policy if exists "admins manage tyco bucket objects" on storage.objects;
 create policy "admins manage tyco bucket objects"
   on storage.objects for all
-  using (bucket_id in ('tracks', 'covers', 'portfolio', 'products', 'artists') and public.is_admin())
-  with check (bucket_id in ('tracks', 'covers', 'portfolio', 'products', 'artists') and public.is_admin());
+  using (bucket_id in ('tracks', 'covers', 'portfolio', 'products', 'artists', 'about') and public.is_admin())
+  with check (bucket_id in ('tracks', 'covers', 'portfolio', 'products', 'artists', 'about') and public.is_admin());
