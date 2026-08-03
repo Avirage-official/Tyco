@@ -1,3 +1,9 @@
+.heroTitle {
+  margin-top: var(--space-xs);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  max-width: 20ch;
+}
+
 .strip {
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);

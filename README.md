@@ -58,25 +58,35 @@ deployed on Vercel, backed by Supabase.
 
 ## App structure
 
-- `/` — branches on auth state. **Signed out**: a minimal landing page —
-  full-bleed looping background video behind the hero statement, a live
+- `/` — branches on auth state. Both states share `VideoHero`
+  (`components/home/VideoHero.tsx`), a full-bleed looping background video
+  (autoplays muted/looped, hidden entirely under `prefers-reduced-motion:
+  reduce`) — drop the clip at `public/video/home-hero.mp4`. **Signed out**:
+  a minimal landing page — the hero statement over the video, a live
   "what's next" spotlight (soonest upcoming published event, otherwise the
   latest published album, hidden entirely when neither exists), sign
   in/sign up/about-us buttons, a quiet Music/Studio/Shop link row, and a
   "who we are" slideshow of photos and short clips underneath (hidden
-  entirely when none are set). Drop the hero clip at
-  `public/video/home-hero.mp4` (autoplays muted/looped, hidden entirely
-  under `prefers-reduced-motion: reduce`); the slideshow's slides are
-  managed from `/admin/settings`. **Signed in**: a personal dashboard —
-  latest release, next event, a "coming next" project teaser and a
-  mission-fund progress bar (both editable from `/admin/settings`, hidden
-  when empty), plus shortcuts to Liked Songs, playlists, order history,
-  and followed artists. The installed PWA's `start_url` points back at
-  `/`, since it now routes every visitor to the right place on its own.
+  entirely when none are set, managed from `/admin/settings`). **Signed
+  in**: a personal dashboard, styled around real music-industry ephemera
+  rather than generic dashboard cards — a scrolling data ticker built from
+  your own live stats, a duotone 35mm contact-strip of recent cover art
+  (from published albums and portfolio items) scrolling like film through
+  a projector, the next event as a perforated ticket stub, the latest
+  release as a halftone-textured poster, a mission-fund progress bar
+  rendered as a pulsing VU/equalizer meter, and shortcuts to Liked Songs,
+  playlists, order history, and followed artists as die-cut backstage-pass
+  tags. The project teaser and mission fund are editable from
+  `/admin/settings` and hidden when empty; the ticker and film strip hide
+  themselves too when there's nothing to show. Every animation loop
+  respects `prefers-reduced-motion`. The installed PWA's `start_url`
+  points back at `/`, since it now routes every visitor to the right
+  place on its own.
 - `/about` — the company story: who TYCO is, what the collective does, and
-  the same three-pillar explore cards as before. Static copy, no database
-  reads — reachable from the top nav, the footer, and the "About us"
-  button on the front page.
+  the same three-pillar explore cards as before, under the same `VideoHero`
+  treatment (a shorter variant) as the front page. Static copy, no
+  database reads — reachable from the top nav, the footer, and the "About
+  us" button on the front page.
 - `/music` — the free streaming catalogue, split into two tabs. **Browse**:
   an instant client-side search bar (artists, albums, tracks, genres — no
   extra request, it filters what's already loaded) sitting above the usual

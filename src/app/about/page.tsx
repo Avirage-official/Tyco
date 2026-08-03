@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { VideoHero } from "@/components/home/VideoHero";
 import { IconArrowRight, IconBag, IconMark, IconWaves } from "@/components/icons";
 import styles from "./about.module.css";
 
@@ -36,7 +36,10 @@ const principles = [
 export default function AboutPage() {
   return (
     <>
-      <PageHeader eyebrow="About us" title="Who we are" />
+      <VideoHero size="compact">
+        <p className="eyebrow">About us</p>
+        <h1 className={styles.heroTitle}>Who we are</h1>
+      </VideoHero>
 
       <div className={styles.strip}>
         <div className={`container ${styles.stripInner}`}>

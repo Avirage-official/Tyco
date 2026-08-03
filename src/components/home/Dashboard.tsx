@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { SpotlightProps } from "@/components/home/Spotlight";
@@ -87,18 +88,54 @@ export function Dashboard({
     { href: "/music/library", label: "Artists", count: followedCount, type: "Following" },
   ];
 
+  const tickerItems: string[] = [];
+  if (event && event.kind === "event") {
+    tickerItems.push(`NEXT UP — ${event.title.toUpperCase()}, ${formatDate(event.date).toUpperCase()}`);
+  }
+  if (release && release.kind === "release") {
+    tickerItems.push(`LATEST RELEASE — ${release.title.toUpperCase()}`);
+  }
+  if (mission && mission.goalCents > 0) {
+    tickerItems.push(`MISSION FUND — ${missionPct}% FUNDED`);
+  }
+  if (nextProject) {
+    tickerItems.push(`COMING NEXT — ${nextProject.title.toUpperCase()}`);
+  }
+  if (tickerItems.length === 0) {
+    tickerItems.push("WELCOME TO TYCO — SOUND, STYLE, AND CULTURE");
+  }
+  const tickerTrack = [...tickerItems, ...tickerItems];
+
+  const filmFrames = ambientImages.length > 0 ? [...ambientImages, ...ambientImages] : [];
+
   return (
     <>
-      <div className={styles.backdrop} aria-hidden>
-        <span className={styles.wash} />
-        {ambientImages.map((url, i) => (
-          <span
-            key={url}
-            className={`${styles.blob} ${styles[`blob${i}`]}`}
-            style={{ backgroundImage: `url(${url})` }}
-          />
-        ))}
-      </div>
+      {tickerItems.length > 0 && (
+        <div className={styles.ticker}>
+          <div className={styles.tickerTrack}>
+            {tickerTrack.map((text, i) => (
+              <Fragment key={i}>
+                <span>{text}</span>
+                <span className={styles.sep} aria-hidden>
+                  /
+                </span>
+              </Fragment>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {filmFrames.length > 0 && (
+        <div className={styles.filmStrip} aria-hidden>
+          <div className={styles.sprocketRow} />
+          <div className={styles.filmTrack}>
+            {filmFrames.map((url, i) => (
+              <span key={i} className={styles.filmFrame} style={{ backgroundImage: `url(${url})` }} />
+            ))}
+          </div>
+          <div className={styles.sprocketRow} />
+        </div>
+      )}
 
       <PageHeader eyebrow="Welcome back" title={`Hey, ${name}`} />
       <div className={`container ${styles.wrap}`}>
