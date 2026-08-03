@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { SpotlightProps } from "@/components/home/Spotlight";
-import { IconBag, IconHeart, IconPlaylist, IconUser } from "@/components/icons";
 import { formatDate, formatPrice } from "@/lib/format";
 import styles from "./Dashboard.module.css";
 
@@ -11,34 +10,52 @@ export type DashboardProps = {
   event: SpotlightProps | null;
   nextProject: { title: string; body: string | null; imageUrl: string | null } | null;
   mission: { raisedCents: number; goalCents: number } | null;
+  ambientImages: string[];
   likedCount: number;
   playlistCount: number;
   orderCount: number;
   followedCount: number;
 };
 
-function FeatureCard({ item }: { item: SpotlightProps }) {
-  const label = item.kind === "event" ? "Next up" : "Latest release";
-  const meta =
-    item.kind === "event"
-      ? [formatDate(item.date), item.location].filter(Boolean).join(" · ")
-      : [item.artist, formatDate(item.date)].filter(Boolean).join(" · ");
+// Decorative heights only — the "lit" count is what actually encodes the
+// mission-fund percentage. Repeats if there are more bars than values.
+const BAR_HEIGHTS = [55, 30, 70, 20, 85, 40, 60, 25, 75, 35, 50, 65, 20, 45, 30, 55, 15, 40, 25, 50, 18, 35];
 
+function ReleaseCard({ item }: { item: Extract<SpotlightProps, { kind: "release" }> }) {
   return (
-    <Link href={item.href} className={styles.feature}>
+    <Link href={item.href} className={styles.releaseCard}>
       <span
-        className={styles.featureBg}
+        className={item.coverUrl ? styles.releaseCover : `${styles.releaseCover} ${styles.releaseCoverEmpty}`}
         style={item.coverUrl ? { backgroundImage: `url(${item.coverUrl})` } : undefined}
         aria-hidden
       />
-      <span className={styles.featureScrim} aria-hidden />
-      <div className={styles.featureBody}>
-        <span className={styles.tag}>
-          <span className={styles.tagDot} aria-hidden />
-          {label}
-        </span>
-        <h2 className={styles.featureTitle}>{item.title}</h2>
-        <p className={styles.featureMeta}>{meta}</p>
+      <span className={styles.halftone} aria-hidden />
+      <span className={styles.releaseScrim} aria-hidden />
+      <span className={styles.tape} aria-hidden />
+      <div className={styles.releaseText}>
+        <p className={styles.stamp}>Latest release</p>
+        <h2 className={styles.releaseTitle}>{item.title}</h2>
+        <p className={styles.releaseMeta}>
+          {[item.artist, formatDate(item.date)].filter(Boolean).join(" — ")}
+        </p>
+      </div>
+    </Link>
+  );
+}
+
+function EventTicket({ item }: { item: Extract<SpotlightProps, { kind: "event" }> }) {
+  return (
+    <Link href={item.href} className={styles.ticket}>
+      <div className={styles.ticketMain}>
+        <p className={styles.stamp}>Next up</p>
+        <h2 className={styles.ticketTitle}>{item.title}</h2>
+        <p className={styles.ticketMeta}>
+          {[formatDate(item.date), item.location].filter(Boolean).join(" — ")}
+        </p>
+      </div>
+      <div className={styles.ticketDivider} aria-hidden />
+      <div className={styles.ticketStub} aria-hidden>
+        ADMIT ONE
       </div>
     </Link>
   );
@@ -50,6 +67,7 @@ export function Dashboard({
   event,
   nextProject,
   mission,
+  ambientImages,
   likedCount,
   playlistCount,
   orderCount,
@@ -59,94 +77,87 @@ export function Dashboard({
     mission && mission.goalCents > 0
       ? Math.min(100, Math.round((mission.raisedCents / mission.goalCents) * 100))
       : 0;
+  const litBars = Math.round((missionPct / 100) * BAR_HEIGHTS.length);
   const soloSecondary = Boolean(nextProject) !== Boolean(mission && mission.goalCents > 0);
+
+  const passes = [
+    { href: "/music/liked", label: "Liked", count: likedCount, type: "Songs" },
+    { href: "/music/library", label: "Your", count: playlistCount, type: "Playlists" },
+    { href: "/account/orders", label: "Order", count: orderCount, type: "History" },
+    { href: "/music/library", label: "Artists", count: followedCount, type: "Following" },
+  ];
 
   return (
     <>
+      <div className={styles.backdrop} aria-hidden>
+        <span className={styles.wash} />
+        {ambientImages.map((url, i) => (
+          <span
+            key={url}
+            className={`${styles.blob} ${styles[`blob${i}`]}`}
+            style={{ backgroundImage: `url(${url})` }}
+          />
+        ))}
+      </div>
+
       <PageHeader eyebrow="Welcome back" title={`Hey, ${name}`} />
       <div className={`container ${styles.wrap}`}>
         {(release || event) && (
-          <div className={styles.heroRow}>
-            {release && <FeatureCard item={release} />}
-            {event && <FeatureCard item={event} />}
+          <div className={styles.board}>
+            {release && release.kind === "release" && <ReleaseCard item={release} />}
+            {event && event.kind === "event" && <EventTicket item={event} />}
           </div>
         )}
 
         {(nextProject || (mission && mission.goalCents > 0)) && (
-          <div className={styles.secondaryRow}>
+          <div className={styles.secondary}>
             {nextProject && (
               <Link
                 href="/studio"
-                className={styles.feature}
+                className={styles.postcard}
                 style={soloSecondary ? { gridColumn: "1 / -1" } : undefined}
               >
-                <span
-                  className={styles.featureBg}
-                  style={nextProject.imageUrl ? { backgroundImage: `url(${nextProject.imageUrl})` } : undefined}
-                  aria-hidden
-                />
-                <span className={styles.featureScrim} aria-hidden />
-                <div className={styles.featureBody}>
-                  <span className={styles.tag}>
-                    <span className={styles.tagDot} aria-hidden />
-                    Coming next
-                  </span>
-                  <h2 className={styles.featureTitle}>{nextProject.title}</h2>
-                  {nextProject.body && <p className={styles.featureMeta}>{nextProject.body}</p>}
-                </div>
+                <p className={styles.stamp}>Coming next</p>
+                <h2 className={styles.postcardTitle}>{nextProject.title}</h2>
+                {nextProject.body && <p className={styles.postcardMeta}>{nextProject.body}</p>}
               </Link>
             )}
 
             {mission && mission.goalCents > 0 && (
-              <div
-                className={styles.mission}
-                style={soloSecondary ? { gridColumn: "1 / -1" } : undefined}
-              >
-                <span className={styles.tag}>
-                  <span className={styles.tagDot} aria-hidden />
-                  Mission fund
-                </span>
-                <p className={styles.missionAmount}>{formatPrice(mission.raisedCents)}</p>
-                <p className={styles.missionGoal}>raised of {formatPrice(mission.goalCents)} goal</p>
-                <div className={styles.progressTrack}>
-                  <div className={styles.progressFill} style={{ width: `${missionPct}%` }} />
+              <div className={styles.meter} style={soloSecondary ? { gridColumn: "1 / -1" } : undefined}>
+                <p className={styles.stamp}>Mission fund</p>
+                <p className={styles.meterAmount}>
+                  {formatPrice(mission.raisedCents)}
+                  <span> / {formatPrice(mission.goalCents)}</span>
+                </p>
+                <div className={styles.bars}>
+                  {BAR_HEIGHTS.map((height, i) => (
+                    <span
+                      key={i}
+                      className={i < litBars ? `${styles.bar} ${styles.barLit}` : styles.bar}
+                      style={{ height: `${height}%` }}
+                    />
+                  ))}
                 </div>
               </div>
             )}
           </div>
         )}
 
-        <p className="eyebrow">Quick access</p>
-        <h2 className={styles.sectionTitle}>Your shortcuts</h2>
-        <div className={styles.shortcutGrid}>
-          <Link href="/music/liked" className={styles.shortcut}>
-            <span className={styles.shortcutIcon}>
-              <IconHeart />
-            </span>
-            <p className={styles.shortcutCount}>{likedCount}</p>
-            <p className={styles.shortcutLabel}>Liked Songs</p>
-          </Link>
-          <Link href="/music/library" className={styles.shortcut}>
-            <span className={styles.shortcutIcon}>
-              <IconPlaylist />
-            </span>
-            <p className={styles.shortcutCount}>{playlistCount}</p>
-            <p className={styles.shortcutLabel}>Playlists</p>
-          </Link>
-          <Link href="/account/orders" className={styles.shortcut}>
-            <span className={styles.shortcutIcon}>
-              <IconBag />
-            </span>
-            <p className={styles.shortcutCount}>{orderCount}</p>
-            <p className={styles.shortcutLabel}>Orders</p>
-          </Link>
-          <Link href="/music/library" className={styles.shortcut}>
-            <span className={styles.shortcutIcon}>
-              <IconUser />
-            </span>
-            <p className={styles.shortcutCount}>{followedCount}</p>
-            <p className={styles.shortcutLabel}>Following</p>
-          </Link>
+        <div className={styles.passHead}>
+          <p className="eyebrow">Quick access</p>
+          <h2>Your shortcuts</h2>
+        </div>
+        <div className={styles.passRow}>
+          {passes.map((p) => (
+            <Link key={p.type} href={p.href} className={styles.pass}>
+              <span className={styles.grommet} aria-hidden />
+              <p className={styles.passLabel}>{p.label}</p>
+              <p className={styles.passCount}>{p.count}</p>
+              <p className={styles.passType}>{p.type}</p>
+              <span className={styles.passStrip} aria-hidden />
+            </Link>
+          ))}
         </div>
       </div>
     </>

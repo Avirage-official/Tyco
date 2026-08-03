@@ -62,24 +62,57 @@ async function getSpotlight(
   return { release: releaseSpotlight, event: eventSpotlight };
 }
 
+async function getAmbientImages(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const [{ data: albums }, { data: portfolio }] = await Promise.all([
+    supabase
+      .from("albums")
+      .select("cover_url")
+      .eq("is_published", true)
+      .not("cover_url", "is", null)
+      .order("release_date", { ascending: false })
+      .limit(3),
+    supabase
+      .from("portfolio_items")
+      .select("cover_url")
+      .eq("is_published", true)
+      .not("cover_url", "is", null)
+      .order("published_at", { ascending: false })
+      .limit(3),
+  ]);
+
+  const urls = [...(albums ?? []), ...(portfolio ?? [])]
+    .map((row) => row.cover_url)
+    .filter((url): url is string => Boolean(url));
+
+  return Array.from(new Set(urls)).slice(0, 4);
+}
+
 async function getDashboardData(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
   name: string
 ): Promise<DashboardProps> {
-  const [{ release, event }, { data: settings }, { count: likedCount }, { count: playlistCount }, { count: orderCount }, { count: followedCount }] =
-    await Promise.all([
-      getSpotlight(supabase),
-      supabase
-        .from("site_settings")
-        .select("next_project_title, next_project_body, next_project_image_url, mission_raised_cents, mission_goal_cents")
-        .eq("id", true)
-        .maybeSingle(),
-      supabase.from("track_likes").select("track_id", { count: "exact", head: true }).eq("user_id", userId),
-      supabase.from("playlists").select("id", { count: "exact", head: true }).eq("user_id", userId),
-      supabase.from("orders").select("id", { count: "exact", head: true }).eq("user_id", userId),
-      supabase.from("artist_follows").select("artist_id", { count: "exact", head: true }).eq("user_id", userId),
-    ]);
+  const [
+    { release, event },
+    { data: settings },
+    ambientImages,
+    { count: likedCount },
+    { count: playlistCount },
+    { count: orderCount },
+    { count: followedCount },
+  ] = await Promise.all([
+    getSpotlight(supabase),
+    supabase
+      .from("site_settings")
+      .select("next_project_title, next_project_body, next_project_image_url, mission_raised_cents, mission_goal_cents")
+      .eq("id", true)
+      .maybeSingle(),
+    getAmbientImages(supabase),
+    supabase.from("track_likes").select("track_id", { count: "exact", head: true }).eq("user_id", userId),
+    supabase.from("playlists").select("id", { count: "exact", head: true }).eq("user_id", userId),
+    supabase.from("orders").select("id", { count: "exact", head: true }).eq("user_id", userId),
+    supabase.from("artist_follows").select("artist_id", { count: "exact", head: true }).eq("user_id", userId),
+  ]);
 
   const nextProject = settings?.next_project_title
     ? {
@@ -99,6 +132,7 @@ async function getDashboardData(
     event,
     nextProject,
     mission,
+    ambientImages,
     likedCount: likedCount ?? 0,
     playlistCount: playlistCount ?? 0,
     orderCount: orderCount ?? 0,
