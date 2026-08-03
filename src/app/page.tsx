@@ -104,7 +104,9 @@ async function getDashboardData(
     getSpotlight(supabase),
     supabase
       .from("site_settings")
-      .select("next_project_title, next_project_body, next_project_image_url, mission_raised_cents, mission_goal_cents")
+      .select(
+        "next_project_title, next_project_body, next_project_image_url, mission_raised_cents, mission_goal_cents, about_gallery"
+      )
       .eq("id", true)
       .maybeSingle(),
     getAmbientImages(supabase),
@@ -133,6 +135,7 @@ async function getDashboardData(
     nextProject,
     mission,
     ambientImages,
+    slides: settings?.about_gallery ?? [],
     likedCount: likedCount ?? 0,
     playlistCount: playlistCount ?? 0,
     orderCount: orderCount ?? 0,

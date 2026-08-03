@@ -1,7 +1,9 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { VideoHero } from "@/components/home/VideoHero";
+import { Slideshow } from "@/components/home/Slideshow";
 import type { SpotlightProps } from "@/components/home/Spotlight";
+import type { AboutSlide } from "@/lib/supabase/types";
 import { formatDate, formatPrice } from "@/lib/format";
 import styles from "./Dashboard.module.css";
 
@@ -12,6 +14,7 @@ export type DashboardProps = {
   nextProject: { title: string; body: string | null; imageUrl: string | null } | null;
   mission: { raisedCents: number; goalCents: number } | null;
   ambientImages: string[];
+  slides: AboutSlide[];
   likedCount: number;
   playlistCount: number;
   orderCount: number;
@@ -69,6 +72,7 @@ export function Dashboard({
   nextProject,
   mission,
   ambientImages,
+  slides,
   likedCount,
   playlistCount,
   orderCount,
@@ -184,7 +188,11 @@ export function Dashboard({
             )}
           </div>
         )}
+      </div>
 
+      {slides.length > 0 && <Slideshow slides={slides} />}
+
+      <div className={`container ${styles.wrap}`} style={{ paddingTop: slides.length > 0 ? "var(--space-2xl)" : 0 }}>
         <div className={styles.passHead}>
           <p className="eyebrow">Quick access</p>
           <h2>Your shortcuts</h2>

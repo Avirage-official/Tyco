@@ -68,20 +68,21 @@ deployed on Vercel, backed by Supabase.
   in/sign up/about-us buttons, a quiet Music/Studio/Shop link row, and a
   "who we are" slideshow of photos and short clips underneath (hidden
   entirely when none are set, managed from `/admin/settings`). **Signed
-  in**: a personal dashboard, styled around real music-industry ephemera
-  rather than generic dashboard cards — a scrolling data ticker built from
-  your own live stats, a duotone 35mm contact-strip of recent cover art
-  (from published albums and portfolio items) scrolling like film through
-  a projector, the next event as a perforated ticket stub, the latest
-  release as a halftone-textured poster, a mission-fund progress bar
-  rendered as a pulsing VU/equalizer meter, and shortcuts to Liked Songs,
-  playlists, order history, and followed artists as die-cut backstage-pass
-  tags. The project teaser and mission fund are editable from
-  `/admin/settings` and hidden when empty; the ticker and film strip hide
-  themselves too when there's nothing to show. Every animation loop
-  respects `prefers-reduced-motion`. The installed PWA's `start_url`
-  points back at `/`, since it now routes every visitor to the right
-  place on its own.
+  in**: a personal dashboard under its own compact `VideoHero` banner,
+  styled around real music-industry ephemera rather than generic dashboard
+  cards — a scrolling data ticker built from your own live stats, a duotone
+  35mm contact-strip of recent cover art (from published albums and
+  portfolio items) scrolling like film through a projector, the next event
+  as a perforated ticket stub, the latest release as a halftone-textured
+  poster, a mission-fund progress bar rendered as a pulsing VU/equalizer
+  meter, the same "who we are" slideshow as the front page, and shortcuts
+  to Liked Songs, playlists, order history, and followed artists as
+  die-cut backstage-pass tags. The project teaser and mission fund are
+  editable from `/admin/settings` and hidden when empty; the ticker, film
+  strip, and slideshow hide themselves too when there's nothing to show.
+  Every animation loop respects `prefers-reduced-motion`. The installed
+  PWA's `start_url` points back at `/`, since it now routes every visitor
+  to the right place on its own.
 - `/about` — the company story: who TYCO is, what the collective does, and
   the same three-pillar explore cards as before, under the same `VideoHero`
   treatment (a shorter variant) as the front page. Static copy, no
@@ -108,8 +109,11 @@ deployed on Vercel, backed by Supabase.
   the playlist itself. All owner-scoped through RLS — no server code
   involved, the browser talks to Supabase directly and the database enforces
   who can see and change what.
-- `/studio` and `/studio/events` — creative/portfolio updates and events
-  (past + upcoming), tabbed together under "Studio".
+- `/studio` and `/studio/events` — creative/portfolio updates and events,
+  tabbed together under "Studio". Events split into an **Upcoming** list
+  (soonest first) and a **Past events** cover-art grid (most recent first)
+  so visitors can see what's already happened, not just what's next —
+  either section is omitted when it's empty.
 - `/shop` and `/shop/[id]` — retail product grid and product detail, with
   per-size stock (sold-out sizes show as struck through) and up to 5 photos
   per product in a swipeable gallery (`Gallery.tsx` — hand-rolled scroll-snap
@@ -140,7 +144,10 @@ Anything published in the last two weeks shows an automatic "New" tag on
 `published_at`.
 
 Mobile gets a bottom tab bar (Home / Music / Studio / Shop / Account) so the
-site behaves like an installed app; desktop gets a top nav instead. The
+site behaves like an installed app; desktop gets a top nav instead, which
+checks auth server-side and shows a "Sign out" link next to the cart when
+you're signed in (`TopNav` is a server component; `NavLinks` and
+`TopNavSignOut` are the client-side pieces inside it). The
 `manifest.webmanifest` + icons make "Add to Home Screen" produce a real app
 icon and standalone window. A site-wide footer sits under every page's
 content with the wordmark, tagline, and a second set of links to the four

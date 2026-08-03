@@ -1,42 +1,23 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { CartLink } from "@/components/cart/CartLink";
+import { createClient } from "@/lib/supabase/server";
 import { Wordmark } from "./Wordmark";
-import { isActive, navItems } from "./nav-items";
+import { NavLinks } from "./NavLinks";
+import { TopNavSignOut } from "./TopNavSignOut";
 import styles from "./TopNav.module.css";
 
-export function TopNav() {
-  const pathname = usePathname();
+export async function TopNav() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <header className={styles.bar}>
       <div className={`container ${styles.inner}`}>
         <Wordmark />
-        <nav className={styles.links} aria-label="Primary">
-          {navItems.map((item) => {
-            const active = isActive(pathname, item.href, item.match);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={active ? `${styles.link} ${styles.linkActive}` : styles.link}
-                aria-current={active ? "page" : undefined}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-          <Link
-            href="/about"
-            className={pathname === "/about" ? `${styles.link} ${styles.linkActive}` : styles.link}
-            aria-current={pathname === "/about" ? "page" : undefined}
-          >
-            About
-          </Link>
-        </nav>
+        <NavLinks />
         <span className={styles.spacer} />
+        {user && <TopNavSignOut />}
         <CartLink />
       </div>
     </header>
