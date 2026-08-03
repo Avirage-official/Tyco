@@ -1,3 +1,8 @@
+.heroTitle {
+  margin-top: var(--space-xs);
+  font-size: clamp(2.4rem, 6vw, 4rem);
+}
+
 /* ============ data ticker ============ */
 .ticker {
   border-block: 1px solid var(--border);

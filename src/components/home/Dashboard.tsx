@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import Link from "next/link";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { VideoHero } from "@/components/home/VideoHero";
 import type { SpotlightProps } from "@/components/home/Spotlight";
 import { formatDate, formatPrice } from "@/lib/format";
 import styles from "./Dashboard.module.css";
@@ -110,6 +110,11 @@ export function Dashboard({
 
   return (
     <>
+      <VideoHero size="compact">
+        <p className="eyebrow">Welcome back</p>
+        <h1 className={styles.heroTitle}>Hey, {name}</h1>
+      </VideoHero>
+
       {tickerItems.length > 0 && (
         <div className={styles.ticker}>
           <div className={styles.tickerTrack}>
@@ -137,7 +142,6 @@ export function Dashboard({
         </div>
       )}
 
-      <PageHeader eyebrow="Welcome back" title={`Hey, ${name}`} />
       <div className={`container ${styles.wrap}`}>
         {(release || event) && (
           <div className={styles.board}>
