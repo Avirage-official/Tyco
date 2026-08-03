@@ -9,6 +9,7 @@ export type SpotlightProps =
       title: string;
       location: string | null;
       date: string;
+      coverUrl: string | null;
     }
   | {
       kind: "release";
@@ -24,13 +25,11 @@ export function Spotlight(props: SpotlightProps) {
 
   return (
     <Link href={props.href} className={styles.spotlight}>
-      {props.kind === "release" && (
-        <span
-          className={styles.cover}
-          style={props.coverUrl ? { backgroundImage: `url(${props.coverUrl})` } : undefined}
-          aria-hidden
-        />
-      )}
+      <span
+        className={styles.cover}
+        style={props.coverUrl ? { backgroundImage: `url(${props.coverUrl})` } : undefined}
+        aria-hidden
+      />
       <div className={styles.body}>
         <span className={styles.label}>
           <span className={styles.dot} aria-hidden />

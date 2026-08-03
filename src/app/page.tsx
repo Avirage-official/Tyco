@@ -11,7 +11,7 @@ async function getSpotlight(
   const [{ data: event }, { data: album }] = await Promise.all([
     supabase
       .from("events")
-      .select("id, title, location, event_date")
+      .select("id, title, location, event_date, cover_url")
       .eq("is_published", true)
       .gte("event_date", nowIso)
       .order("event_date", { ascending: true })
@@ -34,6 +34,7 @@ async function getSpotlight(
       title: event.title,
       location: event.location,
       date: event.event_date,
+      coverUrl: event.cover_url,
     };
   }
 
