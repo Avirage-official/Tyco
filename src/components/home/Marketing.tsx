@@ -46,6 +46,29 @@ export function Marketing({
         </nav>
       </VideoHero>
 
+      <section className={styles.aboutSection}>
+        <span className={styles.aboutImage} aria-hidden />
+        <span className={styles.aboutOverlay} aria-hidden />
+        <div className={`container ${styles.aboutInner}`}>
+          <p className="eyebrow">Who we are</p>
+          <h2 className={styles.aboutTitle}>
+            An artistic collective, not a label with a merch table.
+          </h2>
+          <p className={styles.aboutBody}>
+            TYCO is a Singapore-based artistic collective operating across music
+            production, fashion design, live events, and brand collaborations —
+            each revenue stream feeding our annual community mission fund.
+            We&apos;re not a nonprofit. We&apos;re artists who make money and
+            choose where it goes.
+          </p>
+          <div className={styles.aboutActions}>
+            <LinkButton href="/about" variant="ghost">
+              Read our full story
+            </LinkButton>
+          </div>
+        </div>
+      </section>
+
       {slides.length > 0 && <Slideshow slides={slides} />}
     </>
   );

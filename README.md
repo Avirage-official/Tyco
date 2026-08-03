@@ -65,9 +65,12 @@ deployed on Vercel, backed by Supabase.
   a minimal landing page — the hero statement over the video, a live
   "what's next" spotlight (soonest upcoming published event, otherwise the
   latest published album, hidden entirely when neither exists), sign
-  in/sign up/about-us buttons, a quiet Music/Studio/Shop link row, and a
-  "who we are" slideshow of photos and short clips underneath (hidden
-  entirely when none are set, managed from `/admin/settings`). **Signed
+  in/sign up/about-us buttons, and a quiet Music/Studio/Shop link row, then
+  a static image-backed "who we are" section (a condensed version of the
+  `/about` copy with a link to the full story — drop the photo at
+  `public/images/about-section.jpg`), then the "who we are" slideshow of
+  photos and short clips (hidden entirely when none are set, managed from
+  `/admin/settings`). **Signed
   in**: a personal dashboard under its own compact `VideoHero` banner,
   styled around real music-industry ephemera rather than generic dashboard
   cards — a scrolling data ticker built from your own live stats, a duotone

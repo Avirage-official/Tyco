@@ -44,3 +44,51 @@
 .quickLinks span {
   color: var(--border);
 }
+
+.aboutSection {
+  position: relative;
+  overflow: hidden;
+  min-height: 56vh;
+  min-height: 56dvh;
+  display: flex;
+  align-items: center;
+  border-block: 1px solid var(--border);
+}
+
+.aboutImage {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-color: var(--surface);
+  background-image: url("/images/about-section.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+.aboutOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(16, 14, 13, 0.72) 0%, rgba(16, 14, 13, 0.86) 100%);
+}
+
+.aboutInner {
+  padding-block: var(--space-2xl);
+}
+
+.aboutTitle {
+  margin-top: var(--space-xs);
+  font-size: clamp(1.9rem, 4vw, 2.9rem);
+  max-width: 20ch;
+}
+
+.aboutBody {
+  margin-top: var(--space-md);
+  max-width: 56ch;
+  color: var(--fg-muted);
+  font-size: 1.05rem;
+}
+
+.aboutActions {
+  margin-top: var(--space-lg);
+}
