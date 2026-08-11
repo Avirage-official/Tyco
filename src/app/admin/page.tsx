@@ -4,7 +4,7 @@ import styles from "./admin.module.css";
 
 async function countPublished(
   supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"],
-  table: "artists" | "tracks" | "albums" | "portfolio_items" | "events" | "products"
+  table: "creators" | "portfolio_items" | "events" | "products"
 ) {
   const { count } = await supabase
     .from(table)
@@ -16,10 +16,8 @@ async function countPublished(
 export default async function AdminDashboard() {
   const { supabase } = await requireAdmin();
 
-  const [artists, tracks, albums, portfolio, events, products, pendingOrders] = await Promise.all([
-    countPublished(supabase, "artists"),
-    countPublished(supabase, "tracks"),
-    countPublished(supabase, "albums"),
+  const [creators, portfolio, events, products, pendingOrders] = await Promise.all([
+    countPublished(supabase, "creators"),
     countPublished(supabase, "portfolio_items"),
     countPublished(supabase, "events"),
     countPublished(supabase, "products"),
@@ -31,9 +29,7 @@ export default async function AdminDashboard() {
   ]);
 
   const stats = [
-    { label: "Published artists", value: artists, href: "/admin/artists" },
-    { label: "Published tracks", value: tracks, href: "/admin/tracks" },
-    { label: "Published albums", value: albums, href: "/admin/albums" },
+    { label: "Published creators", value: creators, href: "/admin/creators" },
     { label: "Portfolio items", value: portfolio, href: "/admin/portfolio" },
     { label: "Published events", value: events, href: "/admin/events" },
     { label: "Products live", value: products, href: "/admin/products" },

@@ -21,6 +21,14 @@ type Table<Row, Insert, Update = Partial<Insert>> = {
 
 export type AboutSlide = { url: string; type: "image" | "video" };
 
+export type CreatorType =
+  | "musician"
+  | "visual_artist"
+  | "influencer"
+  | "designer"
+  | "photographer"
+  | "other";
+
 export interface Database {
   public: {
     Tables: {
@@ -46,13 +54,26 @@ export interface Database {
           updated_at?: string;
         }
       >;
-      artists: Table<
+      creators: Table<
         {
           id: string;
+          slug: string;
           name: string;
+          type: CreatorType;
+          tagline: string | null;
           bio: string | null;
-          photo_url: string | null;
-          video_url: string | null;
+          location: string | null;
+          website_url: string | null;
+          instagram_url: string | null;
+          tiktok_url: string | null;
+          youtube_url: string | null;
+          spotify_url: string | null;
+          avatar_url: string | null;
+          banner_url: string | null;
+          gallery: AboutSlide[];
+          tags: string[];
+          display_order: number;
+          is_featured: boolean;
           is_published: boolean;
           published_at: string | null;
           created_at: string;
@@ -60,23 +81,44 @@ export interface Database {
         },
         {
           id?: string;
+          slug: string;
           name: string;
+          type: CreatorType;
+          tagline?: string | null;
           bio?: string | null;
-          photo_url?: string | null;
-          video_url?: string | null;
+          location?: string | null;
+          website_url?: string | null;
+          instagram_url?: string | null;
+          tiktok_url?: string | null;
+          youtube_url?: string | null;
+          spotify_url?: string | null;
+          avatar_url?: string | null;
+          banner_url?: string | null;
+          gallery?: AboutSlide[];
+          tags?: string[];
+          display_order?: number;
+          is_featured?: boolean;
           is_published?: boolean;
           published_at?: string | null;
           created_at?: string;
           updated_at?: string;
         }
       >;
-      albums: Table<
+      creator_admin_notes: Table<
+        { creator_id: string; notes: string | null; created_at: string; updated_at: string },
+        { creator_id: string; notes?: string | null; created_at?: string; updated_at?: string }
+      >;
+      creator_works: Table<
         {
           id: string;
+          creator_id: string;
           title: string;
-          artist_id: string | null;
+          description: string | null;
           cover_url: string | null;
-          release_date: string | null;
+          media_url: string | null;
+          media_type: "image" | "video" | null;
+          external_url: string | null;
+          display_order: number;
           is_published: boolean;
           published_at: string | null;
           created_at: string;
@@ -84,46 +126,14 @@ export interface Database {
         },
         {
           id?: string;
+          creator_id: string;
           title: string;
-          artist_id?: string | null;
+          description?: string | null;
           cover_url?: string | null;
-          release_date?: string | null;
-          is_published?: boolean;
-          published_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        }
-      >;
-      tracks: Table<
-        {
-          id: string;
-          title: string;
-          artist_id: string | null;
-          album_id: string | null;
-          cover_url: string | null;
-          audio_url: string;
-          duration_seconds: number | null;
-          track_number: number | null;
-          release_date: string | null;
-          genre: string | null;
-          play_count: number;
-          is_published: boolean;
-          published_at: string | null;
-          created_at: string;
-          updated_at: string;
-        },
-        {
-          id?: string;
-          title: string;
-          artist_id?: string | null;
-          album_id?: string | null;
-          cover_url?: string | null;
-          audio_url: string;
-          duration_seconds?: number | null;
-          track_number?: number | null;
-          release_date?: string | null;
-          genre?: string | null;
-          play_count?: number;
+          media_url?: string | null;
+          media_type?: "image" | "video" | null;
+          external_url?: string | null;
+          display_order?: number;
           is_published?: boolean;
           published_at?: string | null;
           created_at?: string;
@@ -197,6 +207,7 @@ export interface Database {
           currency: string;
           images: string[];
           category: string | null;
+          creator_id: string | null;
           is_published: boolean;
           published_at: string | null;
           created_at: string;
@@ -210,6 +221,7 @@ export interface Database {
           currency?: string;
           images?: string[];
           category?: string | null;
+          creator_id?: string | null;
           is_published?: boolean;
           published_at?: string | null;
           created_at?: string;
@@ -282,27 +294,6 @@ export interface Database {
           created_at?: string;
         }
       >;
-      track_likes: Table<
-        { user_id: string; track_id: string; created_at: string },
-        { user_id: string; track_id: string; created_at?: string }
-      >;
-      artist_follows: Table<
-        { user_id: string; artist_id: string; created_at: string },
-        { user_id: string; artist_id: string; created_at?: string }
-      >;
-      playlists: Table<
-        { id: string; user_id: string; name: string; created_at: string; updated_at: string },
-        { id?: string; user_id: string; name: string; created_at?: string; updated_at?: string }
-      >;
-      playlist_tracks: Table<
-        { playlist_id: string; track_id: string; position: number; added_at: string },
-        {
-          playlist_id: string;
-          track_id: string;
-          position?: number;
-          added_at?: string;
-        }
-      >;
       site_settings: Table<
         {
           id: boolean;
@@ -331,10 +322,6 @@ export interface Database {
       is_admin: {
         Args: Record<string, never>;
         Returns: boolean;
-      };
-      increment_play_count: {
-        Args: { track_id: string };
-        Returns: undefined;
       };
       decrement_variant_stock: {
         Args: { p_variant_id: string; p_quantity: number };

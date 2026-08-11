@@ -1,23 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { VideoHero } from "@/components/home/VideoHero";
-import { IconArrowRight, IconBag, IconMark, IconWaves } from "@/components/icons";
+import { IconArrowRight, IconBag, IconMark } from "@/components/icons";
 import styles from "./about.module.css";
 
 export const metadata: Metadata = { title: "About" };
 
 const pillars = [
   {
-    href: "/music",
-    icon: IconWaves,
-    title: "Music",
-    desc: "Every release, free to stream. No paywall between the songs and the people who want them.",
-  },
-  {
     href: "/studio",
     icon: IconMark,
     title: "Studio",
-    desc: "The creative work behind the music, and every event we've thrown or have coming up.",
+    desc: "The creative work behind the collective, and every event we've thrown or have coming up.",
   },
   {
     href: "/shop",
@@ -28,7 +22,6 @@ const pillars = [
 ];
 
 const principles = [
-  { title: "Free, always", desc: "Every track stays free to stream. That's not a launch promo, it's the model." },
   { title: "Made in small batches", desc: "The shop restocks in short runs instead of sitting on a warehouse of stock." },
   { title: "One studio, one journal", desc: "The work-in-progress and the finished releases live in the same place." },
 ];
@@ -43,8 +36,6 @@ export default function AboutPage() {
 
       <div className={styles.strip}>
         <div className={`container ${styles.stripInner}`}>
-          <span>Free music</span>
-          <span>&mdash;</span>
           <span>Studio &amp; events</span>
           <span>&mdash;</span>
           <span>Retail</span>

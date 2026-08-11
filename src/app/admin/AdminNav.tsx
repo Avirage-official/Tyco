@@ -7,9 +7,7 @@ import styles from "./AdminNav.module.css";
 const links = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/settings", label: "Homepage" },
-  { href: "/admin/artists", label: "Artists" },
-  { href: "/admin/albums", label: "Albums" },
-  { href: "/admin/tracks", label: "Tracks" },
+  { href: "/admin/creators", label: "Creators" },
   { href: "/admin/portfolio", label: "Portfolio" },
   { href: "/admin/events", label: "Events" },
   { href: "/admin/products", label: "Products" },
