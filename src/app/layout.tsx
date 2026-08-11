@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: "%s · Tyco",
   },
   description:
-    "Tyco — free music, the studio journal, and the retail shop, all in one place.",
+    "Tyco — the studio journal and the retail shop, all in one place.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,

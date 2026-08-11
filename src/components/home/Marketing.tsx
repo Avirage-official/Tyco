@@ -38,8 +38,6 @@ export function Marketing({
           </div>
         )}
         <nav className={styles.quickLinks} aria-label="Quick links">
-          <Link href="/music">Music</Link>
-          <span aria-hidden>&middot;</span>
           <Link href="/studio">Studio</Link>
           <span aria-hidden>&middot;</span>
           <Link href="/shop">Shop</Link>

@@ -9,45 +9,19 @@ import styles from "./Dashboard.module.css";
 
 export type DashboardProps = {
   name: string;
-  release: SpotlightProps | null;
   event: SpotlightProps | null;
   nextProject: { title: string; body: string | null; imageUrl: string | null } | null;
   mission: { raisedCents: number; goalCents: number } | null;
   ambientImages: string[];
   slides: AboutSlide[];
-  likedCount: number;
-  playlistCount: number;
   orderCount: number;
-  followedCount: number;
 };
 
 // Decorative heights only — the "lit" count is what actually encodes the
 // mission-fund percentage. Repeats if there are more bars than values.
 const BAR_HEIGHTS = [55, 30, 70, 20, 85, 40, 60, 25, 75, 35, 50, 65, 20, 45, 30, 55, 15, 40, 25, 50, 18, 35];
 
-function ReleaseCard({ item }: { item: Extract<SpotlightProps, { kind: "release" }> }) {
-  return (
-    <Link href={item.href} className={styles.releaseCard}>
-      <span
-        className={item.coverUrl ? styles.releaseCover : `${styles.releaseCover} ${styles.releaseCoverEmpty}`}
-        style={item.coverUrl ? { backgroundImage: `url(${item.coverUrl})` } : undefined}
-        aria-hidden
-      />
-      <span className={styles.halftone} aria-hidden />
-      <span className={styles.releaseScrim} aria-hidden />
-      <span className={styles.tape} aria-hidden />
-      <div className={styles.releaseText}>
-        <p className={styles.stamp}>Latest release</p>
-        <h2 className={styles.releaseTitle}>{item.title}</h2>
-        <p className={styles.releaseMeta}>
-          {[item.artist, formatDate(item.date)].filter(Boolean).join(" — ")}
-        </p>
-      </div>
-    </Link>
-  );
-}
-
-function EventTicket({ item }: { item: Extract<SpotlightProps, { kind: "event" }> }) {
+function EventTicket({ item }: { item: SpotlightProps }) {
   return (
     <Link href={item.href} className={styles.ticket}>
       <div className={styles.ticketMain}>
@@ -67,16 +41,12 @@ function EventTicket({ item }: { item: Extract<SpotlightProps, { kind: "event" }
 
 export function Dashboard({
   name,
-  release,
   event,
   nextProject,
   mission,
   ambientImages,
   slides,
-  likedCount,
-  playlistCount,
   orderCount,
-  followedCount,
 }: DashboardProps) {
   const missionPct =
     mission && mission.goalCents > 0
@@ -85,19 +55,11 @@ export function Dashboard({
   const litBars = Math.round((missionPct / 100) * BAR_HEIGHTS.length);
   const soloSecondary = Boolean(nextProject) !== Boolean(mission && mission.goalCents > 0);
 
-  const passes = [
-    { href: "/music/liked", label: "Liked", count: likedCount, type: "Songs" },
-    { href: "/music/library", label: "Your", count: playlistCount, type: "Playlists" },
-    { href: "/account/orders", label: "Order", count: orderCount, type: "History" },
-    { href: "/music/library", label: "Artists", count: followedCount, type: "Following" },
-  ];
+  const passes = [{ href: "/account/orders", label: "Order", count: orderCount, type: "History" }];
 
   const tickerItems: string[] = [];
-  if (event && event.kind === "event") {
+  if (event) {
     tickerItems.push(`NEXT UP — ${event.title.toUpperCase()}, ${formatDate(event.date).toUpperCase()}`);
-  }
-  if (release && release.kind === "release") {
-    tickerItems.push(`LATEST RELEASE — ${release.title.toUpperCase()}`);
   }
   if (mission && mission.goalCents > 0) {
     tickerItems.push(`MISSION FUND — ${missionPct}% FUNDED`);
@@ -147,10 +109,9 @@ export function Dashboard({
       )}
 
       <div className={`container ${styles.wrap}`}>
-        {(release || event) && (
+        {event && (
           <div className={styles.board}>
-            {release && release.kind === "release" && <ReleaseCard item={release} />}
-            {event && event.kind === "event" && <EventTicket item={event} />}
+            <EventTicket item={event} />
           </div>
         )}
 

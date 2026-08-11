@@ -46,90 +46,6 @@ export interface Database {
           updated_at?: string;
         }
       >;
-      artists: Table<
-        {
-          id: string;
-          name: string;
-          bio: string | null;
-          photo_url: string | null;
-          video_url: string | null;
-          is_published: boolean;
-          published_at: string | null;
-          created_at: string;
-          updated_at: string;
-        },
-        {
-          id?: string;
-          name: string;
-          bio?: string | null;
-          photo_url?: string | null;
-          video_url?: string | null;
-          is_published?: boolean;
-          published_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        }
-      >;
-      albums: Table<
-        {
-          id: string;
-          title: string;
-          artist_id: string | null;
-          cover_url: string | null;
-          release_date: string | null;
-          is_published: boolean;
-          published_at: string | null;
-          created_at: string;
-          updated_at: string;
-        },
-        {
-          id?: string;
-          title: string;
-          artist_id?: string | null;
-          cover_url?: string | null;
-          release_date?: string | null;
-          is_published?: boolean;
-          published_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        }
-      >;
-      tracks: Table<
-        {
-          id: string;
-          title: string;
-          artist_id: string | null;
-          album_id: string | null;
-          cover_url: string | null;
-          audio_url: string;
-          duration_seconds: number | null;
-          track_number: number | null;
-          release_date: string | null;
-          genre: string | null;
-          play_count: number;
-          is_published: boolean;
-          published_at: string | null;
-          created_at: string;
-          updated_at: string;
-        },
-        {
-          id?: string;
-          title: string;
-          artist_id?: string | null;
-          album_id?: string | null;
-          cover_url?: string | null;
-          audio_url: string;
-          duration_seconds?: number | null;
-          track_number?: number | null;
-          release_date?: string | null;
-          genre?: string | null;
-          play_count?: number;
-          is_published?: boolean;
-          published_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        }
-      >;
       portfolio_items: Table<
         {
           id: string;
@@ -282,27 +198,6 @@ export interface Database {
           created_at?: string;
         }
       >;
-      track_likes: Table<
-        { user_id: string; track_id: string; created_at: string },
-        { user_id: string; track_id: string; created_at?: string }
-      >;
-      artist_follows: Table<
-        { user_id: string; artist_id: string; created_at: string },
-        { user_id: string; artist_id: string; created_at?: string }
-      >;
-      playlists: Table<
-        { id: string; user_id: string; name: string; created_at: string; updated_at: string },
-        { id?: string; user_id: string; name: string; created_at?: string; updated_at?: string }
-      >;
-      playlist_tracks: Table<
-        { playlist_id: string; track_id: string; position: number; added_at: string },
-        {
-          playlist_id: string;
-          track_id: string;
-          position?: number;
-          added_at?: string;
-        }
-      >;
       site_settings: Table<
         {
           id: boolean;
@@ -331,10 +226,6 @@ export interface Database {
       is_admin: {
         Args: Record<string, never>;
         Returns: boolean;
-      };
-      increment_play_count: {
-        Args: { track_id: string };
-        Returns: undefined;
       };
       decrement_variant_stock: {
         Args: { p_variant_id: string; p_quantity: number };

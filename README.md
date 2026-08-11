@@ -1,8 +1,8 @@
 # Tyco
 
-Free music, the studio journal (creative work + events), and the retail shop —
-one web app, styled to feel like an app on your phone. Built with Next.js,
-deployed on Vercel, backed by Supabase.
+The studio journal (creative work + events) and the retail shop — one web
+app, styled to feel like an app on your phone. Built with Next.js, deployed
+on Vercel, backed by Supabase.
 
 ## Stack
 
@@ -43,7 +43,7 @@ deployed on Vercel, backed by Supabase.
 - **Loading states**: a small shared `Loader`/`PageLoader`
   (`src/components/ui/Loader.tsx`) — an orbiting-arc mark in the brand's
   red, not a generic spinner import — wired into a `loading.tsx` in every
-  top-level route segment (`/`, `/music`, `/studio`, `/shop`, `/admin`,
+  top-level route segment (`/`, `/studio`, `/shop`, `/admin`,
   `/account`, `/login`+`/signup`), so any nested route that doesn't define
   its own loading state inherits one automatically.
 - **Page transitions**: `PageTransition` (`src/components/app-shell/`)
@@ -52,9 +52,8 @@ deployed on Vercel, backed by Supabase.
   a React remount. Wired once into `AppShell`, so new pages get it for free.
 - **Micro-interactions**: a shared `.lift` utility class in `globals.css`
   plus hover/active rules baked directly into the shared card styles
-  (album/artist/playlist/library cards, product cards, the home page's
-  pillar cards) — a small rise on hover, a settle on tap. Everything
-  motion-related respects `prefers-reduced-motion`.
+  (product cards, the home page's pillar cards) — a small rise on hover, a
+  settle on tap. Everything motion-related respects `prefers-reduced-motion`.
 
 ## App structure
 
@@ -63,55 +62,30 @@ deployed on Vercel, backed by Supabase.
   (autoplays muted/looped, hidden entirely under `prefers-reduced-motion:
   reduce`) — drop the clip at `public/video/home-hero.mp4`. **Signed out**:
   a minimal landing page — the hero statement over the video, a live
-  "what's next" spotlight (soonest upcoming published event, otherwise the
-  latest published album, hidden entirely when neither exists), sign
-  in/sign up/about-us buttons, and a quiet Music/Studio/Shop link row, then
-  a static image-backed "who we are" section (a condensed version of the
-  `/about` copy with a link to the full story — drop the photo at
-  `public/images/about-section.jpg`), then the "who we are" slideshow of
-  photos and short clips (hidden entirely when none are set, managed from
-  `/admin/settings`). **Signed
-  in**: a personal dashboard under its own compact `VideoHero` banner,
-  styled around real music-industry ephemera rather than generic dashboard
-  cards — a scrolling data ticker built from your own live stats, a duotone
-  35mm contact-strip of recent cover art (from published albums and
-  portfolio items) scrolling like film through a projector, the next event
-  as a perforated ticket stub, the latest release as a halftone-textured
-  poster, a mission-fund progress bar rendered as a pulsing VU/equalizer
-  meter, the same "who we are" slideshow as the front page, and shortcuts
-  to Liked Songs, playlists, order history, and followed artists as
-  die-cut backstage-pass tags. The project teaser and mission fund are
-  editable from `/admin/settings` and hidden when empty; the ticker, film
-  strip, and slideshow hide themselves too when there's nothing to show.
-  Every animation loop respects `prefers-reduced-motion`. The installed
-  PWA's `start_url` points back at `/`, since it now routes every visitor
-  to the right place on its own.
+  "what's next" spotlight (soonest upcoming published event, hidden
+  entirely when there isn't one), sign in/sign up/about-us buttons, and a
+  quiet Studio/Shop link row, then a static image-backed "who we are"
+  section (a condensed version of the `/about` copy with a link to the full
+  story — drop the photo at `public/images/about-section.jpg`), then the
+  "who we are" slideshow of photos and short clips (hidden entirely when
+  none are set, managed from `/admin/settings`). **Signed in**: a personal
+  dashboard under its own compact `VideoHero` banner — a scrolling data
+  ticker built from your own live stats, a duotone 35mm contact-strip of
+  recent cover art (from published portfolio items) scrolling like film
+  through a projector, the next event as a perforated ticket stub, a
+  mission-fund progress bar rendered as a pulsing VU/equalizer meter, the
+  same "who we are" slideshow as the front page, and an order-history
+  shortcut as a die-cut backstage-pass tag. The project teaser and mission
+  fund are editable from `/admin/settings` and hidden when empty; the
+  ticker, film strip, and slideshow hide themselves too when there's
+  nothing to show. Every animation loop respects `prefers-reduced-motion`.
+  The installed PWA's `start_url` points back at `/`, since it now routes
+  every visitor to the right place on its own.
 - `/about` — the company story: who TYCO is, what the collective does, and
-  the same three-pillar explore cards as before, under the same `VideoHero`
+  the same two-pillar explore cards as before, under the same `VideoHero`
   treatment (a shorter variant) as the front page. Static copy, no
   database reads — reachable from the top nav, the footer, and the "About
   us" button on the front page.
-- `/music` — the free streaming catalogue, split into two tabs. **Browse**:
-  an instant client-side search bar (artists, albums, tracks, genres — no
-  extra request, it filters what's already loaded) sitting above the usual
-  browse-by-artist/genre/album/full-track-list view; shuffle everything, or
-  jump into `/music/artists/[id]`, `/music/albums/[id]`, and
-  `/music/genres/[genre]`. **Library** (`/music/library`, signed-in only):
-  Liked Songs, your playlists, and the artists you follow, all in one place.
-  A real player: seek/scrub, skip, shuffle, repeat (off/all/one), an inline
-  "Up Next" queue, lock-screen/notification controls via the Media Session
-  API, and Liked Songs (`/music/liked`) for signed-in listeners. Tap the
-  mini player to expand to a full-screen Now Playing view. Artist pages are
-  full pages (not a modal) — they stack more sensibly with the full-screen
-  player, get shareable URLs, and give room for a real profile: bio,
-  albums, singles, a Follow button, and an optional short muted looping
-  video in place of the static photo.
-- **Playlists** — create, rename, and delete your own playlists
-  (`/music/playlists/[id]`); add any track to one or more playlists from the
-  `+` button next to it in any track list, or pull it back out from inside
-  the playlist itself. All owner-scoped through RLS — no server code
-  involved, the browser talks to Supabase directly and the database enforces
-  who can see and change what.
 - `/studio` and `/studio/events` — creative/portfolio updates and events,
   tabbed together under "Studio". Events split into an **Upcoming** list
   (soonest first) and a **Past events** cover-art grid (most recent first)
@@ -122,9 +96,9 @@ deployed on Vercel, backed by Supabase.
   per product in a swipeable gallery (`Gallery.tsx` — hand-rolled scroll-snap
   + dots + arrows, no carousel library). Pick a size and quantity, add to
   cart.
-- `/cart` — client-side cart (React context + localStorage, same pattern as
-  the music player's queue) — nothing touches the database until checkout.
-  Works for guests; no account required. Checkout re-validates every price
+- `/cart` — client-side cart (React context + localStorage) — nothing
+  touches the database until checkout. Works for guests; no account
+  required. Checkout re-validates every price
   and stock level server-side (never trusts the cart's own numbers), writes
   a `pending` order, and redirects to a Revolut-hosted checkout page.
   `/checkout/confirmation` is where the customer lands afterward; the
@@ -143,10 +117,9 @@ deployed on Vercel, backed by Supabase.
   else gets redirected before rendering anything.
 
 Anything published in the last two weeks shows an automatic "New" tag on
-`/music`, `/shop`, and `/studio` — no manual step, it's driven off
-`published_at`.
+`/shop` and `/studio` — no manual step, it's driven off `published_at`.
 
-Mobile gets a bottom tab bar (Home / Music / Studio / Shop / Account) so the
+Mobile gets a bottom tab bar (Home / Studio / Shop / Account) so the
 site behaves like an installed app; desktop gets a top nav instead, which
 checks auth server-side and shows a "Sign out" link next to the cart when
 you're signed in (`TopNav` is a server component; `NavLinks` and
@@ -162,18 +135,11 @@ sections.
 Supabase auth (not a separate hardcoded login) — see "Local setup" below for
 how to grant yourself access.
 
-- **Artists, Albums, Tracks, Portfolio, Events, Products** — list, create,
-  edit, publish/unpublish, delete. Cover art / audio / gallery images
-  upload straight from the browser to Supabase Storage (bypassing the
-  Next.js server, so there's no file-size limit from Vercel's function
-  body cap). Products manage their per-size stock (`product_variants`)
-  inline on the same form.
-- **Bulk track upload** — from an album's row in `/admin/albums`, "Add
-  tracks" lets you select every audio file for that album at once. Title
-  and track number are guessed from each filename (editable before
-  submitting), duration is read from the file automatically, and
-  artist/cover/release date are inherited from the album. Singles still go
-  through the regular "New track" form one at a time.
+- **Portfolio, Events, Products** — list, create, edit, publish/unpublish,
+  delete. Cover art / gallery images upload straight from the browser to
+  Supabase Storage (bypassing the Next.js server, so there's no file-size
+  limit from Vercel's function body cap). Products manage their per-size
+  stock (`product_variants`) inline on the same form.
 - **Orders** — every order, who placed it, how many items, total, and a
   status dropdown (`pending → paid → fulfilled → …`). This is the only
   place order status changes — customers can never do this themselves.
@@ -194,13 +160,9 @@ how to grant yourself access.
 Every admin write re-checks `is_admin()` on the server on every request —
 nothing is trusted just because a page rendered the admin UI once.
 
-**Supabase free tier caps individual files at 50MB.** Uploads go per track,
-not per album, so a normal 3–5 min WAV song is usually fine — only very
-long or very high-res tracks risk hitting it. If one does, compress just
-that track (MP3/FLAC); no need to upgrade Supabase for this alone. Video is
-the one place this is worth watching more closely — keep an artist's
-profile loop short (5–15s) and compressed; it's a much bigger file than a
-photo for the same number of seconds.
+**Supabase free tier caps individual files at 50MB.** Portfolio and event
+cover images are well under that; no need to upgrade Supabase for this
+alone.
 
 ## Payments (Revolut)
 
@@ -256,7 +218,7 @@ correction once you run a real test — check the Vercel function logs for
    `supabase/schema.sql`. It's idempotent — safe to re-run any time the file
    changes, including on a project that already has an older version applied.
    It creates every table, RLS policy, trigger, and the storage buckets
-   (`tracks`, `covers`, `portfolio`, `products`, `artists`).
+   (`covers`, `portfolio`, `products`, `about`).
 
 4. Grant yourself admin so you can reach `/admin` — sign up in the app first
    (so a `profiles`/`auth.users` row exists), then in the SQL editor:
@@ -285,10 +247,6 @@ correction once you run a real test — check the Vercel function logs for
   has no client-facing policies at all (not even for admins themselves) —
   only the service role can grant/revoke it, so it can't be self-escalated
   into from a signed-in session the way a flag on `profiles` could be.
-- **`artists`** → **`albums`** → **`tracks`** (`artist_id` on both albums and
-  tracks; `album_id` on tracks is nullable — singles don't need one).
-  `tracks.genre` is free text, not an enum — the music page derives its
-  browsable genre list from whatever values are actually in use.
 - **`portfolio_items`**, **`events`** — creative updates and past/upcoming
   events; "past" vs "upcoming" is derived from `event_date` at query time.
 - **`products`** → **`product_variants`** (one row per size, its own stock —
@@ -306,17 +264,6 @@ correction once you run a real test — check the Vercel function logs for
   paid from the browser. `orders.revolut_order_id` and the
   `decrement_variant_stock()` RPC (atomic, clamped at zero) exist
   specifically for the webhook handler.
-- **`track_likes`** — a listener's saved tracks (`user_id`, `track_id`).
-  Purely self-service: RLS restricts every operation to `auth.uid() = user_id`,
-  verified against a local Postgres instance that one user's likes are
-  invisible to and un-deletable by another.
-- **`artist_follows`** — same shape and same RLS pattern as `track_likes`,
-  for artists instead of tracks.
-- **`playlists`** → **`playlist_tracks`** — a listener's own playlists.
-  `playlists` is scoped `auth.uid() = user_id`; `playlist_tracks` has no
-  `user_id` of its own, so its policy checks ownership via an `exists`
-  join to the parent playlist. No admin policy on either — nobody manages
-  another listener's playlists, including admins.
 - **`site_settings`** — a singleton row (`id` is always `true`, enforced by
   a check constraint) holding the homepage's editable bits: the "coming
   next" project teaser, the mission fund raised/goal amounts, and
@@ -338,7 +285,7 @@ on every update).
 ## What's next
 
 This pass is the foundation: design system, navigation shell, auth, and a
-real (if empty) Supabase-backed schema for all three verticals. Natural
+real (if empty) Supabase-backed schema for the remaining verticals. Natural
 next steps, roughly in order:
 
 - Cart + checkout are built (Revolut) but never exercised against a real
@@ -347,11 +294,5 @@ next steps, roughly in order:
 - The cart is per-device (localStorage) — a customer switching phones or
   browsers starts a fresh cart. Fine for now; would need a `cart_items`
   table tied to a signed-in account to change.
-- The player state (queue, position, shuffle) doesn't persist across a full
-  page reload — resets are only mid-session. Worth a localStorage restore
-  if that starts to bother listeners.
 - The admin panel doesn't paginate long lists yet — fine at foundation
-  scale, worth revisiting once there are hundreds of tracks/products.
-- Play counts increment on every track start, not after a minimum listen
-  duration — fine for now, revisit if you want counts closer to how
-  Spotify/Apple define a "play."
+  scale, worth revisiting once there are hundreds of products.

@@ -122,290 +122,20 @@ create trigger on_auth_user_created
   for each row execute procedure public.handle_new_user();
 
 -- ----------------------------------------------------------------------------
--- artists — the roster. A real entity (not free text) since Tyco can
--- release music on behalf of more than one act.
+-- Music feature removal — the app no longer has a music tab, so the entire
+-- catalogue/listener-state schema behind it (artists, albums, tracks, likes,
+-- follows, playlists) is dropped. Explicit drops rather than just deleting
+-- the old `create table` blocks, since this file is re-run against
+-- databases that already have these tables from before removal.
 -- ----------------------------------------------------------------------------
-create table if not exists public.artists (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  bio text,
-  photo_url text,
-  video_url text,
-  is_published boolean not null default false,
-  published_at timestamptz,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-alter table public.artists add column if not exists video_url text;
-
-alter table public.artists enable row level security;
-
-drop policy if exists "published artists are public" on public.artists;
-create policy "published artists are public"
-  on public.artists for select
-  using (is_published = true);
-
-drop policy if exists "admins manage artists" on public.artists;
-create policy "admins manage artists"
-  on public.artists for all
-  using (public.is_admin())
-  with check (public.is_admin());
-
-drop trigger if exists set_artists_updated_at on public.artists;
-create trigger set_artists_updated_at
-  before update on public.artists
-  for each row execute function public.set_updated_at();
-
-drop trigger if exists set_artists_published_at on public.artists;
-create trigger set_artists_published_at
-  before insert or update on public.artists
-  for each row execute function public.set_published_at();
-
-create index if not exists artists_published_idx on public.artists (is_published);
-
--- ----------------------------------------------------------------------------
--- albums — a real entity rather than free text on tracks, so releases can
--- carry their own cover art, release date, and track ordering.
--- ----------------------------------------------------------------------------
-create table if not exists public.albums (
-  id uuid primary key default gen_random_uuid(),
-  title text not null,
-  artist_id uuid references public.artists (id) on delete set null,
-  cover_url text,
-  release_date date,
-  is_published boolean not null default false,
-  published_at timestamptz,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-alter table public.albums add column if not exists artist_id uuid references public.artists (id) on delete set null;
-
-alter table public.albums enable row level security;
-
-drop policy if exists "published albums are public" on public.albums;
-create policy "published albums are public"
-  on public.albums for select
-  using (is_published = true);
-
-drop policy if exists "admins manage albums" on public.albums;
-create policy "admins manage albums"
-  on public.albums for all
-  using (public.is_admin())
-  with check (public.is_admin());
-
-drop trigger if exists set_albums_updated_at on public.albums;
-create trigger set_albums_updated_at
-  before update on public.albums
-  for each row execute function public.set_updated_at();
-
-drop trigger if exists set_albums_published_at on public.albums;
-create trigger set_albums_published_at
-  before insert or update on public.albums
-  for each row execute function public.set_published_at();
-
-create index if not exists albums_published_release_date_idx
-  on public.albums (is_published, release_date desc);
-create index if not exists albums_artist_id_idx on public.albums (artist_id);
-
--- ----------------------------------------------------------------------------
--- tracks — the free music catalogue. album_id is nullable: singles don't
--- need an album.
--- ----------------------------------------------------------------------------
-create table if not exists public.tracks (
-  id uuid primary key default gen_random_uuid(),
-  title text not null,
-  artist_id uuid references public.artists (id) on delete set null,
-  album_id uuid references public.albums (id) on delete set null,
-  cover_url text,
-  audio_url text not null,
-  duration_seconds integer,
-  track_number integer,
-  release_date date,
-  genre text,
-  play_count bigint not null default 0,
-  is_published boolean not null default false,
-  published_at timestamptz,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
--- Migrates the old free-text `artist` column to artist_id. Assumes no real
--- track data predates this — reasonable pre-launch (same caveat as the
--- order_items.variant_id migration earlier).
-alter table public.tracks drop column if exists album;
-alter table public.tracks drop column if exists artist;
-alter table public.tracks add column if not exists artist_id uuid references public.artists (id) on delete set null;
-alter table public.tracks add column if not exists album_id uuid references public.albums (id) on delete set null;
-alter table public.tracks add column if not exists published_at timestamptz;
-alter table public.tracks add column if not exists updated_at timestamptz not null default now();
-alter table public.tracks add column if not exists genre text;
-
-alter table public.tracks drop constraint if exists tracks_duration_positive;
-alter table public.tracks add constraint tracks_duration_positive
-  check (duration_seconds is null or duration_seconds > 0);
-
-alter table public.tracks drop constraint if exists tracks_track_number_positive;
-alter table public.tracks add constraint tracks_track_number_positive
-  check (track_number is null or track_number > 0);
-
-alter table public.tracks drop constraint if exists tracks_play_count_non_negative;
-alter table public.tracks add constraint tracks_play_count_non_negative
-  check (play_count >= 0);
-
-drop index if exists public.tracks_album_track_number_key;
-create unique index tracks_album_track_number_key
-  on public.tracks (album_id, track_number)
-  where album_id is not null and track_number is not null;
-
-alter table public.tracks enable row level security;
-
-drop policy if exists "published tracks are public" on public.tracks;
-create policy "published tracks are public"
-  on public.tracks for select
-  using (is_published = true);
-
-drop policy if exists "admins manage tracks" on public.tracks;
-create policy "admins manage tracks"
-  on public.tracks for all
-  using (public.is_admin())
-  with check (public.is_admin());
-
-drop trigger if exists set_tracks_updated_at on public.tracks;
-create trigger set_tracks_updated_at
-  before update on public.tracks
-  for each row execute function public.set_updated_at();
-
-drop trigger if exists set_tracks_published_at on public.tracks;
-create trigger set_tracks_published_at
-  before insert or update on public.tracks
-  for each row execute function public.set_published_at();
-
-create index if not exists tracks_published_release_date_idx
-  on public.tracks (is_published, release_date desc);
-create index if not exists tracks_album_id_idx on public.tracks (album_id);
-create index if not exists tracks_artist_id_idx on public.tracks (artist_id);
-create index if not exists tracks_genre_idx on public.tracks (genre) where genre is not null;
-
--- Lets the player bump play_count without granting raw UPDATE on tracks to
--- anon/authenticated clients.
-create or replace function public.increment_play_count(track_id uuid)
-returns void
-language sql
-security definer
-set search_path = public
-as $$
-  update public.tracks set play_count = play_count + 1
-  where id = track_id and is_published = true;
-$$;
-
-grant execute on function public.increment_play_count(uuid) to anon, authenticated;
-
--- ----------------------------------------------------------------------------
--- track_likes — a signed-in listener's saved tracks ("Liked Songs"). Purely
--- user-owned: no admin policy needed, nobody manages this on anyone's behalf.
--- ----------------------------------------------------------------------------
-create table if not exists public.track_likes (
-  user_id uuid not null references auth.users (id) on delete cascade,
-  track_id uuid not null references public.tracks (id) on delete cascade,
-  created_at timestamptz not null default now(),
-  primary key (user_id, track_id)
-);
-
-alter table public.track_likes enable row level security;
-
-drop policy if exists "users manage their own likes" on public.track_likes;
-create policy "users manage their own likes"
-  on public.track_likes for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
-create index if not exists track_likes_user_id_idx on public.track_likes (user_id);
-create index if not exists track_likes_track_id_idx on public.track_likes (track_id);
-
--- ----------------------------------------------------------------------------
--- artist_follows — a signed-in listener's followed artists. Same shape and
--- ownership model as track_likes.
--- ----------------------------------------------------------------------------
-create table if not exists public.artist_follows (
-  user_id uuid not null references auth.users (id) on delete cascade,
-  artist_id uuid not null references public.artists (id) on delete cascade,
-  created_at timestamptz not null default now(),
-  primary key (user_id, artist_id)
-);
-
-alter table public.artist_follows enable row level security;
-
-drop policy if exists "users manage their own follows" on public.artist_follows;
-create policy "users manage their own follows"
-  on public.artist_follows for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
-create index if not exists artist_follows_user_id_idx on public.artist_follows (user_id);
-create index if not exists artist_follows_artist_id_idx on public.artist_follows (artist_id);
-
--- ----------------------------------------------------------------------------
--- playlists / playlist_tracks — a signed-in listener's own playlists.
--- Private by nature (no "public playlist" concept yet): every operation is
--- scoped to auth.uid() = user_id, either directly on playlists or via the
--- owning playlist for playlist_tracks. No admin policy — nobody manages a
--- listener's playlist on their behalf.
--- ----------------------------------------------------------------------------
-create table if not exists public.playlists (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users (id) on delete cascade,
-  name text not null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-alter table public.playlists enable row level security;
-
-drop policy if exists "users manage their own playlists" on public.playlists;
-create policy "users manage their own playlists"
-  on public.playlists for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
-drop trigger if exists set_playlists_updated_at on public.playlists;
-create trigger set_playlists_updated_at
-  before update on public.playlists
-  for each row execute function public.set_updated_at();
-
-create index if not exists playlists_user_id_idx on public.playlists (user_id);
-
-create table if not exists public.playlist_tracks (
-  playlist_id uuid not null references public.playlists (id) on delete cascade,
-  track_id uuid not null references public.tracks (id) on delete cascade,
-  position integer not null default 0,
-  added_at timestamptz not null default now(),
-  primary key (playlist_id, track_id)
-);
-
-alter table public.playlist_tracks enable row level security;
-
-drop policy if exists "users manage tracks on their own playlists" on public.playlist_tracks;
-create policy "users manage tracks on their own playlists"
-  on public.playlist_tracks for all
-  using (
-    exists (
-      select 1 from public.playlists
-      where playlists.id = playlist_tracks.playlist_id
-      and playlists.user_id = auth.uid()
-    )
-  )
-  with check (
-    exists (
-      select 1 from public.playlists
-      where playlists.id = playlist_tracks.playlist_id
-      and playlists.user_id = auth.uid()
-    )
-  );
-
-create index if not exists playlist_tracks_playlist_id_idx on public.playlist_tracks (playlist_id);
-create index if not exists playlist_tracks_track_id_idx on public.playlist_tracks (track_id);
+drop table if exists public.playlist_tracks cascade;
+drop table if exists public.playlists cascade;
+drop table if exists public.artist_follows cascade;
+drop table if exists public.track_likes cascade;
+drop function if exists public.increment_play_count(uuid);
+drop table if exists public.tracks cascade;
+drop table if exists public.albums cascade;
+drop table if exists public.artists cascade;
 
 -- ----------------------------------------------------------------------------
 -- portfolio_items — creative work & studio updates
@@ -830,21 +560,24 @@ create trigger set_site_settings_updated_at
 -- ----------------------------------------------------------------------------
 insert into storage.buckets (id, name, public)
 values
-  ('tracks', 'tracks', true),
   ('covers', 'covers', true),
   ('portfolio', 'portfolio', true),
   ('products', 'products', true),
-  ('artists', 'artists', true),
   ('about', 'about', true)
 on conflict (id) do nothing;
+
+-- The 'tracks' and 'artists' buckets (audio files, artist photos/video)
+-- went with the music feature. Files in them are deleted along with the
+-- bucket rows.
+delete from storage.buckets where id in ('tracks', 'artists');
 
 drop policy if exists "public read for tyco buckets" on storage.objects;
 create policy "public read for tyco buckets"
   on storage.objects for select
-  using (bucket_id in ('tracks', 'covers', 'portfolio', 'products', 'artists', 'about'));
+  using (bucket_id in ('covers', 'portfolio', 'products', 'about'));
 
 drop policy if exists "admins manage tyco bucket objects" on storage.objects;
 create policy "admins manage tyco bucket objects"
   on storage.objects for all
-  using (bucket_id in ('tracks', 'covers', 'portfolio', 'products', 'artists', 'about') and public.is_admin())
-  with check (bucket_id in ('tracks', 'covers', 'portfolio', 'products', 'artists', 'about') and public.is_admin());
+  using (bucket_id in ('covers', 'portfolio', 'products', 'about') and public.is_admin())
+  with check (bucket_id in ('covers', 'portfolio', 'products', 'about') and public.is_admin());

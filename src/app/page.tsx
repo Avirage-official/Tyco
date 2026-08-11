@@ -5,82 +5,40 @@ import { createClient } from "@/lib/supabase/server";
 
 async function getSpotlight(
   supabase: Awaited<ReturnType<typeof createClient>>
-): Promise<{ release: SpotlightProps | null; event: SpotlightProps | null }> {
+): Promise<SpotlightProps | null> {
   const nowIso = new Date().toISOString();
 
-  const [{ data: event }, { data: album }] = await Promise.all([
-    supabase
-      .from("events")
-      .select("id, title, location, event_date, cover_url")
-      .eq("is_published", true)
-      .gte("event_date", nowIso)
-      .order("event_date", { ascending: true })
-      .limit(1)
-      .maybeSingle(),
-    supabase
-      .from("albums")
-      .select("id, title, artist_id, cover_url, release_date")
-      .eq("is_published", true)
-      .order("release_date", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-  ]);
+  const { data: event } = await supabase
+    .from("events")
+    .select("id, title, location, event_date, cover_url")
+    .eq("is_published", true)
+    .gte("event_date", nowIso)
+    .order("event_date", { ascending: true })
+    .limit(1)
+    .maybeSingle();
 
-  let eventSpotlight: SpotlightProps | null = null;
-  if (event) {
-    eventSpotlight = {
-      kind: "event",
-      href: "/studio/events",
-      title: event.title,
-      location: event.location,
-      date: event.event_date,
-      coverUrl: event.cover_url,
-    };
-  }
+  if (!event) return null;
 
-  let releaseSpotlight: SpotlightProps | null = null;
-  if (album) {
-    let artistName = "Tyco";
-    if (album.artist_id) {
-      const { data: artist } = await supabase
-        .from("artists")
-        .select("name")
-        .eq("id", album.artist_id)
-        .maybeSingle();
-      if (artist?.name) artistName = artist.name;
-    }
-    releaseSpotlight = {
-      kind: "release",
-      href: `/music/albums/${album.id}`,
-      title: album.title,
-      artist: artistName,
-      coverUrl: album.cover_url,
-      date: album.release_date ?? new Date().toISOString(),
-    };
-  }
-
-  return { release: releaseSpotlight, event: eventSpotlight };
+  return {
+    kind: "event",
+    href: "/studio/events",
+    title: event.title,
+    location: event.location,
+    date: event.event_date,
+    coverUrl: event.cover_url,
+  };
 }
 
 async function getAmbientImages(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const [{ data: albums }, { data: portfolio }] = await Promise.all([
-    supabase
-      .from("albums")
-      .select("cover_url")
-      .eq("is_published", true)
-      .not("cover_url", "is", null)
-      .order("release_date", { ascending: false })
-      .limit(3),
-    supabase
-      .from("portfolio_items")
-      .select("cover_url")
-      .eq("is_published", true)
-      .not("cover_url", "is", null)
-      .order("published_at", { ascending: false })
-      .limit(3),
-  ]);
+  const { data: portfolio } = await supabase
+    .from("portfolio_items")
+    .select("cover_url")
+    .eq("is_published", true)
+    .not("cover_url", "is", null)
+    .order("published_at", { ascending: false })
+    .limit(4);
 
-  const urls = [...(albums ?? []), ...(portfolio ?? [])]
+  const urls = (portfolio ?? [])
     .map((row) => row.cover_url)
     .filter((url): url is string => Boolean(url));
 
@@ -92,15 +50,7 @@ async function getDashboardData(
   userId: string,
   name: string
 ): Promise<DashboardProps> {
-  const [
-    { release, event },
-    { data: settings },
-    ambientImages,
-    { count: likedCount },
-    { count: playlistCount },
-    { count: orderCount },
-    { count: followedCount },
-  ] = await Promise.all([
+  const [event, { data: settings }, ambientImages, { count: orderCount }] = await Promise.all([
     getSpotlight(supabase),
     supabase
       .from("site_settings")
@@ -110,10 +60,7 @@ async function getDashboardData(
       .eq("id", true)
       .maybeSingle(),
     getAmbientImages(supabase),
-    supabase.from("track_likes").select("track_id", { count: "exact", head: true }).eq("user_id", userId),
-    supabase.from("playlists").select("id", { count: "exact", head: true }).eq("user_id", userId),
     supabase.from("orders").select("id", { count: "exact", head: true }).eq("user_id", userId),
-    supabase.from("artist_follows").select("artist_id", { count: "exact", head: true }).eq("user_id", userId),
   ]);
 
   const nextProject = settings?.next_project_title
@@ -130,16 +77,12 @@ async function getDashboardData(
 
   return {
     name,
-    release,
     event,
     nextProject,
     mission,
     ambientImages,
     slides: settings?.about_gallery ?? [],
-    likedCount: likedCount ?? 0,
-    playlistCount: playlistCount ?? 0,
     orderCount: orderCount ?? 0,
-    followedCount: followedCount ?? 0,
   };
 }
 
@@ -161,10 +104,10 @@ export default async function Home() {
     return <Dashboard {...dashboardData} />;
   }
 
-  const [{ release, event }, { data: settings }] = await Promise.all([
+  const [event, { data: settings }] = await Promise.all([
     getSpotlight(supabase),
     supabase.from("site_settings").select("about_gallery").eq("id", true).maybeSingle(),
   ]);
 
-  return <Marketing spotlight={event ?? release} slides={settings?.about_gallery ?? []} />;
+  return <Marketing spotlight={event} slides={settings?.about_gallery ?? []} />;
 }
