@@ -58,6 +58,15 @@ export function IconUser(props: IconProps) {
   );
 }
 
+export function IconStar(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 4.5c.7 3 1.8 4.9 4.7 5.7-2.9.8-4 2.7-4.7 5.7-.7-3-1.8-4.9-4.7-5.7 2.9-.8 4-2.7 4.7-5.7z" strokeLinejoin="round" />
+      <circle cx="18.6" cy="17.4" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function IconArrowRight(props: IconProps) {
   return (
     <svg {...base} {...props}>

@@ -43,7 +43,7 @@ on Vercel, backed by Supabase.
 - **Loading states**: a small shared `Loader`/`PageLoader`
   (`src/components/ui/Loader.tsx`) — an orbiting-arc mark in the brand's
   red, not a generic spinner import — wired into a `loading.tsx` in every
-  top-level route segment (`/`, `/studio`, `/shop`, `/admin`,
+  top-level route segment (`/`, `/creators`, `/studio`, `/shop`, `/admin`,
   `/account`, `/login`+`/signup`), so any nested route that doesn't define
   its own loading state inherits one automatically.
 - **Page transitions**: `PageTransition` (`src/components/app-shell/`)
@@ -64,7 +64,7 @@ on Vercel, backed by Supabase.
   a minimal landing page — the hero statement over the video, a live
   "what's next" spotlight (soonest upcoming published event, hidden
   entirely when there isn't one), sign in/sign up/about-us buttons, and a
-  quiet Studio/Shop link row, then a static image-backed "who we are"
+  quiet Creators/Studio/Shop link row, then a static image-backed "who we are"
   section (a condensed version of the `/about` copy with a link to the full
   story — drop the photo at `public/images/about-section.jpg`), then the
   "who we are" slideshow of photos and short clips (hidden entirely when
@@ -86,6 +86,20 @@ on Vercel, backed by Supabase.
   treatment (a shorter variant) as the front page. Static copy, no
   database reads — reachable from the top nav, the footer, and the "About
   us" button on the front page.
+- `/creators` — a directory of published creators (artists, designers,
+  photographers, influencers). `/creators/[slug]` is each creator's own
+  page: a Lenis-smooth-scrolled sequence of full-bleed "chapters" — a
+  banner hero, then their bio and gallery photos, then their `creator_works`
+  entries, each its own scroll stop with an idle Ken Burns drift so the
+  page keeps moving even at rest (all motion respects
+  `prefers-reduced-motion`). A work whose link is a specific Instagram
+  post/reel or TikTok video renders a real inline embed (`PostEmbed.tsx`);
+  other links (or a musician's actual `youtube_url`, embedded as its own
+  section) render as plain "view"/follow chips — Instagram and TikTok
+  don't support embedding a whole profile, only individual posts. Spotify
+  gets a floating corner player that's mounted only on that creator's page,
+  gone the moment you navigate away. Published products tied to the
+  creator (`products.creator_id`) close the page out as a shop grid.
 - `/studio` and `/studio/events` — creative/portfolio updates and events,
   tabbed together under "Studio". Events split into an **Upcoming** list
   (soonest first) and a **Past events** cover-art grid (most recent first)
@@ -119,14 +133,14 @@ on Vercel, backed by Supabase.
 Anything published in the last two weeks shows an automatic "New" tag on
 `/shop` and `/studio` — no manual step, it's driven off `published_at`.
 
-Mobile gets a bottom tab bar (Home / Studio / Shop / Account) so the
-site behaves like an installed app; desktop gets a top nav instead, which
+Mobile gets a bottom tab bar (Home / Creators / Studio / Shop / Account) so
+the site behaves like an installed app; desktop gets a top nav instead, which
 checks auth server-side and shows a "Sign out" link next to the cart when
 you're signed in (`TopNav` is a server component; `NavLinks` and
 `TopNavSignOut` are the client-side pieces inside it). The
 `manifest.webmanifest` + icons make "Add to Home Screen" produce a real app
 icon and standalone window. A site-wide footer sits under every page's
-content with the wordmark, tagline, and a second set of links to the four
+content with the wordmark, tagline, and a second set of links to the five
 sections.
 
 ## Admin panel
@@ -135,6 +149,13 @@ sections.
 Supabase auth (not a separate hardcoded login) — see "Local setup" below for
 how to grant yourself access.
 
+- **Creators** — onboard an artist/designer/photographer/influencer: bio,
+  tagline, location, tags, social/website links, an avatar + banner + up to
+  5 gallery photos, a "works" showcase (storytelling pieces, not necessarily
+  for sale — separate from anything they sell), and an admin-only internal
+  notes field (deal terms, contact info) that's kept in its own table so it
+  never leaks through the public read policy. Products can be tied to a
+  creator (`products.creator_id`) to show up on their page's shop grid.
 - **Portfolio, Events, Products** — list, create, edit, publish/unpublish,
   delete. Cover art / gallery images upload straight from the browser to
   Supabase Storage (bypassing the Next.js server, so there's no file-size
@@ -218,7 +239,7 @@ correction once you run a real test — check the Vercel function logs for
    `supabase/schema.sql`. It's idempotent — safe to re-run any time the file
    changes, including on a project that already has an older version applied.
    It creates every table, RLS policy, trigger, and the storage buckets
-   (`covers`, `portfolio`, `products`, `about`).
+   (`covers`, `portfolio`, `products`, `about`, `creators`).
 
 4. Grant yourself admin so you can reach `/admin` — sign up in the app first
    (so a `profiles`/`auth.users` row exists), then in the SQL editor:
@@ -247,10 +268,20 @@ correction once you run a real test — check the Vercel function logs for
   has no client-facing policies at all (not even for admins themselves) —
   only the service role can grant/revoke it, so it can't be self-escalated
   into from a signed-in session the way a flag on `profiles` could be.
+- **`creators`** — artist/designer/photographer/influencer profiles: bio,
+  social links, avatar/banner/gallery, `type` (a check-constrained
+  "dropdown"). **`creator_works`** is a creator's storytelling showcase
+  (`creator_id` FK) — pieces that aren't necessarily for sale.
+  **`creator_admin_notes`** holds the private deal/contact notes as its own
+  table, keyed by `creator_id` — RLS is row-level, not column-level, so a
+  public "creators are readable" policy would otherwise expose an admin-only
+  field sitting on the same row.
 - **`portfolio_items`**, **`events`** — creative updates and past/upcoming
   events; "past" vs "upcoming" is derived from `event_date` at query time.
 - **`products`** → **`product_variants`** (one row per size, its own stock —
   so "Medium is sold out, Large isn't" is representable).
+  `products.creator_id` (nullable) ties a product to its creator, so it
+  shows up on that creator's page — a house product just leaves it null.
 - **`orders`** → **`order_items`** (line items pin `unit_price_cents` at
   order time and reference a specific `product_variants` row). A signed-in
   customer's own RLS policies only allow `SELECT`/`INSERT` on their own
