@@ -138,6 +138,146 @@ drop table if exists public.albums cascade;
 drop table if exists public.artists cascade;
 
 -- ----------------------------------------------------------------------------
+-- creators — artist/creative profiles: their own storefront + storytelling
+-- space. Broader than the old `artists` table (musicians only) — `type`
+-- covers musicians, visual artists, influencers, designers, photographers.
+-- ----------------------------------------------------------------------------
+create table if not exists public.creators (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  name text not null,
+  type text not null,
+  tagline text,
+  bio text,
+  location text,
+  website_url text,
+  instagram_url text,
+  tiktok_url text,
+  youtube_url text,
+  spotify_url text,
+  avatar_url text,
+  banner_url text,
+  gallery jsonb not null default '[]'::jsonb,
+  tags text[] not null default '{}',
+  display_order integer not null default 0,
+  is_featured boolean not null default false,
+  is_published boolean not null default false,
+  published_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.creators drop constraint if exists creators_slug_format;
+alter table public.creators add constraint creators_slug_format
+  check (slug ~ '^[a-z0-9-]{2,60}$');
+
+alter table public.creators drop constraint if exists creators_type_check;
+alter table public.creators add constraint creators_type_check
+  check (type in ('musician', 'visual_artist', 'influencer', 'designer', 'photographer', 'other'));
+
+alter table public.creators enable row level security;
+
+drop policy if exists "published creators are public" on public.creators;
+create policy "published creators are public"
+  on public.creators for select
+  using (is_published = true);
+
+drop policy if exists "admins manage creators" on public.creators;
+create policy "admins manage creators"
+  on public.creators for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_creators_updated_at on public.creators;
+create trigger set_creators_updated_at
+  before update on public.creators
+  for each row execute function public.set_updated_at();
+
+drop trigger if exists set_creators_published_at on public.creators;
+create trigger set_creators_published_at
+  before insert or update on public.creators
+  for each row execute function public.set_published_at();
+
+create index if not exists creators_published_order_idx
+  on public.creators (is_published, display_order);
+
+-- ----------------------------------------------------------------------------
+-- creator_admin_notes — private deal/contact notes, admin-only. Kept as its
+-- own table (not a column on creators) since RLS is row-level, not
+-- column-level — a public "creators are readable" policy would otherwise
+-- expose this to anyone querying the row.
+-- ----------------------------------------------------------------------------
+create table if not exists public.creator_admin_notes (
+  creator_id uuid primary key references public.creators (id) on delete cascade,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.creator_admin_notes enable row level security;
+
+drop policy if exists "admins manage creator notes" on public.creator_admin_notes;
+create policy "admins manage creator notes"
+  on public.creator_admin_notes for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_creator_admin_notes_updated_at on public.creator_admin_notes;
+create trigger set_creator_admin_notes_updated_at
+  before update on public.creator_admin_notes
+  for each row execute function public.set_updated_at();
+
+-- ----------------------------------------------------------------------------
+-- creator_works — the storytelling showcase: pieces that aren't necessarily
+-- for sale (a discography entry, a past collab, a shoot) shown on the
+-- creator's page alongside their shop products.
+-- ----------------------------------------------------------------------------
+create table if not exists public.creator_works (
+  id uuid primary key default gen_random_uuid(),
+  creator_id uuid not null references public.creators (id) on delete cascade,
+  title text not null,
+  description text,
+  cover_url text,
+  media_url text,
+  media_type text,
+  external_url text,
+  display_order integer not null default 0,
+  is_published boolean not null default false,
+  published_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.creator_works drop constraint if exists creator_works_media_type_check;
+alter table public.creator_works add constraint creator_works_media_type_check
+  check (media_type is null or media_type in ('image', 'video'));
+
+alter table public.creator_works enable row level security;
+
+drop policy if exists "published creator works are public" on public.creator_works;
+create policy "published creator works are public"
+  on public.creator_works for select
+  using (is_published = true);
+
+drop policy if exists "admins manage creator works" on public.creator_works;
+create policy "admins manage creator works"
+  on public.creator_works for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_creator_works_updated_at on public.creator_works;
+create trigger set_creator_works_updated_at
+  before update on public.creator_works
+  for each row execute function public.set_updated_at();
+
+drop trigger if exists set_creator_works_published_at on public.creator_works;
+create trigger set_creator_works_published_at
+  before insert or update on public.creator_works
+  for each row execute function public.set_published_at();
+
+create index if not exists creator_works_creator_id_idx on public.creator_works (creator_id, display_order);
+
+-- ----------------------------------------------------------------------------
 -- portfolio_items — creative work & studio updates
 -- ----------------------------------------------------------------------------
 create table if not exists public.portfolio_items (
@@ -258,6 +398,9 @@ alter table public.products drop column if exists sizes;
 alter table public.products drop column if exists stock;
 alter table public.products add column if not exists published_at timestamptz;
 alter table public.products add column if not exists updated_at timestamptz not null default now();
+alter table public.products add column if not exists creator_id uuid references public.creators (id) on delete set null;
+
+create index if not exists products_creator_id_idx on public.products (creator_id);
 
 alter table public.products drop constraint if exists products_price_non_negative;
 alter table public.products add constraint products_price_non_negative
@@ -563,7 +706,8 @@ values
   ('covers', 'covers', true),
   ('portfolio', 'portfolio', true),
   ('products', 'products', true),
-  ('about', 'about', true)
+  ('about', 'about', true),
+  ('creators', 'creators', true)
 on conflict (id) do nothing;
 
 -- The 'tracks' and 'artists' buckets (audio files, artist photos/video)
@@ -574,10 +718,10 @@ delete from storage.buckets where id in ('tracks', 'artists');
 drop policy if exists "public read for tyco buckets" on storage.objects;
 create policy "public read for tyco buckets"
   on storage.objects for select
-  using (bucket_id in ('covers', 'portfolio', 'products', 'about'));
+  using (bucket_id in ('covers', 'portfolio', 'products', 'about', 'creators'));
 
 drop policy if exists "admins manage tyco bucket objects" on storage.objects;
 create policy "admins manage tyco bucket objects"
   on storage.objects for all
-  using (bucket_id in ('covers', 'portfolio', 'products', 'about') and public.is_admin())
-  with check (bucket_id in ('covers', 'portfolio', 'products', 'about') and public.is_admin());
+  using (bucket_id in ('covers', 'portfolio', 'products', 'about', 'creators') and public.is_admin())
+  with check (bucket_id in ('covers', 'portfolio', 'products', 'about', 'creators') and public.is_admin());
