@@ -1,0 +1,304 @@
+.page {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============ hero ============ */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: flex-end;
+  background: var(--bg-raised);
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: -5%;
+  background: inherit;
+  background-size: cover;
+  background-position: center;
+  animation: idleDrift 24s ease-in-out infinite alternate;
+}
+
+.heroScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(16, 14, 13, 0.92) 0%, rgba(16, 14, 13, 0.35) 55%, rgba(16, 14, 13, 0.15) 100%);
+}
+
+.heroInner {
+  position: relative;
+  z-index: 1;
+  padding: var(--space-2xl) var(--space-md) var(--space-xl);
+  max-width: var(--shell-max);
+  margin-inline: auto;
+  width: 100%;
+}
+
+.heroTitle {
+  margin-top: var(--space-2xs);
+  font-size: clamp(2.6rem, 8vw, 5.5rem);
+  color: var(--fg);
+}
+
+.heroTagline {
+  margin-top: var(--space-xs);
+  max-width: 45ch;
+  color: var(--fg-muted);
+  font-size: 1.1rem;
+}
+
+/* ============ chapters ============ */
+.chapter {
+  position: relative;
+  min-height: 90svh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.chapterBgWrap {
+  position: absolute;
+  inset: -15% 0;
+  height: 130%;
+}
+
+.chapterBg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-size: cover;
+  background-position: center;
+  animation: idleDrift 24s ease-in-out infinite alternate;
+}
+
+.chapterScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(16, 14, 13, 0.88) 0%, rgba(16, 14, 13, 0.25) 60%, rgba(16, 14, 13, 0.1) 100%);
+}
+
+.chapterInner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--shell-max);
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-md) var(--space-2xl);
+}
+
+.chapterCard {
+  max-width: 52ch;
+}
+
+.workTitle {
+  margin-top: var(--space-2xs);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  color: var(--fg);
+}
+
+.bio {
+  margin-top: var(--space-2xs);
+  color: var(--fg-muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.linkRow {
+  margin-top: var(--space-md);
+  display: flex;
+  gap: var(--space-2xs);
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--fg);
+  background: rgba(16, 14, 13, 0.4);
+  backdrop-filter: blur(6px);
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@keyframes idleDrift {
+  from {
+    transform: scale(1) translateY(0);
+  }
+  to {
+    transform: scale(1.08) translateY(-1.5%);
+  }
+}
+
+/* ============ youtube ============ */
+.youtubeSection {
+  padding-block: var(--space-2xl);
+}
+
+.youtubeFrame {
+  margin-top: var(--space-sm);
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-raised);
+}
+
+.youtubeFrame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ============ shop ============ */
+.shopSection {
+  padding-block: var(--space-2xl);
+}
+
+.shopTitle {
+  margin-top: var(--space-2xs);
+  margin-bottom: var(--space-md);
+}
+
+.shopGrid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.productCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-raised);
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+.productCard:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+}
+
+.productMedia {
+  aspect-ratio: 3 / 4;
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+}
+
+.productBody {
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.productName {
+  font-weight: 600;
+}
+
+.productPrice {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+/* ============ floating spotify widget ============ */
+.spotifyWidget {
+  position: fixed;
+  right: var(--space-md);
+  bottom: var(--space-md);
+  z-index: 40;
+  width: min(320px, calc(100vw - 2 * var(--space-md)));
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  animation: widgetIn 0.5s var(--ease) both;
+  animation-delay: 0.4s;
+}
+
+.spotifyPulse {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  z-index: 1;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.spotifyClose {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.4rem;
+  z-index: 1;
+  width: 1.4rem;
+  height: 1.4rem;
+  line-height: 1;
+  border-radius: 50%;
+  background: rgba(16, 14, 13, 0.65);
+  color: var(--fg);
+  font-size: 1rem;
+}
+
+.spotifyClose:hover {
+  color: var(--accent);
+}
+
+@keyframes widgetIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero::before,
+  .chapterBg,
+  .spotifyPulse,
+  .spotifyWidget {
+    animation: none;
+  }
+}
