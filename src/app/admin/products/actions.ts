@@ -11,7 +11,7 @@ export type ProductInput = {
   images: string[];
 };
 
-export type VariantInput = { size: string; stock: number };
+export type VariantInput = { size: string; stock: number; merchizeVariantCode?: string };
 
 function revalidateProducts() {
   revalidatePath("/admin/products");
@@ -26,7 +26,12 @@ async function replaceVariants(
   await supabase.from("product_variants").delete().eq("product_id", productId);
   const rows = variants
     .filter((v) => v.size.trim().length > 0)
-    .map((v) => ({ product_id: productId, size: v.size.trim(), stock: v.stock }));
+    .map((v) => ({
+      product_id: productId,
+      size: v.size.trim(),
+      stock: v.stock,
+      merchize_variant_code: v.merchizeVariantCode?.trim() || null,
+    }));
   if (rows.length > 0) {
     const { error } = await supabase.from("product_variants").insert(rows);
     if (error) throw new Error(error.message);

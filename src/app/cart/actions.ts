@@ -7,12 +7,41 @@ import { createRevolutOrder } from "@/lib/checkout/revolut";
 
 export type CheckoutLine = { variantId: string; quantity: number };
 
-export async function startCheckout(lines: CheckoutLine[], email: string) {
+export type ShippingDetails = {
+  firstName: string;
+  lastName: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  region: string;
+  postcode: string;
+  countryCode: string;
+  phone: string;
+};
+
+const REQUIRED_SHIPPING_FIELDS: (keyof ShippingDetails)[] = [
+  "firstName",
+  "lastName",
+  "address1",
+  "city",
+  "region",
+  "postcode",
+  "countryCode",
+  "phone",
+];
+
+export async function startCheckout(lines: CheckoutLine[], email: string, shipping: ShippingDetails) {
   if (lines.length === 0) throw new Error("Your cart is empty.");
 
   const trimmedEmail = email.trim();
   if (!trimmedEmail || !trimmedEmail.includes("@")) {
     throw new Error("Enter a valid email so we can send your receipt.");
+  }
+
+  for (const field of REQUIRED_SHIPPING_FIELDS) {
+    if (!shipping[field] || !shipping[field]!.toString().trim()) {
+      throw new Error("Fill in every shipping field so your order can be delivered.");
+    }
   }
 
   // Read the signed-in session (if any) from the regular, cookie-aware
@@ -78,6 +107,17 @@ export async function startCheckout(lines: CheckoutLine[], email: string) {
       status: "pending",
       currency,
       total_cents: totalCents,
+      shipping_address: {
+        firstName: shipping.firstName.trim(),
+        lastName: shipping.lastName.trim(),
+        address1: shipping.address1.trim(),
+        address2: shipping.address2?.trim() || "",
+        city: shipping.city.trim(),
+        region: shipping.region.trim(),
+        postcode: shipping.postcode.trim(),
+        countryCode: shipping.countryCode.trim(),
+        phone: shipping.phone.trim(),
+      },
     })
     .select("id")
     .single();
