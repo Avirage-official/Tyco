@@ -197,6 +197,49 @@ payload field-paths it reads are the two things most likely to need a small
 correction once you run a real test — check the Vercel function logs for
 `/api/webhooks/revolut` on the first live attempt.
 
+## Fulfilment (Merchize)
+
+Checkout now collects a shipping address (cart → shipping fields →
+`orders.shipping_address`), so once Revolut confirms payment,
+`/api/webhooks/revolut` also submits the order to Merchize, a print-on-
+demand/dropship partner, via `src/lib/checkout/merchize.ts`. Merchize's own
+webhook then reports fulfilment status and tracking back.
+
+1. **Get your store's API base URL + access token**: Merchize dashboard →
+   API page. The base URL is specific to your store, not a shared constant.
+2. **Set env vars** (see `.env.example`): `MERCHIZE_API_BASE_URL`,
+   `MERCHIZE_ACCESS_TOKEN`, `MERCHIZE_MODE`.
+3. **Register the webhook**: same dashboard → Webhooks → add
+   `https://<your-domain>/api/webhooks/merchize`, select the order-lifecycle
+   events (created, changed progress/shipment/tracking, invalid address,
+   importer error, issue updated — the payment/fee ones aren't used here),
+   then copy the value they send in the `merchize-webhook-key` header into
+   `MERCHIZE_WEBHOOK_KEY`.
+4. **Set each product variant's Merchize code**: `/admin/products` → edit a
+   product → each size row has a "Merchize code" field — the exact
+   variant/SKU code from your Merchize product catalog. An order containing
+   a variant with no code set will fail the Merchize submission (logged in
+   Vercel's function logs, not silently dropped — the order still shows as
+   paid, it just needs a manual push once the code is added).
+5. **Test a full checkout** once both webhooks and at least one product's
+   variant codes are set up.
+
+`orders.status` only ever advances to `fulfilled` once Merchize's webhook
+actually reports a shipment — everything in between (submitted, in
+production, etc.) lives in the separate `merchize_status` column, visible
+per-order in `/admin/orders`, so the existing pending → paid → fulfilled →
+… status dropdown and any logic built on it doesn't need to change.
+
+**Honest caveat**: same situation as Revolut above — Merchize's docs (as
+available when this was built) cover the `merchize-webhook-key` header and
+retry rules (5 attempts/day over 3 days, expects HTTP 200) clearly, but not
+the exact order-creation request schema or webhook payload shape. The field
+names in `src/lib/checkout/merchize.ts` and the payload field-lookups in
+`src/app/api/webhooks/merchize/route.ts` are a best-effort reconstruction,
+not a confirmed spec — place one real order and check Vercel's function logs
+for both routes; a rejected order or an unmatched webhook event is almost
+certainly a field name needing a small correction, not the surrounding logic.
+
 ## Local setup
 
 1. Install dependencies:

@@ -10,7 +10,9 @@ export default async function AdminOrdersPage() {
   const [{ data: orders }, { data: items }] = await Promise.all([
     supabase
       .from("orders")
-      .select("id, customer_email, status, currency, total_cents, created_at")
+      .select(
+        "id, customer_email, status, currency, total_cents, created_at, merchize_status, tracking_number, tracking_url"
+      )
       .order("created_at", { ascending: false }),
     supabase.from("order_items").select("order_id, quantity"),
   ]);
@@ -39,6 +41,7 @@ export default async function AdminOrdersPage() {
                 <th>Total</th>
                 <th>Placed</th>
                 <th>Status</th>
+                <th>Merchize</th>
               </tr>
             </thead>
             <tbody>
@@ -65,6 +68,21 @@ export default async function AdminOrdersPage() {
                         Update
                       </button>
                     </form>
+                  </td>
+                  <td className={styles.rowMeta}>
+                    {order.merchize_status ?? "—"}
+                    {order.tracking_number && (
+                      <>
+                        <br />
+                        {order.tracking_url ? (
+                          <a href={order.tracking_url} target="_blank" rel="noopener noreferrer">
+                            {order.tracking_number}
+                          </a>
+                        ) : (
+                          order.tracking_number
+                        )}
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}

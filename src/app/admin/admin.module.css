@@ -234,9 +234,15 @@
 
 .variantRow {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr auto;
   gap: var(--space-2xs);
   align-items: center;
+}
+
+@media (max-width: 640px) {
+  .variantRow {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .imageGrid {

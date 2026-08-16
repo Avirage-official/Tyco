@@ -33,7 +33,9 @@ export function ProductForm({
   const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [variants, setVariants] = useState<VariantInput[]>(
-    initialVariants && initialVariants.length > 0 ? initialVariants : [{ size: "", stock: 0 }]
+    initialVariants && initialVariants.length > 0
+      ? initialVariants
+      : [{ size: "", stock: 0, merchizeVariantCode: "" }]
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -256,6 +258,10 @@ export function ProductForm({
 
       <div className={styles.field}>
         <label className={styles.label}>Sizes &amp; stock</label>
+        <p className={styles.hint}>
+          Merchize code is that size&rsquo;s variant/SKU code from your Merchize product catalog — required for
+          orders of that size to reach fulfilment automatically.
+        </p>
         <div className={styles.variantsBlock}>
           {variants.map((variant, i) => (
             <div key={i} className={styles.variantRow}>
@@ -273,6 +279,12 @@ export function ProductForm({
                 value={variant.stock}
                 onChange={(e) => updateVariant(i, { stock: Number(e.target.value) })}
               />
+              <input
+                className={styles.input}
+                placeholder="Merchize code"
+                value={variant.merchizeVariantCode ?? ""}
+                onChange={(e) => updateVariant(i, { merchizeVariantCode: e.target.value })}
+              />
               <button type="button" className={styles.dangerBtn} onClick={() => removeVariant(i)}>
                 Remove
               </button>
@@ -282,7 +294,7 @@ export function ProductForm({
             type="button"
             className={styles.linkBtn}
             style={{ alignSelf: "flex-start" }}
-            onClick={() => setVariants((prev) => [...prev, { size: "", stock: 0 }])}
+            onClick={() => setVariants((prev) => [...prev, { size: "", stock: 0, merchizeVariantCode: "" }])}
           >
             + Add size
           </button>

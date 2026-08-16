@@ -235,6 +235,7 @@ export interface Database {
           size: string;
           sku: string | null;
           stock: number;
+          merchize_variant_code: string | null;
           created_at: string;
           updated_at: string;
         },
@@ -244,6 +245,7 @@ export interface Database {
           size: string;
           sku?: string | null;
           stock?: number;
+          merchize_variant_code?: string | null;
           created_at?: string;
           updated_at?: string;
         }
@@ -259,6 +261,10 @@ export interface Database {
           shipping_address: Json | null;
           stripe_payment_intent_id: string | null;
           revolut_order_id: string | null;
+          merchize_order_id: string | null;
+          merchize_status: string | null;
+          tracking_number: string | null;
+          tracking_url: string | null;
           created_at: string;
           updated_at: string;
         },
@@ -272,6 +278,10 @@ export interface Database {
           shipping_address?: Json | null;
           stripe_payment_intent_id?: string | null;
           revolut_order_id?: string | null;
+          merchize_order_id?: string | null;
+          merchize_status?: string | null;
+          tracking_number?: string | null;
+          tracking_url?: string | null;
           created_at?: string;
           updated_at?: string;
         }

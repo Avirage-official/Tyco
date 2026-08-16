@@ -644,6 +644,32 @@ create index if not exists order_items_order_id_idx on public.order_items (order
 create index if not exists order_items_variant_id_idx on public.order_items (variant_id);
 
 -- ----------------------------------------------------------------------------
+-- Merchize fulfilment — once an order is marked "paid" (by the Revolut
+-- webhook), the same handler creates a fulfilment order at Merchize, a
+-- print-on-demand/dropship partner. merchize_order_id round-trips the same
+-- way revolut_order_id does; merchize_status carries their raw status string
+-- (informational — the constrained `orders.status` only ever gets bumped to
+-- 'fulfilled' once Merchize actually reports a shipment, so existing status-
+-- based UI/logic elsewhere in the app doesn't need to change). tracking_*
+-- are populated by their webhook once a shipment goes out.
+--
+-- merchize_variant_code on product_variants is the size-specific variant/SKU
+-- code from the Merchize product catalog — set per size from the admin
+-- product form. Required for a variant to be fulfillable; an order containing
+-- a variant with no code set will fail at the Merchize API call (logged, not
+-- silently dropped — see src/app/api/webhooks/revolut/route.ts).
+-- ----------------------------------------------------------------------------
+alter table public.orders add column if not exists merchize_order_id text;
+alter table public.orders add column if not exists merchize_status text;
+alter table public.orders add column if not exists tracking_number text;
+alter table public.orders add column if not exists tracking_url text;
+
+create index if not exists orders_merchize_order_id_idx
+  on public.orders (merchize_order_id) where merchize_order_id is not null;
+
+alter table public.product_variants add column if not exists merchize_variant_code text;
+
+-- ----------------------------------------------------------------------------
 -- site_settings — a single row of homepage content the admin can edit
 -- without a deploy: the next-project teaser, the mission fund progress
 -- bar, and the front-page "who we are" slideshow (about_gallery — an
