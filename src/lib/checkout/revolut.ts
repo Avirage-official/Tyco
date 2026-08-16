@@ -42,7 +42,7 @@ export async function createRevolutOrder({
     body: JSON.stringify({
       amount: amountCents,
       currency: currency.toUpperCase(),
-      capture_mode: "AUTOMATIC",
+      capture_mode: "automatic",
       merchant_order_ext_ref: orderId,
       redirect_url: redirectUrl,
     }),
