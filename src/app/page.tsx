@@ -2,6 +2,7 @@ import { Marketing } from "@/components/home/Marketing";
 import { Dashboard, type DashboardProps } from "@/components/home/Dashboard";
 import type { SpotlightProps } from "@/components/home/Spotlight";
 import type { ShopItem } from "@/components/home/FeaturedShop";
+import type { EventSlide } from "@/components/home/MissionEventSplit";
 import { createClient } from "@/lib/supabase/server";
 
 const SHOP_FIELDS = "id, name, price_cents, currency, images, category, published_at";
@@ -55,6 +56,22 @@ async function getSpotlight(
   };
 }
 
+async function getUpcomingEvents(
+  supabase: Awaited<ReturnType<typeof createClient>>
+): Promise<EventSlide[]> {
+  const nowIso = new Date().toISOString();
+
+  const { data: events } = await supabase
+    .from("events")
+    .select("id, title, location, event_date, cover_url")
+    .eq("is_published", true)
+    .gte("event_date", nowIso)
+    .order("event_date", { ascending: true })
+    .limit(5);
+
+  return events ?? [];
+}
+
 async function getAmbientImages(supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data: portfolio } = await supabase
     .from("portfolio_items")
@@ -76,8 +93,8 @@ async function getDashboardData(
   userId: string,
   name: string
 ): Promise<DashboardProps> {
-  const [event, { data: settings }, ambientImages, { count: orderCount }, shopItems] = await Promise.all([
-    getSpotlight(supabase),
+  const [events, { data: settings }, ambientImages, { count: orderCount }, shopItems] = await Promise.all([
+    getUpcomingEvents(supabase),
     supabase
       .from("site_settings")
       .select(
@@ -100,7 +117,7 @@ async function getDashboardData(
 
   return {
     name,
-    event,
+    events,
     nextProject,
     missionBlurb: settings?.mission_blurb ?? null,
     missionRaisedCents: settings?.mission_raised_cents ?? 0,

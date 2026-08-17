@@ -120,113 +120,6 @@
   color: var(--accent);
 }
 
-.board {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: var(--space-xl) var(--space-lg);
-  margin-bottom: var(--space-2xl);
-}
-
-/* -- event card: ticket stub -- */
-.ticket {
-  position: relative;
-  display: flex;
-  height: 320px;
-  transform: rotate(1.1deg);
-  transition: transform 260ms var(--ease);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
-}
-
-.ticket:hover {
-  transform: rotate(1.1deg) translateY(-4px);
-}
-
-.ticket:active {
-  transform: rotate(1.1deg) translateY(-1px) scale(0.99);
-}
-
-.ticketMain {
-  flex: 1;
-  min-width: 0;
-  background: var(--bg-raised);
-  border: 2px solid var(--paper-line);
-  border-right: none;
-  padding: var(--space-md) var(--space-lg);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.ticketTitle {
-  margin-top: 0.35rem;
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.ticketMeta {
-  margin-top: 0.25rem;
-  font-size: 0.9rem;
-  color: var(--fg-muted);
-  font-family: var(--font-display);
-  font-style: italic;
-}
-
-.ticketDivider {
-  position: relative;
-  width: 0;
-  border-left: 3px dashed var(--ink);
-}
-
-.ticketDivider::before,
-.ticketDivider::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--bg);
-}
-
-.ticketDivider::before {
-  top: -12px;
-}
-
-.ticketDivider::after {
-  bottom: -12px;
-}
-
-.ticketStub {
-  width: 92px;
-  flex: none;
-  background: var(--paper);
-  color: var(--ink);
-  border: 2px solid var(--paper-line);
-  border-left: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-style: italic;
-  font-size: 1.1rem;
-  letter-spacing: 0.05em;
-  transform: rotate(180deg);
-}
-
-@media (max-width: 480px) {
-  .ticketStub {
-    width: 64px;
-    font-size: 0.9rem;
-  }
-}
-
 /* ============ secondary row ============ */
 .secondary {
   display: grid;
@@ -361,7 +254,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ticket,
   .postcard,
   .pass {
     transition: none;
