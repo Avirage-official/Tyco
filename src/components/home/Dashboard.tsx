@@ -3,15 +3,14 @@ import Link from "next/link";
 import { VideoHero } from "@/components/home/VideoHero";
 import { Slideshow } from "@/components/home/Slideshow";
 import { FeaturedShop, type ShopItem } from "@/components/home/FeaturedShop";
-import { MissionJourney } from "@/components/home/MissionJourney";
-import type { SpotlightProps } from "@/components/home/Spotlight";
+import { MissionEventSplit, type EventSlide } from "@/components/home/MissionEventSplit";
 import type { AboutSlide } from "@/lib/supabase/types";
 import { formatDate } from "@/lib/format";
 import styles from "./Dashboard.module.css";
 
 export type DashboardProps = {
   name: string;
-  event: SpotlightProps | null;
+  events: EventSlide[];
   nextProject: { title: string; body: string | null; imageUrl: string | null } | null;
   missionBlurb: string | null;
   missionRaisedCents: number;
@@ -22,27 +21,9 @@ export type DashboardProps = {
   shopItems: ShopItem[];
 };
 
-function EventTicket({ item }: { item: SpotlightProps }) {
-  return (
-    <Link href={item.href} className={styles.ticket}>
-      <div className={styles.ticketMain}>
-        <p className={styles.stamp}>Next up</p>
-        <h2 className={styles.ticketTitle}>{item.title}</h2>
-        <p className={styles.ticketMeta}>
-          {[formatDate(item.date), item.location].filter(Boolean).join(" — ")}
-        </p>
-      </div>
-      <div className={styles.ticketDivider} aria-hidden />
-      <div className={styles.ticketStub} aria-hidden>
-        ADMIT ONE
-      </div>
-    </Link>
-  );
-}
-
 export function Dashboard({
   name,
-  event,
+  events,
   nextProject,
   missionBlurb,
   missionRaisedCents,
@@ -55,8 +36,10 @@ export function Dashboard({
   const passes = [{ href: "/account/orders", label: "Order", count: orderCount, type: "History" }];
 
   const tickerItems: string[] = [];
-  if (event) {
-    tickerItems.push(`NEXT UP — ${event.title.toUpperCase()}, ${formatDate(event.date).toUpperCase()}`);
+  if (events[0]) {
+    tickerItems.push(
+      `NEXT UP — ${events[0].title.toUpperCase()}, ${formatDate(events[0].event_date).toUpperCase()}`
+    );
   }
   if (nextProject) {
     tickerItems.push(`COMING NEXT — ${nextProject.title.toUpperCase()}`);
@@ -104,19 +87,14 @@ export function Dashboard({
 
       <FeaturedShop items={shopItems} />
 
-      <MissionJourney
+      <MissionEventSplit
         blurb={missionBlurb}
         raisedCents={missionRaisedCents}
         goalCents={missionGoalCents}
+        events={events}
       />
 
       <div className={`container ${styles.wrap}`}>
-        {event && (
-          <div className={styles.board}>
-            <EventTicket item={event} />
-          </div>
-        )}
-
         {nextProject && (
           <div className={styles.secondary}>
             <Link href="/studio" className={styles.postcard} style={{ gridColumn: "1 / -1" }}>
