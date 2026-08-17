@@ -1,3 +1,59 @@
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-sm);
+}
+
+@media (min-width: 520px) {
+  .layout {
+    grid-template-columns: 72px 1fr;
+  }
+}
+
+.thumbs {
+  display: flex;
+  gap: var(--space-2xs);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.thumbs::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 520px) {
+  .thumbs {
+    order: -1;
+    flex-direction: column;
+    overflow-x: visible;
+    overflow-y: auto;
+    max-height: 620px;
+  }
+}
+
+.thumb {
+  display: block;
+  flex: 0 0 auto;
+  width: 60px;
+  aspect-ratio: 3 / 4;
+  background-color: var(--surface);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  opacity: 0.55;
+  transition: opacity var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.thumb:hover {
+  opacity: 0.85;
+}
+
+.thumbActive {
+  opacity: 1;
+  border-color: var(--accent);
+}
+
 .frame {
   position: relative;
   aspect-ratio: 3 / 4;
@@ -6,32 +62,18 @@
   background: var(--surface);
 }
 
-.track {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-}
-
-.track::-webkit-scrollbar {
-  display: none;
-}
-
-.slide {
-  flex: 0 0 100%;
-  height: 100%;
+.mainImage {
+  position: absolute;
+  inset: 0;
   background-size: cover;
   background-position: center;
-  scroll-snap-align: start;
 }
 
 .arrow {
   position: absolute;
   top: 50%;
-  left: var(--space-sm);
-  transform: translateY(-50%) rotate(180deg);
+  right: var(--space-sm);
+  transform: translateY(-50%);
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 50%;
@@ -53,36 +95,8 @@
   pointer-events: none;
 }
 
-.arrowNext {
-  left: auto;
-  right: var(--space-sm);
-  transform: translateY(-50%);
-}
-
-.dots {
-  position: absolute;
-  bottom: var(--space-sm);
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.4rem;
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(244, 236, 220, 0.4);
-  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
-}
-
-.dotActive {
-  background: var(--paper);
-  transform: scale(1.3);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .track {
-    scroll-behavior: auto;
-  }
+.arrowPrev {
+  right: auto;
+  left: var(--space-sm);
+  transform: translateY(-50%) rotate(180deg);
 }

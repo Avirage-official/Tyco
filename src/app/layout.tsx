@@ -1,20 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Work_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import { AppShell } from "@/components/app-shell/AppShell";
 import { SplashScreen } from "@/components/brand/SplashScreen";
 import "./globals.css";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-  axes: ["opsz", "SOFT", "WONK"],
   style: ["normal", "italic"],
-  display: "swap",
-});
-
-const workSans = Work_Sans({
-  variable: "--font-work-sans",
-  subsets: ["latin"],
   display: "swap",
 });
 
@@ -46,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${workSans.variable}`}>
+    <html lang="en" className={inter.variable}>
       <body>
         <SplashScreen />
         <AppShell>{children}</AppShell>

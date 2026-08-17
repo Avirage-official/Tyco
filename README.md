@@ -20,9 +20,12 @@ on Vercel, backed by Supabase.
   (`--paper*`). Tokens are in `src/app/globals.css`. Black is the fixed
   background — deliberately no `prefers-color-scheme` override, so the look
   doesn't change based on the visitor's system theme.
-- **Type**: Fraunces (display/serif, warm and a little wonky at large sizes)
-  paired with Work Sans (body). Deliberately not Inter/Geist/Space
-  Grotesk — those read as generic "AI app" defaults.
+- **Type**: Inter, one family for both display and body, loaded once in
+  `layout.tsx` and set on the shared `--font-display`/`--font-body` tokens
+  in `globals.css` — every component reads through those two tokens rather
+  than naming a font directly, so this was a two-file change even though it
+  touches every page. Deliberately not the original Fraunces/Work Sans
+  pairing — moved to a cleaner, more neutral retail-catalog feel.
 - **Icons**: a small hand-built SVG set in `src/components/icons.tsx`, not a
   library import — every mark carries a small red dot as a recurring motif.
 - App icon / favicon / manifest icons are generated in code with `next/og`
@@ -93,9 +96,13 @@ on Vercel, backed by Supabase.
   either section is omitted when it's empty.
 - `/shop` and `/shop/[id]` — retail product grid and product detail, with
   per-size stock (sold-out sizes show as struck through) and up to 5 photos
-  per product in a swipeable gallery (`Gallery.tsx` — hand-rolled scroll-snap
-  + dots + arrows, no carousel library). Pick a size and quantity, add to
-  cart.
+  per product in a thumbnail-driven gallery (`Gallery.tsx` — a vertical
+  thumbnail rail alongside the main image on desktop, a horizontal row above
+  it on mobile; click a thumbnail or use the arrows, no autoplay and no
+  carousel library). A breadcrumb (Home / Shop / category / product) sits
+  above the gallery, and the description lives in a collapsed "Product
+  details" accordion (`components/ui/Accordion.tsx`). Pick a size and
+  quantity, add to cart.
 - `/cart` — client-side cart (React context + localStorage) — nothing
   touches the database until checkout. Works for guests; no account
   required. Checkout re-validates every price
