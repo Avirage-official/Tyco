@@ -9,6 +9,7 @@ export type ProductInput = {
   price_cents: number;
   category: string | null;
   images: string[];
+  is_featured: boolean;
 };
 
 export type VariantInput = { size: string; stock: number; merchizeVariantCode?: string };
@@ -16,6 +17,7 @@ export type VariantInput = { size: string; stock: number; merchizeVariantCode?: 
 function revalidateProducts() {
   revalidatePath("/admin/products");
   revalidatePath("/shop");
+  revalidatePath("/");
 }
 
 async function replaceVariants(

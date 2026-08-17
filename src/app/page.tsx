@@ -1,7 +1,33 @@
 import { Marketing } from "@/components/home/Marketing";
 import { Dashboard, type DashboardProps } from "@/components/home/Dashboard";
 import type { SpotlightProps } from "@/components/home/Spotlight";
+import type { ShopItem } from "@/components/home/FeaturedShop";
 import { createClient } from "@/lib/supabase/server";
+
+const SHOP_FIELDS = "id, name, price_cents, currency, images, category, published_at";
+
+async function getFeaturedShop(
+  supabase: Awaited<ReturnType<typeof createClient>>
+): Promise<ShopItem[]> {
+  const { data: featured } = await supabase
+    .from("products")
+    .select(SHOP_FIELDS)
+    .eq("is_published", true)
+    .eq("is_featured", true)
+    .order("published_at", { ascending: false })
+    .limit(4);
+
+  if (featured && featured.length > 0) return featured;
+
+  const { data: recent } = await supabase
+    .from("products")
+    .select(SHOP_FIELDS)
+    .eq("is_published", true)
+    .order("created_at", { ascending: false })
+    .limit(4);
+
+  return recent ?? [];
+}
 
 async function getSpotlight(
   supabase: Awaited<ReturnType<typeof createClient>>
@@ -50,7 +76,7 @@ async function getDashboardData(
   userId: string,
   name: string
 ): Promise<DashboardProps> {
-  const [event, { data: settings }, ambientImages, { count: orderCount }] = await Promise.all([
+  const [event, { data: settings }, ambientImages, { count: orderCount }, shopItems] = await Promise.all([
     getSpotlight(supabase),
     supabase
       .from("site_settings")
@@ -61,6 +87,7 @@ async function getDashboardData(
       .maybeSingle(),
     getAmbientImages(supabase),
     supabase.from("orders").select("id", { count: "exact", head: true }).eq("user_id", userId),
+    getFeaturedShop(supabase),
   ]);
 
   const nextProject = settings?.next_project_title
@@ -83,6 +110,7 @@ async function getDashboardData(
     ambientImages,
     slides: settings?.about_gallery ?? [],
     orderCount: orderCount ?? 0,
+    shopItems,
   };
 }
 

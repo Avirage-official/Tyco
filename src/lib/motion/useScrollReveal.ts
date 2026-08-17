@@ -73,3 +73,35 @@ export function useRevealOnScroll<T extends HTMLElement>() {
 
   return ref;
 }
+
+/** Reveals a grid/row's direct children one after another as the container enters the viewport. */
+export function useStaggerReveal<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        el.children,
+        { autoAlpha: 0, y: 36 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.85,
+          ease: "power3.out",
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: el,
+            start: "top 85%",
+          },
+        }
+      );
+    }, el);
+
+    return () => ctx.revert();
+  }, []);
+
+  return ref;
+}

@@ -399,8 +399,10 @@ alter table public.products drop column if exists stock;
 alter table public.products add column if not exists published_at timestamptz;
 alter table public.products add column if not exists updated_at timestamptz not null default now();
 alter table public.products add column if not exists creator_id uuid references public.creators (id) on delete set null;
+alter table public.products add column if not exists is_featured boolean not null default false;
 
 create index if not exists products_creator_id_idx on public.products (creator_id);
+create index if not exists products_featured_idx on public.products (is_featured) where is_featured = true;
 
 alter table public.products drop constraint if exists products_price_non_negative;
 alter table public.products add constraint products_price_non_negative

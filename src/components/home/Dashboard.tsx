@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import Link from "next/link";
 import { VideoHero } from "@/components/home/VideoHero";
 import { Slideshow } from "@/components/home/Slideshow";
+import { FeaturedShop, type ShopItem } from "@/components/home/FeaturedShop";
 import type { SpotlightProps } from "@/components/home/Spotlight";
 import type { AboutSlide } from "@/lib/supabase/types";
 import { formatDate, formatPrice } from "@/lib/format";
@@ -15,6 +16,7 @@ export type DashboardProps = {
   ambientImages: string[];
   slides: AboutSlide[];
   orderCount: number;
+  shopItems: ShopItem[];
 };
 
 // Decorative heights only — the "lit" count is what actually encodes the
@@ -47,6 +49,7 @@ export function Dashboard({
   ambientImages,
   slides,
   orderCount,
+  shopItems,
 }: DashboardProps) {
   const missionPct =
     mission && mission.goalCents > 0
@@ -77,8 +80,8 @@ export function Dashboard({
   return (
     <>
       <VideoHero size="compact">
-        <p className="eyebrow">Welcome back</p>
-        <h1 className={styles.heroTitle}>Hey, {name}</h1>
+        <p className="eyebrow">Tyco</p>
+        <h1 className={styles.heroTitle}>Welcome back, {name}</h1>
       </VideoHero>
 
       {tickerItems.length > 0 && (
@@ -107,6 +110,8 @@ export function Dashboard({
           <div className={styles.sprocketRow} />
         </div>
       )}
+
+      <FeaturedShop items={shopItems} />
 
       <div className={`container ${styles.wrap}`}>
         {event && (

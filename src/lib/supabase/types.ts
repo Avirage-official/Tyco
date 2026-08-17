@@ -208,6 +208,7 @@ export interface Database {
           images: string[];
           category: string | null;
           creator_id: string | null;
+          is_featured: boolean;
           is_published: boolean;
           published_at: string | null;
           created_at: string;
@@ -222,6 +223,7 @@ export interface Database {
           images?: string[];
           category?: string | null;
           creator_id?: string | null;
+          is_featured?: boolean;
           is_published?: boolean;
           published_at?: string | null;
           created_at?: string;
