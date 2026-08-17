@@ -28,8 +28,8 @@
   --on-ink: var(--paper);
 
   /* -- type --------------------------------------------------------------- */
-  --font-display: var(--font-fraunces), "Iowan Old Style", serif;
-  --font-body: var(--font-work-sans), "Segoe UI", sans-serif;
+  --font-display: var(--font-inter), "Segoe UI", sans-serif;
+  --font-body: var(--font-inter), "Segoe UI", sans-serif;
 
   /* -- scale ---------------------------------------------------------- */
   --space-3xs: 0.25rem;

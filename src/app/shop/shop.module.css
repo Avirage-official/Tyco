@@ -55,6 +55,28 @@
   padding-block: var(--space-lg) var(--space-2xl);
 }
 
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: var(--space-lg);
+  font-size: 0.82rem;
+  color: var(--fg-muted);
+}
+
+.breadcrumb a {
+  transition: color var(--dur) var(--ease);
+}
+
+.breadcrumb a:hover {
+  color: var(--fg);
+}
+
+.breadcrumb span[aria-current] {
+  color: var(--fg);
+}
+
 .detailGrid {
   display: grid;
   gap: var(--space-lg);
@@ -74,10 +96,8 @@
   font-weight: 600;
 }
 
-.detailDesc {
-  margin-top: var(--space-md);
-  color: var(--fg-muted);
-  max-width: 55ch;
+.accordions {
+  margin-top: var(--space-xl);
 }
 
 .sizes {
