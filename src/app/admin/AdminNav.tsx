@@ -12,6 +12,7 @@ const links = [
   { href: "/admin/events", label: "Events" },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/webhooks", label: "Webhooks" },
   { href: "/admin/users", label: "Users" },
 ];
 
