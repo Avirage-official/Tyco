@@ -16,6 +16,7 @@ type Product = {
   price_cents: number;
   category: string | null;
   images: string[];
+  is_featured?: boolean;
 };
 
 export function ProductForm({
@@ -30,6 +31,7 @@ export function ProductForm({
   const [description, setDescription] = useState(product?.description ?? "");
   const [price, setPrice] = useState(product ? (product.price_cents / 100).toFixed(2) : "");
   const [category, setCategory] = useState(product?.category ?? "");
+  const [isFeatured, setIsFeatured] = useState(product?.is_featured ?? false);
   const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [variants, setVariants] = useState<VariantInput[]>(
@@ -102,6 +104,7 @@ export function ProductForm({
         price_cents: priceCents,
         category: category || null,
         images: finalImages,
+        is_featured: isFeatured,
       };
 
       const cleanVariants = variants.filter((v) => v.size.trim().length > 0);
@@ -175,6 +178,16 @@ export function ProductForm({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
+      </div>
+
+      <div className={styles.checkboxRow}>
+        <input
+          id="featured"
+          type="checkbox"
+          checked={isFeatured}
+          onChange={(e) => setIsFeatured(e.target.checked)}
+        />
+        <label htmlFor="featured">Feature on homepage</label>
       </div>
 
       <div className={styles.field}>

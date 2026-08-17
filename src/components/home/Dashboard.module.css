@@ -127,86 +127,6 @@
   margin-bottom: var(--space-2xl);
 }
 
-/* -- release card: torn-paper poster -- */
-.releaseCard {
-  position: relative;
-  display: block;
-  height: 320px;
-  border: 2px solid var(--paper-line);
-  outline: 6px solid var(--bg);
-  outline-offset: -2px;
-  transform: rotate(-1.4deg);
-  transition: transform 260ms var(--ease), outline-color 260ms var(--ease);
-}
-
-.releaseCard:hover {
-  transform: rotate(-1.4deg) translateY(-4px);
-}
-
-.releaseCard:active {
-  transform: rotate(-1.4deg) translateY(-1px) scale(0.99);
-}
-
-.releaseCover {
-  position: absolute;
-  inset: 0;
-  background-color: var(--surface);
-  background-size: cover;
-  background-position: center;
-}
-
-.releaseCoverEmpty {
-  background: linear-gradient(150deg, var(--red-deep) 0%, var(--ink) 65%);
-}
-
-.halftone {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, rgba(244, 236, 220, 0.9) 1px, transparent 1.4px);
-  background-size: 5px 5px;
-  mix-blend-mode: overlay;
-  opacity: 0.5;
-}
-
-.releaseScrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(0deg, rgba(16, 14, 13, 0.95) 0%, rgba(16, 14, 13, 0.15) 60%, transparent 100%);
-}
-
-.releaseText {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: var(--space-md) var(--space-lg) var(--space-lg);
-}
-
-.releaseTitle {
-  margin-top: 0.35rem;
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  color: var(--paper);
-}
-
-.releaseMeta {
-  margin-top: 0.25rem;
-  font-size: 0.9rem;
-  color: rgba(244, 236, 220, 0.75);
-  font-family: var(--font-display);
-  font-style: italic;
-}
-
-.tape {
-  position: absolute;
-  top: -14px;
-  left: 28px;
-  width: 74px;
-  height: 26px;
-  background: rgba(244, 236, 220, 0.85);
-  transform: rotate(-4deg);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
 /* -- event card: ticket stub -- */
 .ticket {
   position: relative;
@@ -501,7 +421,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .releaseCard,
   .ticket,
   .postcard,
   .pass {
