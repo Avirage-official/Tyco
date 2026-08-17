@@ -59,3 +59,49 @@
 .spacer {
   flex: 1;
 }
+
+.authLinks {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* ============ menu dropdown ============ */
+.menuRoot {
+  position: relative;
+}
+
+.menuPanel {
+  position: absolute;
+  top: calc(100% + var(--space-sm));
+  left: 0;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2xs);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
+  z-index: 50;
+}
+
+.menuPanelLink {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+
+.menuPanelLink:hover {
+  color: var(--fg);
+  background: var(--surface);
+}
+
+.menuPanelLinkActive {
+  color: var(--accent);
+}
