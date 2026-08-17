@@ -4,7 +4,25 @@ import crypto from "node:crypto";
 // Revolut requires every request pinned to a specific API version. Bump this
 // deliberately (and re-check the create-order response shape) rather than
 // letting it drift — https://developer.revolut.com/docs/guides/accept-payments/versioning/api-versions
+//
+// Order creation stays pinned to the version it was built and verified
+// against (a real order has been created successfully with it) — bumping it
+// without re-testing risks a response-shape change breaking a proven path.
+// Webhook management is new code, pinned to the version shown in Revolut's
+// current docs at the time it was written.
 const REVOLUT_API_VERSION = "2024-09-01";
+const REVOLUT_WEBHOOKS_API_VERSION = "2026-04-20";
+
+export type RevolutWebhook = { id: string; url: string; events: string[]; signing_secret?: string };
+
+export const REVOLUT_ORDER_EVENTS = [
+  "ORDER_COMPLETED",
+  "ORDER_AUTHORISED",
+  "ORDER_CANCELLED",
+  "ORDER_FAILED",
+  "ORDER_PAYMENT_DECLINED",
+  "ORDER_PAYMENT_FAILED",
+] as const;
 
 function requireEnv(name: string) {
   const value = process.env[name];
@@ -101,4 +119,52 @@ export function verifyRevolutSignature({
   if (!provided || provided.length !== expected.length) return false;
 
   return crypto.timingSafeEqual(Buffer.from(provided, "hex"), Buffer.from(expected, "hex"));
+}
+
+function webhooksHeaders() {
+  return {
+    Authorization: `Bearer ${requireEnv("REVOLUT_SECRET_KEY")}`,
+    "Revolut-Api-Version": REVOLUT_WEBHOOKS_API_VERSION,
+  };
+}
+
+/** Lists every webhook currently registered on this Revolut account (max 10 total, per Revolut). */
+export async function listRevolutWebhooks(): Promise<RevolutWebhook[]> {
+  const baseUrl = requireEnv("REVOLUT_API_BASE_URL");
+  const res = await fetch(`${baseUrl}/api/webhooks`, { headers: webhooksHeaders() });
+  if (!res.ok) {
+    throw new Error(`Failed to list Revolut webhooks (${res.status}): ${await res.text()}`);
+  }
+  const data = (await res.json()) as { webhooks: RevolutWebhook[] };
+  return data.webhooks;
+}
+
+/** Retrieves a single webhook, including its signing_secret (omitted from the list endpoint). */
+export async function getRevolutWebhook(id: string): Promise<RevolutWebhook> {
+  const baseUrl = requireEnv("REVOLUT_API_BASE_URL");
+  const res = await fetch(`${baseUrl}/api/webhooks/${id}`, { headers: webhooksHeaders() });
+  if (!res.ok) {
+    throw new Error(`Failed to retrieve Revolut webhook (${res.status}): ${await res.text()}`);
+  }
+  return res.json();
+}
+
+/** Registers a new webhook. Returns signing_secret once — save it (it's also retrievable later via getRevolutWebhook). */
+export async function createRevolutWebhook({
+  url,
+  events,
+}: {
+  url: string;
+  events: readonly string[];
+}): Promise<RevolutWebhook> {
+  const baseUrl = requireEnv("REVOLUT_API_BASE_URL");
+  const res = await fetch(`${baseUrl}/api/webhooks`, {
+    method: "POST",
+    headers: { ...webhooksHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ url, events }),
+  });
+  if (!res.ok) {
+    throw new Error(`Revolut webhook creation failed (${res.status}): ${await res.text()}`);
+  }
+  return res.json();
 }

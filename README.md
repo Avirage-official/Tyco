@@ -174,11 +174,15 @@ Revolut-hosted page, and a webhook is what actually confirms payment.
    Developer → API keys. Start with sandbox, not live.
 2. **Set env vars** (see `.env.example`): `REVOLUT_API_BASE_URL`,
    `REVOLUT_SECRET_KEY`.
-3. **Register the webhook**: same dashboard → Webhooks → add
-   `https://<your-domain>/api/webhooks/revolut`, subscribe to
-   `ORDER_COMPLETED`, `ORDER_AUTHORISED`, `ORDER_CANCELLED`,
-   `ORDER_PAYMENT_DECLINED`, `ORDER_PAYMENT_FAILED`, then copy the signing
-   secret into `REVOLUT_WEBHOOK_SIGNING_SECRET`.
+3. **Register the webhook**: Revolut's Business dashboard has no webhook UI
+   on this account — it's registered via their API instead. Visit
+   `/admin/webhooks` (signed in as an admin) and submit your production
+   webhook URL (`https://<your-domain>/api/webhooks/revolut`); it registers
+   for `ORDER_COMPLETED`, `ORDER_AUTHORISED`, `ORDER_CANCELLED`,
+   `ORDER_PAYMENT_DECLINED`, `ORDER_PAYMENT_FAILED` and shows the signing
+   secret to copy into `REVOLUT_WEBHOOK_SIGNING_SECRET`. Re-submitting the
+   same URL later just re-shows the secret rather than creating a duplicate
+   (Revolut caps accounts at 10 webhooks total).
 4. **Test a full checkout** in sandbox (test card numbers are in Revolut's
    docs under Testing) before switching `REVOLUT_API_BASE_URL` and the two
    secrets to their live equivalents.
