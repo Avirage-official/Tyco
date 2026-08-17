@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { LinkButton } from "@/components/ui/Button";
 import { NewBadge } from "@/components/ui/NewBadge";
@@ -17,18 +18,54 @@ export type ShopItem = {
   published_at: string | null;
 };
 
-function ShopCard({ item, hero }: { item: ShopItem; hero?: boolean }) {
+const CYCLE_MS = 2800;
+const STAGGER_MS = 700;
+
+/** Cycles through a card's photos on a timer, each card phase-offset so the grid never swaps in unison. */
+function useImageCycle(count: number, offsetMs: number) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (count <= 1) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+    const timeoutId = setTimeout(() => {
+      intervalId = setInterval(() => setIndex((i) => (i + 1) % count), CYCLE_MS);
+    }, offsetMs);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [count, offsetMs]);
+
+  return index;
+}
+
+function ShopCard({ item, hero, position }: { item: ShopItem; hero?: boolean; position: number }) {
+  const activeImage = useImageCycle(item.images.length, position * STAGGER_MS);
+
   return (
     <Link
       href={`/shop/${item.id}`}
       className={hero ? `${styles.card} ${styles.hero}` : styles.card}
     >
       {hero && <span className={styles.tape} aria-hidden />}
-      <span
-        className={styles.cover}
-        style={item.images?.[0] ? { backgroundImage: `url(${item.images[0]})` } : undefined}
-        aria-hidden
-      />
+      <span className={styles.cover} aria-hidden>
+        {item.images.length > 0 ? (
+          item.images.map((url, i) => (
+            <span
+              key={url}
+              className={styles.coverImg}
+              data-active={i === activeImage}
+              style={{ backgroundImage: `url(${url})` }}
+            />
+          ))
+        ) : (
+          <span className={styles.coverImg} data-active="true" />
+        )}
+      </span>
       <span className={styles.halftone} aria-hidden />
       <span className={styles.scrim} aria-hidden />
       <span className={styles.priceTag}>{formatPrice(item.price_cents, item.currency)}</span>
@@ -62,9 +99,9 @@ export function FeaturedShop({ items }: { items: ShopItem[] }) {
       </div>
 
       <div ref={gridRef} className={styles.grid} data-count={items.length}>
-        <ShopCard item={hero} hero />
-        {rest.map((item) => (
-          <ShopCard key={item.id} item={item} />
+        <ShopCard item={hero} hero position={0} />
+        {rest.map((item, i) => (
+          <ShopCard key={item.id} item={item} position={i + 1} />
         ))}
       </div>
     </section>
