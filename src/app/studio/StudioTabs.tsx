@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import styles from "./StudioTabs.module.css";
 
 const tabs = [
-  { href: "/studio", label: "Work" },
+  { href: "/studio", label: "Creators" },
   { href: "/studio/events", label: "Events" },
 ];
 
