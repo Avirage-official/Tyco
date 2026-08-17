@@ -674,8 +674,9 @@ alter table public.product_variants add column if not exists merchize_variant_co
 -- ----------------------------------------------------------------------------
 -- site_settings — a single row of homepage content the admin can edit
 -- without a deploy: the next-project teaser, the mission fund progress
--- bar, and the front-page "who we are" slideshow (about_gallery — an
--- ordered jsonb array of {url, type} where type is "image" or "video").
+-- (raised/goal cents plus a short editorial blurb on what's currently
+-- being funded), and the front-page "who we are" slideshow (about_gallery
+-- — an ordered jsonb array of {url, type} where type is "image" or "video").
 -- Singleton by construction (id is always `true`), so there's never an
 -- ambiguous "which row" to query.
 -- ----------------------------------------------------------------------------
@@ -686,12 +687,14 @@ create table if not exists public.site_settings (
   next_project_image_url text,
   mission_raised_cents integer not null default 0,
   mission_goal_cents integer not null default 0,
+  mission_blurb text,
   about_gallery jsonb not null default '[]'::jsonb,
   updated_at timestamptz not null default now(),
   constraint site_settings_singleton check (id)
 );
 
 alter table public.site_settings add column if not exists about_gallery jsonb not null default '[]'::jsonb;
+alter table public.site_settings add column if not exists mission_blurb text;
 
 insert into public.site_settings (id)
 values (true)

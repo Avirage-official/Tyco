@@ -274,66 +274,6 @@
   max-width: 46ch;
 }
 
-.meter {
-  position: relative;
-  background: var(--bg-raised);
-  border: 2px solid var(--paper-line);
-  padding: var(--space-md) var(--space-lg);
-  transform: rotate(0.6deg);
-}
-
-.meterAmount {
-  margin-top: var(--space-sm);
-  font-family: var(--font-display);
-  font-size: clamp(1.9rem, 3.6vw, 2.5rem);
-  font-variant-numeric: tabular-nums;
-}
-
-.meterAmount span {
-  font-size: 1rem;
-  color: var(--fg-muted);
-  font-family: var(--font-body);
-  font-style: normal;
-}
-
-.bars {
-  margin-top: var(--space-md);
-  height: 56px;
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-}
-
-.bar {
-  flex: 1;
-  border-radius: 1px;
-  background: var(--border);
-  transform-origin: bottom;
-}
-
-.barLit {
-  background: linear-gradient(0deg, var(--red-deep), var(--accent));
-  animation: barPulse 1.6s ease-in-out infinite;
-}
-
-.barLit:nth-child(2n) {
-  animation-delay: 0.15s;
-}
-
-.barLit:nth-child(3n) {
-  animation-delay: 0.3s;
-}
-
-@keyframes barPulse {
-  0%,
-  100% {
-    transform: scaleY(1);
-  }
-  50% {
-    transform: scaleY(0.82);
-  }
-}
-
 /* ============ backstage passes ============ */
 .passHead {
   margin-bottom: var(--space-lg);
@@ -425,9 +365,5 @@
   .postcard,
   .pass {
     transition: none;
-  }
-
-  .barLit {
-    animation: none;
   }
 }

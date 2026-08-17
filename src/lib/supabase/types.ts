@@ -314,6 +314,7 @@ export interface Database {
           next_project_image_url: string | null;
           mission_raised_cents: number;
           mission_goal_cents: number;
+          mission_blurb: string | null;
           about_gallery: AboutSlide[];
           updated_at: string;
         },
@@ -324,6 +325,7 @@ export interface Database {
           next_project_image_url?: string | null;
           mission_raised_cents?: number;
           mission_goal_cents?: number;
+          mission_blurb?: string | null;
           about_gallery?: AboutSlide[];
           updated_at?: string;
         }

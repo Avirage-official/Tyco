@@ -16,6 +16,7 @@ type Settings = {
   next_project_image_url: string | null;
   mission_raised_cents: number;
   mission_goal_cents: number;
+  mission_blurb: string | null;
   about_gallery: AboutSlide[];
 } | null;
 
@@ -27,6 +28,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [raised, setRaised] = useState(String((settings?.mission_raised_cents ?? 0) / 100));
   const [goal, setGoal] = useState(String((settings?.mission_goal_cents ?? 0) / 100));
+  const [missionBlurb, setMissionBlurb] = useState(settings?.mission_blurb ?? "");
   const [slides, setSlides] = useState<AboutSlide[]>(settings?.about_gallery ?? []);
   const [slideFiles, setSlideFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
@@ -87,6 +89,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         next_project_image_url: finalImageUrl,
         mission_raised_cents: Math.round(Number(raised) * 100) || 0,
         mission_goal_cents: Math.round(Number(goal) * 100) || 0,
+        mission_blurb: missionBlurb || null,
         about_gallery: [...slides, ...newSlides],
       });
 
@@ -232,9 +235,29 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         />
       </div>
 
+      <h3 style={{ marginTop: "var(--space-lg)" }}>The mission</h3>
+      <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>
+        Shown on the dashboard as a quiet, animated strip — not a number. Say what the fund is
+        for right now, in a line or two. Leave it blank to hide the strip entirely.
+      </p>
+
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="mission-blurb">
+          What we&rsquo;re funding
+        </label>
+        <textarea
+          id="mission-blurb"
+          className={styles.textarea}
+          placeholder="A line about where the fund is headed right now."
+          value={missionBlurb}
+          onChange={(e) => setMissionBlurb(e.target.value)}
+        />
+      </div>
+
       <h3 style={{ marginTop: "var(--space-lg)" }}>Mission fund progress</h3>
       <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>
-        Shown on the dashboard as a progress bar. Set the goal to 0 to hide it.
+        Kept for the record — not shown on the homepage. Set the goal to 0 if there&rsquo;s
+        nothing to track yet.
       </p>
 
       <div className={styles.field}>

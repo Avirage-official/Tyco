@@ -3,25 +3,22 @@ import Link from "next/link";
 import { VideoHero } from "@/components/home/VideoHero";
 import { Slideshow } from "@/components/home/Slideshow";
 import { FeaturedShop, type ShopItem } from "@/components/home/FeaturedShop";
+import { MissionJourney } from "@/components/home/MissionJourney";
 import type { SpotlightProps } from "@/components/home/Spotlight";
 import type { AboutSlide } from "@/lib/supabase/types";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import styles from "./Dashboard.module.css";
 
 export type DashboardProps = {
   name: string;
   event: SpotlightProps | null;
   nextProject: { title: string; body: string | null; imageUrl: string | null } | null;
-  mission: { raisedCents: number; goalCents: number } | null;
+  missionBlurb: string | null;
   ambientImages: string[];
   slides: AboutSlide[];
   orderCount: number;
   shopItems: ShopItem[];
 };
-
-// Decorative heights only — the "lit" count is what actually encodes the
-// mission-fund percentage. Repeats if there are more bars than values.
-const BAR_HEIGHTS = [55, 30, 70, 20, 85, 40, 60, 25, 75, 35, 50, 65, 20, 45, 30, 55, 15, 40, 25, 50, 18, 35];
 
 function EventTicket({ item }: { item: SpotlightProps }) {
   return (
@@ -45,27 +42,17 @@ export function Dashboard({
   name,
   event,
   nextProject,
-  mission,
+  missionBlurb,
   ambientImages,
   slides,
   orderCount,
   shopItems,
 }: DashboardProps) {
-  const missionPct =
-    mission && mission.goalCents > 0
-      ? Math.min(100, Math.round((mission.raisedCents / mission.goalCents) * 100))
-      : 0;
-  const litBars = Math.round((missionPct / 100) * BAR_HEIGHTS.length);
-  const soloSecondary = Boolean(nextProject) !== Boolean(mission && mission.goalCents > 0);
-
   const passes = [{ href: "/account/orders", label: "Order", count: orderCount, type: "History" }];
 
   const tickerItems: string[] = [];
   if (event) {
     tickerItems.push(`NEXT UP — ${event.title.toUpperCase()}, ${formatDate(event.date).toUpperCase()}`);
-  }
-  if (mission && mission.goalCents > 0) {
-    tickerItems.push(`MISSION FUND — ${missionPct}% FUNDED`);
   }
   if (nextProject) {
     tickerItems.push(`COMING NEXT — ${nextProject.title.toUpperCase()}`);
@@ -113,6 +100,8 @@ export function Dashboard({
 
       <FeaturedShop items={shopItems} />
 
+      <MissionJourney blurb={missionBlurb} />
+
       <div className={`container ${styles.wrap}`}>
         {event && (
           <div className={styles.board}>
@@ -120,38 +109,13 @@ export function Dashboard({
           </div>
         )}
 
-        {(nextProject || (mission && mission.goalCents > 0)) && (
+        {nextProject && (
           <div className={styles.secondary}>
-            {nextProject && (
-              <Link
-                href="/studio"
-                className={styles.postcard}
-                style={soloSecondary ? { gridColumn: "1 / -1" } : undefined}
-              >
-                <p className={styles.stamp}>Coming next</p>
-                <h2 className={styles.postcardTitle}>{nextProject.title}</h2>
-                {nextProject.body && <p className={styles.postcardMeta}>{nextProject.body}</p>}
-              </Link>
-            )}
-
-            {mission && mission.goalCents > 0 && (
-              <div className={styles.meter} style={soloSecondary ? { gridColumn: "1 / -1" } : undefined}>
-                <p className={styles.stamp}>Mission fund</p>
-                <p className={styles.meterAmount}>
-                  {formatPrice(mission.raisedCents)}
-                  <span> / {formatPrice(mission.goalCents)}</span>
-                </p>
-                <div className={styles.bars}>
-                  {BAR_HEIGHTS.map((height, i) => (
-                    <span
-                      key={i}
-                      className={i < litBars ? `${styles.bar} ${styles.barLit}` : styles.bar}
-                      style={{ height: `${height}%` }}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
+            <Link href="/studio" className={styles.postcard} style={{ gridColumn: "1 / -1" }}>
+              <p className={styles.stamp}>Coming next</p>
+              <h2 className={styles.postcardTitle}>{nextProject.title}</h2>
+              {nextProject.body && <p className={styles.postcardMeta}>{nextProject.body}</p>}
+            </Link>
           </div>
         )}
       </div>
