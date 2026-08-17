@@ -14,6 +14,8 @@ export type DashboardProps = {
   event: SpotlightProps | null;
   nextProject: { title: string; body: string | null; imageUrl: string | null } | null;
   missionBlurb: string | null;
+  missionRaisedCents: number;
+  missionGoalCents: number;
   ambientImages: string[];
   slides: AboutSlide[];
   orderCount: number;
@@ -43,6 +45,8 @@ export function Dashboard({
   event,
   nextProject,
   missionBlurb,
+  missionRaisedCents,
+  missionGoalCents,
   ambientImages,
   slides,
   orderCount,
@@ -100,7 +104,11 @@ export function Dashboard({
 
       <FeaturedShop items={shopItems} />
 
-      <MissionJourney blurb={missionBlurb} />
+      <MissionJourney
+        blurb={missionBlurb}
+        raisedCents={missionRaisedCents}
+        goalCents={missionGoalCents}
+      />
 
       <div className={`container ${styles.wrap}`}>
         {event && (
