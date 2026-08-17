@@ -10,10 +10,16 @@
 }
 
 .card {
+  display: block;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--bg-raised);
+  transition: transform var(--dur) var(--ease);
+}
+
+.card:hover {
+  transform: translateY(-4px);
 }
 
 .cardMedia {
@@ -38,6 +44,12 @@
 .cardTitle {
   margin-top: 0.3rem;
   font-size: 1.05rem;
+}
+
+.cardTagline {
+  margin-top: 0.25rem;
+  color: var(--fg-muted);
+  font-size: 0.88rem;
 }
 
 .eventsList {
