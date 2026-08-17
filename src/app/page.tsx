@@ -80,9 +80,7 @@ async function getDashboardData(
     getSpotlight(supabase),
     supabase
       .from("site_settings")
-      .select(
-        "next_project_title, next_project_body, next_project_image_url, mission_raised_cents, mission_goal_cents, about_gallery"
-      )
+      .select("next_project_title, next_project_body, next_project_image_url, mission_blurb, about_gallery")
       .eq("id", true)
       .maybeSingle(),
     getAmbientImages(supabase),
@@ -98,15 +96,11 @@ async function getDashboardData(
       }
     : null;
 
-  const mission = settings
-    ? { raisedCents: settings.mission_raised_cents, goalCents: settings.mission_goal_cents }
-    : null;
-
   return {
     name,
     event,
     nextProject,
-    mission,
+    missionBlurb: settings?.mission_blurb ?? null,
     ambientImages,
     slides: settings?.about_gallery ?? [],
     orderCount: orderCount ?? 0,

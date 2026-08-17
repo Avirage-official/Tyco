@@ -112,3 +112,14 @@ export function IconCheck(props: IconProps) {
     </svg>
   );
 }
+
+export function IconBoat(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 17V5" />
+      <path d="M12 6.5 18 14.5H12Z" />
+      <path d="M3.5 17c2 1.6 4.6 2.4 8.5 2.4s6.5-.8 8.5-2.4" />
+      <circle cx="12" cy="5" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
