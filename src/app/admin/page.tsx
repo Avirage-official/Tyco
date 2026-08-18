@@ -16,7 +16,7 @@ async function countPublished(
 export default async function AdminDashboard() {
   const { supabase } = await requireAdmin();
 
-  const [creators, portfolio, events, products, pendingOrders] = await Promise.all([
+  const [creators, portfolio, events, products, pendingOrders, webhookErrors] = await Promise.all([
     countPublished(supabase, "creators"),
     countPublished(supabase, "portfolio_items"),
     countPublished(supabase, "events"),
@@ -26,6 +26,10 @@ export default async function AdminDashboard() {
       .select("*", { count: "exact", head: true })
       .eq("status", "pending")
       .then((r) => r.count ?? 0),
+    supabase
+      .from("webhook_errors")
+      .select("*", { count: "exact", head: true })
+      .then((r) => r.count ?? 0),
   ]);
 
   const stats = [
@@ -34,6 +38,7 @@ export default async function AdminDashboard() {
     { label: "Published events", value: events, href: "/admin/events" },
     { label: "Products live", value: products, href: "/admin/products" },
     { label: "Pending orders", value: pendingOrders, href: "/admin/orders" },
+    { label: "Webhook errors", value: webhookErrors, href: "/admin/debug" },
   ];
 
   return (

@@ -330,6 +330,22 @@ export interface Database {
           updated_at?: string;
         }
       >;
+      webhook_errors: Table<
+        {
+          id: string;
+          source: "revolut" | "merchize";
+          message: string;
+          context: Json | null;
+          created_at: string;
+        },
+        {
+          id?: string;
+          source: "revolut" | "merchize";
+          message: string;
+          context?: Json | null;
+          created_at?: string;
+        }
+      >;
     };
     Views: Record<string, never>;
     Functions: {

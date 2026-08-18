@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { logWebhookError } from "@/lib/checkout/webhookErrors";
 
 /**
  * Receives fulfilment-status events from Merchize (order accepted, shipped,
@@ -57,7 +58,10 @@ export async function POST(request: Request) {
         : { data: null };
 
     if (!order) {
-      console.error("Merchize webhook: no matching order for", externalId ?? merchizeOrderId);
+      await logWebhookError("merchize", "No matching order for webhook event", {
+        externalId,
+        merchizeOrderId,
+      });
       return NextResponse.json({ received: true });
     }
 
@@ -82,7 +86,8 @@ export async function POST(request: Request) {
       await supabase.from("orders").update(patch).eq("id", order.id);
     }
   } catch (err) {
-    console.error("Merchize webhook processing failed", err);
+    const message = err instanceof Error ? err.message : String(err);
+    await logWebhookError("merchize", `Webhook processing failed: ${message}`);
   }
 
   return NextResponse.json({ received: true });

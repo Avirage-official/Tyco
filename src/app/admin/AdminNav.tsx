@@ -14,6 +14,7 @@ const links = [
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/webhooks", label: "Webhooks" },
   { href: "/admin/users", label: "Users" },
+  { href: "/admin/debug", label: "Debug" },
 ];
 
 export function AdminNav() {
