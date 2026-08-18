@@ -727,6 +727,37 @@ create trigger set_site_settings_updated_at
   for each row execute function public.set_updated_at();
 
 -- ----------------------------------------------------------------------------
+-- webhook_errors — a scoped-down debug log. Not a catch-all error tracker;
+-- specifically for the two integrations that can fail silently from a
+-- customer's point of view (a paid order that never reaches Merchize, a
+-- Merchize status update that never finds its order), so an admin has
+-- somewhere to look instead of grepping Vercel's function logs. Written
+-- only by the webhook routes via the service-role client — no insert
+-- policy for anyone else, RLS bypassed by design for that one writer.
+-- ----------------------------------------------------------------------------
+create table if not exists public.webhook_errors (
+  id uuid primary key default gen_random_uuid(),
+  source text not null,
+  message text not null,
+  context jsonb,
+  created_at timestamptz not null default now()
+);
+
+alter table public.webhook_errors drop constraint if exists webhook_errors_source_check;
+alter table public.webhook_errors add constraint webhook_errors_source_check
+  check (source in ('revolut', 'merchize'));
+
+alter table public.webhook_errors enable row level security;
+
+drop policy if exists "admins read webhook errors" on public.webhook_errors;
+create policy "admins read webhook errors"
+  on public.webhook_errors for select
+  using (public.is_admin());
+
+create index if not exists webhook_errors_created_at_idx
+  on public.webhook_errors (created_at desc);
+
+-- ----------------------------------------------------------------------------
 -- Storage buckets referenced by the app, plus the RLS policies storage.objects
 -- actually needs — creating a public bucket alone does not grant upload
 -- access; without an explicit policy nothing (not even a future admin

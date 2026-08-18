@@ -154,15 +154,22 @@ how to grant yourself access.
   the front-page slideshow (up to 8 photos/clips, upload straight from the
   browser, reorder with the arrows — empty just hides the slideshow), the
   "coming next" project teaser (title, description, image — blank title
-  hides the card), and the mission fund progress bar (raised/goal in USD —
-  a zero goal hides the bar). The teaser and mission bar render on the
-  signed-in dashboard at `/`; the slideshow renders on the signed-out
-  landing page.
+  hides the card), and the mission ("What we're funding" — a short editorial
+  line shown as an animated strip beside the next event, blank hides it —
+  plus raised/goal in USD, kept for the record but not shown on the
+  homepage). The teaser and mission strip render on the signed-in dashboard
+  at `/`; the slideshow renders on the signed-out landing page.
 - **Users** — every signed-up account, block/unblock, delete. Uses the
   Supabase **Admin API**, which needs the service-role key
   (`SUPABASE_SERVICE_ROLE_KEY`) — the only part of the app that does. You
   can't block or delete your own account from this screen (guards against
   locking yourself out).
+- **Debug** (`/admin/debug`) — a scoped-down error log, not a general one:
+  just the two failure modes that can happen silently from a customer's
+  point of view — a paid order that never reached Merchize, or a Merchize
+  status update that couldn't be matched to an order (`webhook_errors`
+  table, written only by the two webhook routes via the service-role
+  client). Everything else still only shows up in Vercel's function logs.
 
 Every admin write re-checks `is_admin()` on the server on every request —
 nothing is trusted just because a page rendered the admin UI once.
@@ -320,10 +327,14 @@ certainly a field name needing a small correction, not the surrounding logic.
   specifically for the webhook handler.
 - **`site_settings`** — a singleton row (`id` is always `true`, enforced by
   a check constraint) holding the homepage's editable bits: the "coming
-  next" project teaser, the mission fund raised/goal amounts, and
+  next" project teaser, the mission blurb + raised/goal amounts, and
   `about_gallery` (an ordered jsonb array of `{url, type}`, `type` being
   `"image"` or `"video"`) for the front-page slideshow. Publicly readable,
   admin-writable, same as everything else — edited from `/admin/settings`.
+- **`webhook_errors`** — a small log for the two integration failure modes
+  worth an admin's attention (see "Admin panel" above). No client-facing
+  policies beyond an admin-only `select`; only the service-role client
+  (used by the webhook routes) can insert.
 
 Every publishable table has `is_published` + `published_at` (auto-stamped by
 a trigger the first time a row is published) and `updated_at` (auto-bumped

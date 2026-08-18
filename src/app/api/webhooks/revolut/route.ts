@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyRevolutSignature } from "@/lib/checkout/revolut";
 import { createMerchizeOrder, type MerchizeShipping } from "@/lib/checkout/merchize";
+import { logWebhookError } from "@/lib/checkout/webhookErrors";
 
 const PAYMENT_COMPLETED_EVENTS = new Set(["ORDER_COMPLETED", "ORDER_AUTHORISED"]);
 const PAYMENT_FAILED_EVENTS = new Set(["ORDER_CANCELLED", "ORDER_PAYMENT_DECLINED", "ORDER_PAYMENT_FAILED"]);
@@ -102,12 +103,12 @@ async function submitToMerchize(
 
     const shippingAddress = (order?.shipping_address ?? null) as Partial<MerchizeShipping> | null;
     if (!order || !shippingAddress || !shippingAddress.address1) {
-      console.error("Merchize submit skipped — no shipping address on order", orderId);
+      await logWebhookError("merchize", "Submit skipped — no shipping address on order", { orderId });
       return;
     }
 
     if (items.length === 0) {
-      console.error("Merchize submit skipped — order has no line items", orderId);
+      await logWebhookError("merchize", "Submit skipped — order has no line items", { orderId });
       return;
     }
 
@@ -151,6 +152,7 @@ async function submitToMerchize(
       })
       .eq("id", orderId);
   } catch (err) {
-    console.error("Merchize submission failed for order", orderId, err);
+    const message = err instanceof Error ? err.message : String(err);
+    await logWebhookError("merchize", `Submission failed: ${message}`, { orderId });
   }
 }
