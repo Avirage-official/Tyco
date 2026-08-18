@@ -350,6 +350,55 @@ create table if not exists public.events (
 alter table public.events add column if not exists published_at timestamptz;
 alter table public.events add column if not exists updated_at timestamptz not null default now();
 
+-- Ticketing. price_cents = 0 means free entry (still requires "buying" a
+-- zero-cost ticket so capacity/check-in tracking still works). capacity is
+-- the admin-set cap set when creating the event; capacity_remaining is the
+-- live decrementing counter — same relationship as products.stock vs
+-- product_variants, and decremented on the same "only once actually paid"
+-- schedule, for the same reason (a pending, unpaid cart shouldn't lock out
+-- other buyers).
+alter table public.events add column if not exists price_cents integer not null default 0;
+alter table public.events add column if not exists currency text not null default 'usd';
+alter table public.events add column if not exists capacity integer;
+alter table public.events add column if not exists capacity_remaining integer;
+
+alter table public.events drop constraint if exists events_price_non_negative;
+alter table public.events add constraint events_price_non_negative
+  check (price_cents >= 0);
+
+alter table public.events drop constraint if exists events_capacity_non_negative;
+alter table public.events add constraint events_capacity_non_negative
+  check (capacity is null or capacity >= 0);
+
+-- Keeps capacity_remaining aligned whenever an admin sets/changes capacity,
+-- without discarding tickets already sold: applies just the delta of the
+-- capacity change rather than resetting to the new value outright, so
+-- editing an event's other fields (which resubmits the same capacity every
+-- time) doesn't refill sold-out inventory.
+create or replace function public.sync_event_capacity_remaining()
+returns trigger
+language plpgsql
+as $$
+begin
+  if tg_op = 'INSERT' then
+    new.capacity_remaining := new.capacity;
+  elsif new.capacity is null then
+    new.capacity_remaining := null;
+  elsif old.capacity is null or new.capacity is distinct from old.capacity then
+    new.capacity_remaining := greatest(
+      0,
+      coalesce(old.capacity_remaining, old.capacity, new.capacity) + (new.capacity - coalesce(old.capacity, new.capacity))
+    );
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists sync_event_capacity_remaining on public.events;
+create trigger sync_event_capacity_remaining
+  before insert or update on public.events
+  for each row execute function public.sync_event_capacity_remaining();
+
 alter table public.events enable row level security;
 
 drop policy if exists "published events are public" on public.events;
@@ -375,6 +424,136 @@ create trigger set_events_published_at
 
 create index if not exists events_published_event_date_idx
   on public.events (is_published, event_date);
+
+-- ----------------------------------------------------------------------------
+-- event_tickets — one row per purchase (not per attendee: a single ticket
+-- row can cover several pax, matching "select number of pax, buy one
+-- ticket" rather than a ticket-per-person model). Requires a signed-in
+-- buyer — unlike shop orders, a ticket only means something tied to an
+-- account, since that's how the buyer proves it at the door and how staff
+-- find it to check them in. reference_code is the short human-readable
+-- code shown on the ticket and looked up by door staff; status transitions
+-- (pending -> paid -> ...) are a service-role/webhook concern, same as
+-- orders, and check-in is an admin-only action, never the buyer's own.
+-- ----------------------------------------------------------------------------
+create table if not exists public.event_tickets (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.events (id) on delete cascade,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  quantity integer not null default 1,
+  unit_price_cents integer not null,
+  total_cents integer not null,
+  currency text not null default 'usd',
+  status text not null default 'pending',
+  revolut_order_id text,
+  reference_code text not null default upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8)),
+  checked_in_at timestamptz,
+  checked_in_by uuid references auth.users (id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.event_tickets drop constraint if exists event_tickets_quantity_positive;
+alter table public.event_tickets add constraint event_tickets_quantity_positive
+  check (quantity > 0);
+
+alter table public.event_tickets drop constraint if exists event_tickets_prices_non_negative;
+alter table public.event_tickets add constraint event_tickets_prices_non_negative
+  check (unit_price_cents >= 0 and total_cents >= 0);
+
+alter table public.event_tickets drop constraint if exists event_tickets_status_check;
+alter table public.event_tickets add constraint event_tickets_status_check
+  check (status in ('pending', 'paid', 'cancelled', 'refunded'));
+
+alter table public.event_tickets drop constraint if exists event_tickets_reference_code_key;
+alter table public.event_tickets add constraint event_tickets_reference_code_key unique (reference_code);
+
+alter table public.event_tickets enable row level security;
+
+drop policy if exists "buyers see their own tickets" on public.event_tickets;
+create policy "buyers see their own tickets"
+  on public.event_tickets for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "buyers create their own tickets" on public.event_tickets;
+create policy "buyers create their own tickets"
+  on public.event_tickets for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "admins manage event tickets" on public.event_tickets;
+create policy "admins manage event tickets"
+  on public.event_tickets for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_event_tickets_updated_at on public.event_tickets;
+create trigger set_event_tickets_updated_at
+  before update on public.event_tickets
+  for each row execute function public.set_updated_at();
+
+create index if not exists event_tickets_event_id_idx on public.event_tickets (event_id);
+create index if not exists event_tickets_user_id_idx on public.event_tickets (user_id);
+create index if not exists event_tickets_reference_code_idx on public.event_tickets (reference_code);
+
+-- decrement_event_capacity — called only from the checkout webhook handler
+-- (service role) once a ticket payment is confirmed. Clamps at zero and is
+-- a no-op when the event has no capacity limit set, same tolerance as
+-- decrement_variant_stock below.
+create or replace function public.decrement_event_capacity(p_event_id uuid, p_quantity integer)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.events
+  set capacity_remaining = greatest(0, capacity_remaining - p_quantity)
+  where id = p_event_id and capacity_remaining is not null;
+$$;
+
+grant execute on function public.decrement_event_capacity(uuid, integer) to service_role;
+
+-- check_in_ticket — the one and only way a ticket's checked_in_at gets
+-- set. Admin-only (matches the event_tickets RLS policy above), and
+-- refuses a ticket that's already checked in rather than silently
+-- overwriting the original check-in time/admin, so re-scanning a used
+-- ticket surfaces as an error instead of quietly resetting it.
+create or replace function public.check_in_ticket(p_ticket_id uuid)
+returns public.event_tickets
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_ticket public.event_tickets;
+begin
+  if not public.is_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  select * into v_ticket from public.event_tickets where id = p_ticket_id for update;
+
+  if v_ticket.id is null then
+    raise exception 'Ticket not found';
+  end if;
+
+  if v_ticket.status != 'paid' then
+    raise exception 'Ticket is not paid';
+  end if;
+
+  if v_ticket.checked_in_at is not null then
+    raise exception 'Ticket already checked in';
+  end if;
+
+  update public.event_tickets
+  set checked_in_at = now(), checked_in_by = auth.uid()
+  where id = p_ticket_id
+  returning * into v_ticket;
+
+  return v_ticket;
+end;
+$$;
+
+grant execute on function public.check_in_ticket(uuid) to authenticated;
 
 -- ----------------------------------------------------------------------------
 -- products — the retail shop. Stock lives on product_variants, not here:

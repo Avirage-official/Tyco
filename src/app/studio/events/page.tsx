@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/server";
+import { formatPrice } from "@/lib/format";
+import { TicketPurchase } from "./TicketPurchase";
 import styles from "../studio.module.css";
 
 export const metadata: Metadata = { title: "Events" };
@@ -17,10 +19,10 @@ export default async function StudioEventsPage() {
   const supabase = await createClient();
   const nowIso = new Date().toISOString();
 
-  const [{ data: upcoming }, { data: past }] = await Promise.all([
+  const [{ data: upcoming }, { data: past }, { data: userData }] = await Promise.all([
     supabase
       .from("events")
-      .select("id, title, location, event_date")
+      .select("id, title, location, event_date, price_cents, currency, capacity, capacity_remaining")
       .eq("is_published", true)
       .gte("event_date", nowIso)
       .order("event_date", { ascending: true }),
@@ -30,7 +32,10 @@ export default async function StudioEventsPage() {
       .eq("is_published", true)
       .lt("event_date", nowIso)
       .order("event_date", { ascending: false }),
+    supabase.auth.getUser(),
   ]);
+
+  const signedIn = Boolean(userData.user);
 
   const hasUpcoming = upcoming && upcoming.length > 0;
   const hasPast = past && past.length > 0;
@@ -55,8 +60,18 @@ export default async function StudioEventsPage() {
                 <div className={styles.eventMeta}>
                   <h3 className={styles.eventTitle}>{event.title}</h3>
                   {event.location && <p className={styles.eventLocation}>{event.location}</p>}
+                  <p className={styles.eventPrice}>
+                    {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free"}
+                  </p>
                 </div>
                 <span className={styles.eventDate}>{formatEventDate(event.event_date)}</span>
+                <TicketPurchase
+                  eventId={event.id}
+                  priceCents={event.price_cents}
+                  currency={event.currency}
+                  capacityRemaining={event.capacity != null ? event.capacity_remaining : null}
+                  signedIn={signedIn}
+                />
               </div>
             ))}
           </div>

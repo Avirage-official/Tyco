@@ -1,0 +1,127 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding-block: var(--space-lg) var(--space-2xl);
+  max-width: 640px;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-sm);
+}
+
+.eventTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.eventMeta {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  margin-top: 0.15rem;
+}
+
+.status {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  color: var(--fg-muted);
+}
+
+.status_paid {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.status_cancelled,
+.status_refunded {
+  color: var(--fg-muted);
+  text-decoration: line-through;
+}
+
+.proof {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.proofLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.referenceCode {
+  margin-top: 0.2rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.pax {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.paxCount {
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.paxLabel {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.checkedIn {
+  margin-top: var(--space-sm);
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.total {
+  font-weight: 700;
+}

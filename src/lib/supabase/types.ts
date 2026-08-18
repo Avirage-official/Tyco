@@ -29,6 +29,23 @@ export type CreatorType =
   | "photographer"
   | "other";
 
+export type EventTicket = {
+  id: string;
+  event_id: string;
+  user_id: string;
+  quantity: number;
+  unit_price_cents: number;
+  total_cents: number;
+  currency: string;
+  status: "pending" | "paid" | "cancelled" | "refunded";
+  revolut_order_id: string | null;
+  reference_code: string;
+  checked_in_at: string | null;
+  checked_in_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export interface Database {
   public: {
     Tables: {
@@ -179,6 +196,10 @@ export interface Database {
           event_date: string;
           cover_url: string | null;
           ticket_url: string | null;
+          price_cents: number;
+          currency: string;
+          capacity: number | null;
+          capacity_remaining: number | null;
           is_published: boolean;
           published_at: string | null;
           created_at: string;
@@ -192,8 +213,31 @@ export interface Database {
           event_date: string;
           cover_url?: string | null;
           ticket_url?: string | null;
+          price_cents?: number;
+          currency?: string;
+          capacity?: number | null;
+          capacity_remaining?: number | null;
           is_published?: boolean;
           published_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        }
+      >;
+      event_tickets: Table<
+        EventTicket,
+        {
+          id?: string;
+          event_id: string;
+          user_id: string;
+          quantity?: number;
+          unit_price_cents: number;
+          total_cents: number;
+          currency?: string;
+          status?: "pending" | "paid" | "cancelled" | "refunded";
+          revolut_order_id?: string | null;
+          reference_code?: string;
+          checked_in_at?: string | null;
+          checked_in_by?: string | null;
           created_at?: string;
           updated_at?: string;
         }
@@ -356,6 +400,14 @@ export interface Database {
       decrement_variant_stock: {
         Args: { p_variant_id: string; p_quantity: number };
         Returns: undefined;
+      };
+      decrement_event_capacity: {
+        Args: { p_event_id: string; p_quantity: number };
+        Returns: undefined;
+      };
+      check_in_ticket: {
+        Args: { p_ticket_id: string };
+        Returns: EventTicket;
       };
     };
     Enums: Record<string, never>;

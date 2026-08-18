@@ -40,9 +40,12 @@ export default async function AccountPage() {
             <p className={styles.email}>{user.email}</p>
           </div>
         </div>
-        <div style={{ marginBottom: "var(--space-md)" }}>
+        <div style={{ display: "flex", gap: "var(--space-sm)", marginBottom: "var(--space-md)" }}>
           <LinkButton href="/account/orders" variant="ghost">
             Your orders
+          </LinkButton>
+          <LinkButton href="/account/tickets" variant="ghost">
+            Your tickets
           </LinkButton>
         </div>
         {isAdmin && (

@@ -10,6 +10,8 @@ export type EventInput = {
   event_date: string;
   cover_url: string | null;
   ticket_url: string | null;
+  price_cents: number;
+  capacity: number | null;
 };
 
 function revalidateEvents() {
