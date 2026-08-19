@@ -97,9 +97,31 @@
 
 .ticketPurchase {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.ticketPurchaseRow {
+  display: flex;
   align-items: center;
   gap: var(--space-sm);
   flex-wrap: wrap;
+}
+
+.ticketPolicy {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  max-width: 320px;
+  cursor: pointer;
+}
+
+.ticketPolicy input {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
 }
 
 .ticketCta {

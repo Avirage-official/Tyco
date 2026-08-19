@@ -10,9 +10,12 @@ import { createRevolutOrder } from "@/lib/checkout/revolut";
  * a ticket only means something tied to an account (that's how the buyer
  * proves it at the door and how staff find it to check them in).
  */
-export async function startTicketCheckout(eventId: string, quantity: number) {
+export async function startTicketCheckout(eventId: string, quantity: number, agreedToNoRefundPolicy: boolean) {
   if (!Number.isInteger(quantity) || quantity < 1) {
     throw new Error("Choose at least 1 ticket.");
+  }
+  if (!agreedToNoRefundPolicy) {
+    throw new Error("You must agree that this purchase is final before buying.");
   }
 
   const sessionClient = await createClient();
