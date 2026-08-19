@@ -138,6 +138,18 @@
   color: var(--accent);
 }
 
+.embedWrap {
+  margin-top: var(--space-md);
+  max-width: 540px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-raised);
+}
+
+.embedWrap :global(iframe) {
+  display: block;
+}
+
 @keyframes idleDrift {
   from {
     transform: scale(1) translateY(0);

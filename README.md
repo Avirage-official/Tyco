@@ -89,7 +89,20 @@ on Vercel, backed by Supabase.
   treatment (a shorter variant) as the front page. Static copy, no
   database reads — reachable from the top nav, the footer, and the "About
   us" button on the front page.
-- `/studio` and `/studio/events` — a Creators directory (published creator
+- `/creators` — the public directory of published creators (avatar, type,
+  name, tagline), each linking to their `/creators/[slug]` page. That page
+  is a Lenis-smooth-scrolled sequence of full-bleed "chapters" — a banner
+  hero, bio and gallery, then `creator_works` entries. A work whose
+  `external_url` is a specific Instagram post/reel or TikTok video renders
+  a real inline embed (`PostEmbed.tsx`, each platform's official
+  `embed.js`) instead of a plain "View" link — profile-level
+  `instagram_url`/`tiktok_url` stay as simple chips, since neither platform
+  supports embedding a whole profile feed, only individual posts. A
+  musician's `youtube_url` gets its own embedded section, and
+  `spotify_url` a floating corner player mounted only on that creator's
+  page. Published products tied to the creator (`products.creator_id`)
+  close the page out as a shop grid.
+- `/studio` and `/studio/events` — a Creators teaser (published creator
   profiles, linking into their full `/creators/[slug]` pages) and events,
   tabbed together under "Studio". Events split into an **Upcoming** list
   (soonest first) and a **Past events** cover-art grid (most recent first)
@@ -141,8 +154,8 @@ you're signed in (`TopNav` is a server component; `NavLinks` and
 `TopNavSignOut` are the client-side pieces inside it). The
 `manifest.webmanifest` + icons make "Add to Home Screen" produce a real app
 icon and standalone window. A site-wide footer sits under every page's
-content with the wordmark, tagline, and a second set of links to the four
-sections.
+content with the wordmark, tagline, and a second set of links (Creators,
+Studio, Shop, About, Account, Terms & Conditions).
 
 ## Admin panel
 
