@@ -48,7 +48,7 @@ async function getSpotlight(
 
   return {
     kind: "event",
-    href: "/studio/events",
+    href: "/studio",
     title: event.title,
     location: event.location,
     organizer: event.organizer,

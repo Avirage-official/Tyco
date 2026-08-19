@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/format";
 import { startTicketCheckout } from "./actions";
-import styles from "../studio.module.css";
+import styles from "./studio.module.css";
 
 export function TicketPurchase({
   eventId,
@@ -43,7 +43,7 @@ export function TicketPurchase({
 
   if (!signedIn) {
     return (
-      <Link href={`/login?next=/studio/events`} className={styles.ticketCta}>
+      <Link href={`/login?next=/studio`} className={styles.ticketCta}>
         Sign in to get tickets
       </Link>
     );

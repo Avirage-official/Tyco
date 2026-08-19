@@ -91,7 +91,7 @@ export function MissionEventSplit({
 
       {showEvents && (
         <Link
-          href="/studio/events"
+          href="/studio"
           className={showMission ? styles.events : `${styles.events} ${styles.solo}`}
         >
           {events.map((ev, i) => (
