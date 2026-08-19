@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { NewBadge } from "@/components/ui/NewBadge";
+import { IconArrowRight } from "@/components/icons";
 import { createClient } from "@/lib/supabase/server";
 import { isNew } from "@/lib/format";
 import type { CreatorType } from "@/lib/supabase/types";
@@ -36,27 +37,58 @@ export default async function StudioCreatorsPage() {
     );
   }
 
+  const [featured, ...rest] = creators;
+
   return (
-    <div className={styles.grid}>
-      {creators.map((creator) => (
-        <Link key={creator.slug} href={`/creators/${creator.slug}`} className={styles.card}>
-          <div
-            className={styles.cardMedia}
-            style={
-              (creator.banner_url ?? creator.avatar_url)
-                ? { backgroundImage: `url(${creator.banner_url ?? creator.avatar_url})` }
-                : undefined
-            }
-          />
-          <div className={styles.cardBody}>
-            <p className={styles.cardCategory}>{TYPE_LABELS[creator.type as CreatorType]}</p>
-            <h3 className={styles.cardTitle}>
-              {creator.name} {isNew(creator.published_at) && <NewBadge />}
-            </h3>
-            {creator.tagline && <p className={styles.cardTagline}>{creator.tagline}</p>}
-          </div>
-        </Link>
-      ))}
+    <div>
+      <Link href={`/creators/${featured.slug}`} className={styles.creatorHero}>
+        <span
+          className={styles.creatorHeroMedia}
+          style={
+            (featured.banner_url ?? featured.avatar_url)
+              ? { backgroundImage: `url(${featured.banner_url ?? featured.avatar_url})` }
+              : undefined
+          }
+          aria-hidden
+        />
+        <span className={styles.creatorHeroScrim} aria-hidden />
+        <div className={`container ${styles.creatorHeroBody}`}>
+          <p className={styles.creatorHeroType}>{TYPE_LABELS[featured.type as CreatorType]}</p>
+          <h2 className={styles.creatorHeroName}>
+            {featured.name} {isNew(featured.published_at) && <NewBadge />}
+          </h2>
+          {featured.tagline && <p className={styles.creatorHeroTagline}>{featured.tagline}</p>}
+          <span className={styles.creatorHeroLink}>
+            View profile <IconArrowRight />
+          </span>
+        </div>
+      </Link>
+
+      {rest.length > 0 && (
+        <div className={styles.creatorGrid}>
+          {rest.map((creator) => (
+            <Link key={creator.slug} href={`/creators/${creator.slug}`} className={styles.posterCard}>
+              <span
+                className={styles.posterMedia}
+                style={
+                  (creator.banner_url ?? creator.avatar_url)
+                    ? { backgroundImage: `url(${creator.banner_url ?? creator.avatar_url})` }
+                    : undefined
+                }
+                aria-hidden
+              />
+              <span className={styles.posterScrim} aria-hidden />
+              <div className={styles.posterBody}>
+                <p className={styles.posterType}>{TYPE_LABELS[creator.type as CreatorType]}</p>
+                <p className={styles.posterName}>
+                  {creator.name} {isNew(creator.published_at) && <NewBadge />}
+                </p>
+                {creator.tagline && <p className={styles.posterTagline}>{creator.tagline}</p>}
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
