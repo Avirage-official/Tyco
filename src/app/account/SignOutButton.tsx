@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/Button";
+import { IconArrowRight, IconLogout } from "@/components/icons";
+import styles from "./page.module.css";
 
-export function SignOutButton() {
+export function SignOutRow() {
   const router = useRouter();
 
   async function handleSignOut() {
@@ -15,8 +16,12 @@ export function SignOutButton() {
   }
 
   return (
-    <Button variant="ghost" onClick={handleSignOut}>
-      Sign out
-    </Button>
+    <button type="button" className={`${styles.row} ${styles.rowButton}`} onClick={handleSignOut}>
+      <IconLogout className={styles.rowIcon} />
+      <span className={styles.rowBody}>
+        <span className={styles.rowLabel}>Sign out</span>
+      </span>
+      <IconArrowRight className={styles.rowChevron} />
+    </button>
   );
 }
