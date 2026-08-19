@@ -89,11 +89,19 @@ on Vercel, backed by Supabase.
   treatment (a shorter variant) as the front page. Static copy, no
   database reads — reachable from the top nav, the footer, and the "About
   us" button on the front page.
-- `/studio` and `/studio/events` — creative/portfolio updates and events,
+- `/studio` and `/studio/events` — a Creators directory (published creator
+  profiles, linking into their full `/creators/[slug]` pages) and events,
   tabbed together under "Studio". Events split into an **Upcoming** list
   (soonest first) and a **Past events** cover-art grid (most recent first)
   so visitors can see what's already happened, not just what's next —
-  either section is omitted when it's empty.
+  either section is omitted when it's empty. Upcoming events sell tickets:
+  pick a pax count, pay through the same Revolut flow as the shop (skipped
+  entirely for free events), and the ticket shows up in `/account/tickets`
+  with a short reference code and a pax badge — that's what the buyer shows
+  at the door. Buying a ticket requires being signed in, unlike shop
+  checkout, since the whole point is that it's tied to an account staff can
+  check in. Capacity (if the event has one) is tracked the same way shop
+  stock is: decremented only once payment actually clears, not at checkout.
 - `/shop` and `/shop/[id]` — retail product grid and product detail, with
   per-size stock (sold-out sizes show as struck through) and up to 5 photos
   per product in a thumbnail-driven gallery (`Gallery.tsx` — a vertical
@@ -146,7 +154,14 @@ how to grant yourself access.
   delete. Cover art / gallery images upload straight from the browser to
   Supabase Storage (bypassing the Next.js server, so there's no file-size
   limit from Vercel's function body cap). Products manage their per-size
-  stock (`product_variants`) inline on the same form.
+  stock (`product_variants`) inline on the same form; Events set a ticket
+  price (0 for free) and an optional capacity in the same form.
+- **Check-in** (`/admin/checkin`) — type a ticket's reference code, see the
+  event, pax count, and payment status, then check it in. A ticket can only
+  be checked in once — the underlying `check_in_ticket()` function raises
+  rather than silently overwriting if it's already used, so re-scanning a
+  used code surfaces as an error instead of letting someone back in twice.
+  Also linked from the Events list.
 - **Orders** — every order, who placed it, how many items, total, and a
   status dropdown (`pending → paid → fulfilled → …`). This is the only
   place order status changes — customers can never do this themselves.
@@ -310,6 +325,18 @@ certainly a field name needing a small correction, not the surrounding logic.
   into from a signed-in session the way a flag on `profiles` could be.
 - **`portfolio_items`**, **`events`** — creative updates and past/upcoming
   events; "past" vs "upcoming" is derived from `event_date` at query time.
+  `events.price_cents`/`capacity` are admin-set; `capacity_remaining` is a
+  live decrementing counter, same relationship as `products.stock`.
+- **`event_tickets`** — one row per *purchase*, not per attendee (a single
+  ticket row covers however many pax were bought together). Requires a
+  signed-in buyer — unlike shop orders, a ticket only means something tied
+  to an account, since that's how the buyer proves it at the door and how
+  staff find it to check them in. `reference_code` is the short code shown
+  on the ticket and looked up in `/admin/checkin`; `checked_in_at`/`_by` are
+  only ever set through the `check_in_ticket()` function (admin-only,
+  refuses an already-checked-in ticket). `decrement_event_capacity()`
+  mirrors `decrement_variant_stock()` — same webhook-only, payment-confirmed
+  timing.
 - **`products`** → **`product_variants`** (one row per size, its own stock —
   so "Medium is sold out, Large isn't" is representable).
 - **`orders`** → **`order_items`** (line items pin `unit_price_cents` at

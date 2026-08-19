@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin/require-admin";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatPrice } from "@/lib/format";
 import { PublishBadge } from "../PublishBadge";
 import { toggleEventPublish, deleteEvent } from "./actions";
 import styles from "../admin.module.css";
@@ -9,16 +9,21 @@ export default async function AdminEventsPage() {
   const { supabase } = await requireAdmin();
   const { data: events } = await supabase
     .from("events")
-    .select("id, title, location, event_date, is_published")
+    .select("id, title, location, event_date, is_published, price_cents, capacity, capacity_remaining")
     .order("event_date", { ascending: false });
 
   return (
     <div>
       <div className={styles.headerRow}>
         <h2>Events</h2>
-        <Link href="/admin/events/new" className={styles.linkBtn}>
-          + New event
-        </Link>
+        <div className={styles.actions}>
+          <Link href="/admin/checkin" className={styles.linkBtn}>
+            Check in tickets
+          </Link>
+          <Link href="/admin/events/new" className={styles.linkBtn}>
+            + New event
+          </Link>
+        </div>
       </div>
 
       {!events || events.length === 0 ? (
@@ -31,6 +36,8 @@ export default async function AdminEventsPage() {
                 <th>Title</th>
                 <th>Date</th>
                 <th>Location</th>
+                <th>Price</th>
+                <th>Pax sold</th>
                 <th>Status</th>
                 <th></th>
               </tr>
@@ -41,6 +48,14 @@ export default async function AdminEventsPage() {
                   <td className={styles.rowTitle}>{event.title}</td>
                   <td className={styles.rowMeta}>{formatDate(event.event_date)}</td>
                   <td className={styles.rowMeta}>{event.location ?? "—"}</td>
+                  <td className={styles.rowMeta}>
+                    {event.price_cents > 0 ? formatPrice(event.price_cents) : "Free"}
+                  </td>
+                  <td className={styles.rowMeta}>
+                    {event.capacity != null
+                      ? `${event.capacity - (event.capacity_remaining ?? event.capacity)} / ${event.capacity}`
+                      : "Unlimited"}
+                  </td>
                   <td>
                     <PublishBadge isPublished={event.is_published} />
                   </td>

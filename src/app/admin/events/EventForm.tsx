@@ -15,6 +15,8 @@ type Event = {
   event_date: string;
   cover_url: string | null;
   ticket_url: string | null;
+  price_cents: number;
+  capacity: number | null;
 };
 
 function toLocalInputValue(iso: string | null) {
@@ -32,6 +34,8 @@ export function EventForm({ event }: { event?: Event }) {
   const [location, setLocation] = useState(event?.location ?? "");
   const [eventDate, setEventDate] = useState(toLocalInputValue(event?.event_date ?? null));
   const [ticketUrl, setTicketUrl] = useState(event?.ticket_url ?? "");
+  const [price, setPrice] = useState(event ? (event.price_cents / 100).toFixed(2) : "0");
+  const [capacity, setCapacity] = useState(event?.capacity != null ? String(event.capacity) : "");
   const coverUrl = event?.cover_url ?? null;
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
@@ -45,6 +49,17 @@ export function EventForm({ event }: { event?: Event }) {
     try {
       if (!eventDate) throw new Error("Event date is required.");
 
+      const priceCents = Math.round(parseFloat(price || "0") * 100);
+      if (!Number.isFinite(priceCents) || priceCents < 0) {
+        throw new Error("Enter a valid ticket price.");
+      }
+
+      const trimmedCapacity = capacity.trim();
+      const capacityValue = trimmedCapacity ? Number(trimmedCapacity) : null;
+      if (capacityValue !== null && (!Number.isInteger(capacityValue) || capacityValue < 0)) {
+        throw new Error("Capacity must be a whole number of pax, or blank for unlimited.");
+      }
+
       let finalCoverUrl = coverUrl;
       if (coverFile) {
         finalCoverUrl = await uploadToBucket("covers", coverFile);
@@ -57,6 +72,8 @@ export function EventForm({ event }: { event?: Event }) {
         event_date: new Date(eventDate).toISOString(),
         cover_url: finalCoverUrl,
         ticket_url: ticketUrl || null,
+        price_cents: priceCents,
+        capacity: capacityValue,
       };
 
       if (event) {
@@ -112,6 +129,40 @@ export function EventForm({ event }: { event?: Event }) {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
           />
+        </div>
+      </div>
+
+      <div className={styles.fieldRow}>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="price">
+            Ticket price (USD)
+          </label>
+          <input
+            id="price"
+            type="number"
+            min="0"
+            step="0.01"
+            className={styles.input}
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+          />
+          <p className={styles.hint}>0 for free entry — tickets are still tracked and checked in.</p>
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="capacity">
+            Capacity (pax)
+          </label>
+          <input
+            id="capacity"
+            type="number"
+            min="0"
+            step="1"
+            className={styles.input}
+            placeholder="Unlimited"
+            value={capacity}
+            onChange={(e) => setCapacity(e.target.value)}
+          />
+          <p className={styles.hint}>Leave blank for no cap.</p>
         </div>
       </div>
 

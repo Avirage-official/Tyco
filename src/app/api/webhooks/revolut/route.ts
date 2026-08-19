@@ -48,6 +48,39 @@ export async function POST(request: Request) {
 
   const supabase = createAdminClient();
 
+  // Event-ticket purchases are round-tripped as "ticket:<event_tickets.id>"
+  // so they share this same webhook without being confused for a shop order.
+  if (orderId.startsWith("ticket:")) {
+    const ticketId = orderId.slice("ticket:".length);
+
+    if (PAYMENT_COMPLETED_EVENTS.has(eventType)) {
+      // Same atomic-conditional-update pattern as orders below: only the
+      // request that actually flips pending -> paid decrements capacity.
+      const { data: updated } = await supabase
+        .from("event_tickets")
+        .update({ status: "paid" })
+        .eq("id", ticketId)
+        .eq("status", "pending")
+        .select("event_id, quantity")
+        .maybeSingle();
+
+      if (updated) {
+        await supabase.rpc("decrement_event_capacity", {
+          p_event_id: updated.event_id,
+          p_quantity: updated.quantity,
+        });
+      }
+    } else if (PAYMENT_FAILED_EVENTS.has(eventType)) {
+      await supabase
+        .from("event_tickets")
+        .update({ status: "cancelled" })
+        .eq("id", ticketId)
+        .eq("status", "pending");
+    }
+
+    return NextResponse.json({ received: true });
+  }
+
   if (PAYMENT_COMPLETED_EVENTS.has(eventType)) {
     // Atomic conditional update: only the request that actually flips
     // pending -> paid proceeds to decrement stock, so a retried webhook

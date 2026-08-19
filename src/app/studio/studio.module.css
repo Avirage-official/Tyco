@@ -59,7 +59,8 @@
 
 .eventRow {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: var(--space-sm);
   padding-block: var(--space-md);
@@ -86,4 +87,80 @@
   color: var(--fg-muted);
   font-size: 0.88rem;
   margin-top: 0.2rem;
+}
+
+.eventPrice {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+}
+
+.ticketPurchase {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.ticketCta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background var(--dur) var(--ease);
+}
+
+.ticketCta:hover {
+  background: var(--accent-strong);
+}
+
+.ticketCta:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.soldOut {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ticketError {
+  width: 100%;
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+
+.qtyStepper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.qtyStepper button {
+  font-size: 1rem;
+  font-weight: 600;
+  width: 1.2rem;
+  color: var(--fg);
+}
+
+.qtyStepper button:disabled {
+  color: var(--fg-muted);
+}
+
+.qtyStepper span {
+  min-width: 1.2rem;
+  text-align: center;
+  font-size: 0.9rem;
 }
