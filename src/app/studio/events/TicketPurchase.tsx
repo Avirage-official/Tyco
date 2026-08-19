@@ -22,6 +22,7 @@ export function TicketPurchase({
 }) {
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +33,7 @@ export function TicketPurchase({
     setLoading(true);
     setError(null);
     try {
-      const { checkoutUrl } = await startTicketCheckout(eventId, quantity);
+      const { checkoutUrl } = await startTicketCheckout(eventId, quantity, agreed);
       router.push(checkoutUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -54,32 +55,39 @@ export function TicketPurchase({
 
   return (
     <div className={styles.ticketPurchase}>
-      <div className={styles.qtyStepper}>
-        <button
-          type="button"
-          onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-          disabled={quantity <= 1}
-          aria-label="Fewer pax"
-        >
-          −
-        </button>
-        <span>{quantity}</span>
-        <button
-          type="button"
-          onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
-          disabled={quantity >= maxQuantity}
-          aria-label="More pax"
-        >
-          +
+      <label className={styles.ticketPolicy}>
+        <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
+        I understand this purchase is final — refunds are only given if approved by the event
+        organizers.
+      </label>
+      <div className={styles.ticketPurchaseRow}>
+        <div className={styles.qtyStepper}>
+          <button
+            type="button"
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            disabled={quantity <= 1}
+            aria-label="Fewer pax"
+          >
+            −
+          </button>
+          <span>{quantity}</span>
+          <button
+            type="button"
+            onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
+            disabled={quantity >= maxQuantity}
+            aria-label="More pax"
+          >
+            +
+          </button>
+        </div>
+        <button type="button" className={styles.ticketCta} onClick={handleBuy} disabled={loading || !agreed}>
+          {loading
+            ? "Redirecting…"
+            : priceCents === 0
+              ? "Get free ticket"
+              : `Get tickets — ${formatPrice(priceCents * quantity, currency)}`}
         </button>
       </div>
-      <button type="button" className={styles.ticketCta} onClick={handleBuy} disabled={loading}>
-        {loading
-          ? "Redirecting…"
-          : priceCents === 0
-            ? "Get free ticket"
-            : `Get tickets — ${formatPrice(priceCents * quantity, currency)}`}
-      </button>
       {error && <p className={styles.ticketError}>{error}</p>}
     </div>
   );

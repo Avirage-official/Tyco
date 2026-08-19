@@ -12,6 +12,16 @@
   padding: var(--space-md);
 }
 
+.cardHighlight {
+  border-color: var(--accent);
+}
+
+.confirming {
+  margin-top: var(--space-sm);
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+
 .cardHeader {
   display: flex;
   align-items: flex-start;

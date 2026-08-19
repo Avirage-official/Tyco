@@ -16,7 +16,12 @@ const STATUS_LABEL: Record<string, string> = {
   refunded: "Refunded",
 };
 
-export default async function TicketsPage() {
+export default async function TicketsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ticket?: string }>;
+}) {
+  const { ticket: justPurchasedId } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -60,8 +65,12 @@ export default async function TicketsPage() {
           <ul className={styles.list}>
             {tickets.map((ticket) => {
               const event = eventById.get(ticket.event_id);
+              const justPurchased = ticket.id === justPurchasedId;
               return (
-                <li key={ticket.id} className={styles.card}>
+                <li
+                  key={ticket.id}
+                  className={justPurchased ? `${styles.card} ${styles.cardHighlight}` : styles.card}
+                >
                   <div className={styles.cardHeader}>
                     <div>
                       <p className={styles.eventTitle}>{event?.title ?? "Event"}</p>
@@ -87,6 +96,13 @@ export default async function TicketsPage() {
                         <span className={styles.paxLabel}>{ticket.quantity === 1 ? "pax" : "pax"}</span>
                       </div>
                     </div>
+                  )}
+
+                  {justPurchased && ticket.status === "pending" && (
+                    <p className={styles.confirming}>
+                      We&rsquo;re confirming your payment — refresh this page in a moment if it doesn&rsquo;t
+                      update.
+                    </p>
                   )}
 
                   {ticket.checked_in_at && (
