@@ -10,7 +10,7 @@ const pillars = [
   {
     href: "/studio",
     icon: IconMark,
-    title: "Studio",
+    title: "Happenings",
     desc: "The creative work behind the collective, and every event we've thrown or have coming up.",
   },
   {
@@ -36,7 +36,7 @@ export default function AboutPage() {
 
       <div className={styles.strip}>
         <div className={`container ${styles.stripInner}`}>
-          <span>Studio &amp; events</span>
+          <span>Happenings</span>
           <span>&mdash;</span>
           <span>Retail</span>
           <span>&mdash;</span>

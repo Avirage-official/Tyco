@@ -3,7 +3,6 @@ import { CartLink } from "@/components/cart/CartLink";
 import { createClient } from "@/lib/supabase/server";
 import { Wordmark } from "./Wordmark";
 import { DesktopNav } from "./DesktopNav";
-import { TopNavSignOut } from "./TopNavSignOut";
 import styles from "./TopNav.module.css";
 
 export async function TopNav() {
@@ -16,11 +15,9 @@ export async function TopNav() {
     <header className={styles.bar}>
       <div className={`container ${styles.inner}`}>
         <Wordmark />
-        <DesktopNav />
+        <DesktopNav signedIn={Boolean(user)} />
         <span className={styles.spacer} />
-        {user ? (
-          <TopNavSignOut />
-        ) : (
+        {!user && (
           <div className={styles.authLinks}>
             <Link href="/login" className={styles.link}>
               Login

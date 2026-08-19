@@ -1,80 +1,143 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { isActive, navItems } from "./nav-items";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import styles from "./TopNav.module.css";
 
-const menuItems = navItems.filter((item) => item.href !== "/");
+const flatLinks = [
+  { href: "/studio", label: "Happenings" },
+  { href: "/shop", label: "Shop" },
+  { href: "/about", label: "About" },
+  { href: "/account/tickets", label: "Your tickets" },
+  { href: "/account/orders", label: "Your orders" },
+];
 
-export function DesktopNav() {
+function linkMatches(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export function DesktopNav({ signedIn }: { signedIn: boolean }) {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const railRef = useRef<HTMLDivElement>(null);
+  const accountRef = useRef<HTMLDivElement>(null);
+  const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
+  const [accountOpen, setAccountOpen] = useState(false);
+
+  const activeHref = flatLinks.find((item) => linkMatches(pathname, item.href))?.href;
+  const accountActive = pathname === "/account";
+
+  function movePillTo(el: HTMLElement | null | undefined) {
+    if (!el || !railRef.current) return;
+    const railRect = railRef.current.getBoundingClientRect();
+    const rect = el.getBoundingClientRect();
+    setPill({ left: rect.left - railRect.left, width: rect.width });
+  }
+
+  function resetPill() {
+    const activeEl = railRef.current?.querySelector<HTMLElement>('[data-active="true"]');
+    if (activeEl) {
+      movePillTo(activeEl);
+    } else {
+      setPill(null);
+    }
+  }
+
+  useLayoutEffect(() => {
+    resetPill();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   useEffect(() => {
-    if (!open) return;
+    window.addEventListener("resize", resetPill);
+    return () => window.removeEventListener("resize", resetPill);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
+  useEffect(() => {
+    if (!accountOpen) return;
     function handleClick(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        setOpen(false);
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
+        setAccountOpen(false);
       }
     }
     function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") setAccountOpen(false);
     }
-
     document.addEventListener("mousedown", handleClick);
     document.addEventListener("keydown", handleKey);
     return () => {
       document.removeEventListener("mousedown", handleClick);
       document.removeEventListener("keydown", handleKey);
     };
-  }, [open]);
+  }, [accountOpen]);
 
-  const menuActive = menuItems.some((item) => isActive(pathname, item.href, item.match));
-  const aboutActive = pathname === "/about";
+  async function handleSignOut() {
+    setAccountOpen(false);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <nav className={styles.links} aria-label="Primary">
-      <div ref={rootRef} className={styles.menuRoot}>
-        <button
-          type="button"
-          className={menuActive ? `${styles.link} ${styles.linkActive}` : styles.link}
-          aria-expanded={open}
-          aria-haspopup="true"
-          onClick={() => setOpen((v) => !v)}
-        >
-          Menu
-        </button>
-        {open && (
-          <div className={styles.menuPanel} role="menu">
-            {menuItems.map((item) => {
-              const active = isActive(pathname, item.href, item.match);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  role="menuitem"
-                  className={active ? `${styles.menuPanelLink} ${styles.menuPanelLinkActive}` : styles.menuPanelLink}
-                  onClick={() => setOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
+      <div ref={railRef} className={styles.rail} onMouseLeave={resetPill}>
+        {pill && (
+          <span
+            className={styles.hoverPill}
+            style={{ transform: `translateX(${pill.left}px)`, width: pill.width }}
+            aria-hidden
+          />
         )}
+        {flatLinks.map((item) => {
+          const active = item.href === activeHref;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              data-active={active}
+              className={active ? `${styles.link} ${styles.linkActive}` : styles.link}
+              aria-current={active ? "page" : undefined}
+              onMouseEnter={(e) => movePillTo(e.currentTarget)}
+              onFocus={(e) => movePillTo(e.currentTarget)}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
       </div>
 
-      <Link
-        href="/about"
-        className={aboutActive ? `${styles.link} ${styles.linkActive}` : styles.link}
-        aria-current={aboutActive ? "page" : undefined}
-      >
-        About
-      </Link>
+      {signedIn && (
+        <div ref={accountRef} className={styles.menuRoot}>
+          <button
+            type="button"
+            className={accountActive ? `${styles.link} ${styles.linkActive}` : styles.link}
+            aria-expanded={accountOpen}
+            aria-haspopup="true"
+            onClick={() => setAccountOpen((v) => !v)}
+          >
+            Account
+          </button>
+          {accountOpen && (
+            <div className={styles.menuPanel} role="menu">
+              <Link
+                href="/account"
+                role="menuitem"
+                className={styles.menuPanelLink}
+                onClick={() => setAccountOpen(false)}
+              >
+                Your account
+              </Link>
+              <button type="button" role="menuitem" className={styles.menuPanelLink} onClick={handleSignOut}>
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </nav>
   );
 }

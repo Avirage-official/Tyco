@@ -13,7 +13,7 @@ export function StudioTabs() {
   const pathname = usePathname();
 
   return (
-    <nav className={styles.tabs} aria-label="Studio sections">
+    <nav className={styles.tabs} aria-label="Happenings sections">
       {tabs.map((tab) => {
         const active = pathname === tab.href;
         return (

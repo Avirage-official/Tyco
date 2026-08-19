@@ -6,7 +6,7 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
     <>
       <PageHeader
         eyebrow="Behind the sound"
-        title="Studio"
+        title="Happenings"
         description="The creative work in progress, and every event we've thrown or have coming up."
       />
       <div className="container">
