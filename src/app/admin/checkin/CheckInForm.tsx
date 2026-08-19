@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatEventDateTime } from "@/lib/format";
 import { lookupTicket, checkInTicket, type TicketLookup } from "./actions";
 import styles from "../admin.module.css";
 
@@ -67,7 +67,7 @@ export function CheckInForm() {
           style={{ marginTop: "var(--space-md)", maxWidth: 420, textAlign: "left" }}
         >
           <p className={styles.rowTitle}>{ticket.eventTitle}</p>
-          <p className={styles.rowMeta}>{ticket.eventDate ? formatDate(ticket.eventDate) : ""}</p>
+          <p className={styles.rowMeta}>{ticket.eventDate ? formatEventDateTime(ticket.eventDate) : ""}</p>
           <p style={{ marginTop: "var(--space-sm)", fontSize: "1.4rem", fontWeight: 700 }}>
             {ticket.quantity} pax
           </p>

@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatDate, formatEventDateTime, formatPrice } from "@/lib/format";
 import styles from "./tickets.module.css";
 
 export const metadata: Metadata = { title: "Your tickets" };
@@ -76,7 +76,7 @@ export default async function TicketsPage({
                       <p className={styles.eventTitle}>{event?.title ?? "Event"}</p>
                       {event && (
                         <p className={styles.eventMeta}>
-                          {[formatDate(event.event_date), event.location].filter(Boolean).join(" — ")}
+                          {[formatEventDateTime(event.event_date), event.location].filter(Boolean).join(" — ")}
                         </p>
                       )}
                     </div>

@@ -12,6 +12,7 @@ type Event = {
   title: string;
   description: string | null;
   location: string | null;
+  organizer: string | null;
   event_date: string;
   cover_url: string | null;
   ticket_url: string | null;
@@ -32,6 +33,7 @@ export function EventForm({ event }: { event?: Event }) {
   const [title, setTitle] = useState(event?.title ?? "");
   const [description, setDescription] = useState(event?.description ?? "");
   const [location, setLocation] = useState(event?.location ?? "");
+  const [organizer, setOrganizer] = useState(event?.organizer ?? "");
   const [eventDate, setEventDate] = useState(toLocalInputValue(event?.event_date ?? null));
   const [ticketUrl, setTicketUrl] = useState(event?.ticket_url ?? "");
   const [price, setPrice] = useState(event ? (event.price_cents / 100).toFixed(2) : "0");
@@ -69,6 +71,7 @@ export function EventForm({ event }: { event?: Event }) {
         title,
         description: description || null,
         location: location || null,
+        organizer: organizer || null,
         event_date: new Date(eventDate).toISOString(),
         cover_url: finalCoverUrl,
         ticket_url: ticketUrl || null,
@@ -132,10 +135,26 @@ export function EventForm({ event }: { event?: Event }) {
         </div>
       </div>
 
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="organizer">
+          Organizer
+        </label>
+        <input
+          id="organizer"
+          className={styles.input}
+          placeholder="Leave blank if it's a Tyco event"
+          value={organizer}
+          onChange={(e) => setOrganizer(e.target.value)}
+        />
+        <p className={styles.hint}>
+          Set this when a third party is hosting — shows as &ldquo;Hosted by&rdquo; on the event.
+        </p>
+      </div>
+
       <div className={styles.fieldRow}>
         <div className={styles.field}>
           <label className={styles.label} htmlFor="price">
-            Ticket price (USD)
+            Ticket price (SGD)
           </label>
           <input
             id="price"

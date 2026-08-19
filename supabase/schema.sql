@@ -338,6 +338,7 @@ create table if not exists public.events (
   title text not null,
   description text,
   location text,
+  organizer text,
   event_date timestamptz not null,
   cover_url text,
   ticket_url text,
@@ -348,6 +349,7 @@ create table if not exists public.events (
 );
 
 alter table public.events add column if not exists published_at timestamptz;
+alter table public.events add column if not exists organizer text;
 alter table public.events add column if not exists updated_at timestamptz not null default now();
 
 -- Ticketing. price_cents = 0 means free entry (still requires "buying" a

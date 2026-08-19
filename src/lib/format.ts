@@ -14,6 +14,19 @@ export function formatDate(iso: string | null) {
   });
 }
 
+/** Date + start time, in the viewer's own local timezone — for event dates,
+ * where a buyer actually needs to know what time to show up. */
+export function formatEventDateTime(iso: string | null) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export function formatDuration(seconds: number | null | undefined) {
   if (!seconds || !Number.isFinite(seconds)) return "0:00";
   const m = Math.floor(seconds / 60);

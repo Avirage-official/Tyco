@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/admin/require-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate, formatPrice } from "@/lib/format";
-import { refundTicket } from "./actions";
+import { checkInTicketFromList, refundTicket } from "./actions";
 import styles from "../admin.module.css";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -94,13 +94,22 @@ export default async function AdminTicketsPage() {
                     {ticket.checked_in_at ? formatDate(ticket.checked_in_at) : "—"}
                   </td>
                   <td>
-                    {ticket.status === "paid" && (
-                      <form action={refundTicket.bind(null, ticket.id)}>
-                        <button type="submit" className={styles.dangerBtn}>
-                          Refund
-                        </button>
-                      </form>
-                    )}
+                    <div className={styles.actions}>
+                      {ticket.status === "paid" && !ticket.checked_in_at && (
+                        <form action={checkInTicketFromList.bind(null, ticket.id)}>
+                          <button type="submit" className={styles.linkBtn}>
+                            Check in
+                          </button>
+                        </form>
+                      )}
+                      {ticket.status === "paid" && (
+                        <form action={refundTicket.bind(null, ticket.id)}>
+                          <button type="submit" className={styles.dangerBtn}>
+                            Refund
+                          </button>
+                        </form>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

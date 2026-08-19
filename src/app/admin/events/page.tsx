@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin/require-admin";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatEventDateTime, formatPrice } from "@/lib/format";
 import { PublishBadge } from "../PublishBadge";
 import { toggleEventPublish, deleteEvent } from "./actions";
 import styles from "../admin.module.css";
@@ -9,7 +9,9 @@ export default async function AdminEventsPage() {
   const { supabase } = await requireAdmin();
   const { data: events } = await supabase
     .from("events")
-    .select("id, title, location, event_date, is_published, price_cents, capacity, capacity_remaining")
+    .select(
+      "id, title, location, organizer, event_date, is_published, price_cents, currency, capacity, capacity_remaining"
+    )
     .order("event_date", { ascending: false });
 
   return (
@@ -49,10 +51,18 @@ export default async function AdminEventsPage() {
               {events.map((event) => (
                 <tr key={event.id}>
                   <td className={styles.rowTitle}>{event.title}</td>
-                  <td className={styles.rowMeta}>{formatDate(event.event_date)}</td>
-                  <td className={styles.rowMeta}>{event.location ?? "—"}</td>
+                  <td className={styles.rowMeta}>{formatEventDateTime(event.event_date)}</td>
                   <td className={styles.rowMeta}>
-                    {event.price_cents > 0 ? formatPrice(event.price_cents) : "Free"}
+                    {event.location ?? "—"}
+                    {event.organizer && (
+                      <>
+                        <br />
+                        <em>Hosted by {event.organizer}</em>
+                      </>
+                    )}
+                  </td>
+                  <td className={styles.rowMeta}>
+                    {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free"}
                   </td>
                   <td className={styles.rowMeta}>
                     {event.capacity != null

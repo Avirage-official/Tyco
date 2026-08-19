@@ -7,6 +7,7 @@ export type EventInput = {
   title: string;
   description: string | null;
   location: string | null;
+  organizer: string | null;
   event_date: string;
   cover_url: string | null;
   ticket_url: string | null;
@@ -19,16 +20,22 @@ function revalidateEvents() {
   revalidatePath("/studio/events");
 }
 
+// Single-currency site — SGD, not exposed as a form field.
+const EVENT_CURRENCY = "sgd";
+
 export async function createEvent(input: EventInput) {
   const { supabase } = await requireAdmin();
-  const { error } = await supabase.from("events").insert(input);
+  const { error } = await supabase.from("events").insert({ ...input, currency: EVENT_CURRENCY });
   if (error) throw new Error(error.message);
   revalidateEvents();
 }
 
 export async function updateEvent(id: string, input: EventInput) {
   const { supabase } = await requireAdmin();
-  const { error } = await supabase.from("events").update(input).eq("id", id);
+  const { error } = await supabase
+    .from("events")
+    .update({ ...input, currency: EVENT_CURRENCY })
+    .eq("id", id);
   if (error) throw new Error(error.message);
   revalidateEvents();
 }

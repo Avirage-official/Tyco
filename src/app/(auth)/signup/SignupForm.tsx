@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
+import { GoogleAuthButton } from "../GoogleAuthButton";
 import styles from "../auth.module.css";
 
 export function SignupForm() {
@@ -48,54 +49,58 @@ export function SignupForm() {
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="displayName">
-          Name
-        </label>
-        <input
-          id="displayName"
-          type="text"
-          autoComplete="name"
-          className={styles.input}
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-        />
-      </div>
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="email">
-          Email
-        </label>
-        <input
-          id="email"
-          type="email"
-          required
-          autoComplete="email"
-          className={styles.input}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="password">
-          Password
-        </label>
-        <input
-          id="password"
-          type="password"
-          required
-          minLength={6}
-          autoComplete="new-password"
-          className={styles.input}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </div>
-      {error && <p className={styles.error}>{error}</p>}
-      {notice && <p className={styles.notice}>{notice}</p>}
-      <Button type="submit" full disabled={loading}>
-        {loading ? "Creating account…" : "Create account"}
-      </Button>
-    </form>
+    <>
+      <GoogleAuthButton />
+      <div className={styles.divider}>or</div>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="displayName">
+            Name
+          </label>
+          <input
+            id="displayName"
+            type="text"
+            autoComplete="name"
+            className={styles.input}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+          />
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="email">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            className={styles.input}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="password">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            required
+            minLength={6}
+            autoComplete="new-password"
+            className={styles.input}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        {error && <p className={styles.error}>{error}</p>}
+        {notice && <p className={styles.notice}>{notice}</p>}
+        <Button type="submit" full disabled={loading}>
+          {loading ? "Creating account…" : "Create account"}
+        </Button>
+      </form>
+    </>
   );
 }
