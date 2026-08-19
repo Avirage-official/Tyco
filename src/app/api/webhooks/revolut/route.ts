@@ -43,6 +43,12 @@ export async function POST(request: Request) {
     (nested.merchant_order_ext_ref as string | undefined);
 
   if (!eventType || !orderId) {
+    // A signature-valid Revolut webhook whose shape we don't recognize —
+    // rare enough (unlike a bad signature, which is just internet noise)
+    // that it's worth a record instead of a silent 400.
+    await logWebhookError("revolut", "Webhook missing event type or order reference", {
+      body: event,
+    });
     return NextResponse.json({ error: "Missing event type or order reference" }, { status: 400 });
   }
 
@@ -69,6 +75,8 @@ export async function POST(request: Request) {
           p_event_id: updated.event_id,
           p_quantity: updated.quantity,
         });
+      } else {
+        await warnIfMissing(supabase, "event_tickets", ticketId, orderId, eventType);
       }
     } else if (PAYMENT_FAILED_EVENTS.has(eventType)) {
       await supabase
@@ -76,6 +84,8 @@ export async function POST(request: Request) {
         .update({ status: "cancelled" })
         .eq("id", ticketId)
         .eq("status", "pending");
+    } else {
+      await logWebhookError("revolut", `Unhandled event type for a ticket order: ${eventType}`, { orderId });
     }
 
     return NextResponse.json({ received: true });
@@ -107,12 +117,39 @@ export async function POST(request: Request) {
       }
 
       await submitToMerchize(supabase, updated.id, items ?? []);
+    } else {
+      await warnIfMissing(supabase, "orders", orderId, orderId, eventType);
     }
   } else if (PAYMENT_FAILED_EVENTS.has(eventType)) {
     await supabase.from("orders").update({ status: "cancelled" }).eq("id", orderId).eq("status", "pending");
+  } else {
+    await logWebhookError("revolut", `Unhandled event type for a shop order: ${eventType}`, { orderId });
   }
 
   return NextResponse.json({ received: true });
+}
+
+/**
+ * A completed-payment webhook that didn't flip anything to `paid` is
+ * usually just a retried delivery arriving after the row was already
+ * settled — expected, not an error. It's only worth a debug-log entry
+ * when the row doesn't exist at all, since that means real money moved on
+ * Revolut's side with nothing on ours to reconcile it against.
+ */
+async function warnIfMissing(
+  supabase: ReturnType<typeof createAdminClient>,
+  table: "orders" | "event_tickets",
+  rowId: string,
+  orderId: string,
+  eventType: string
+) {
+  const { data: existing } = await supabase.from(table).select("id").eq("id", rowId).maybeSingle();
+  if (!existing) {
+    await logWebhookError("revolut", `Payment completed for unknown ${table === "orders" ? "order" : "ticket"}`, {
+      orderId,
+      eventType,
+    });
+  }
 }
 
 /**
