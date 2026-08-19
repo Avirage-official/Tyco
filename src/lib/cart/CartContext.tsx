@@ -40,11 +40,26 @@ function readStoredCart(): CartItem[] {
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(readStoredCart);
+  // Starts empty on both server and the first client render so hydration
+  // always matches, then reads the real cart client-only right after —
+  // a lazy useState(readStoredCart) initializer runs during hydration too
+  // and mismatches the server's empty render for any returning visitor
+  // who already has items in their cart.
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // One-time hydration from a browser-only API after mount, by design —
+    // this is what fixes the SSR/client mismatch in the first place.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setItems(readStoredCart());
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+  }, [items, hydrated]);
 
   const addItem = useCallback((item: Omit<CartItem, "quantity">, quantity: number) => {
     setItems((prev) => {

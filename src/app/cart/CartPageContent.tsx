@@ -33,9 +33,8 @@ const SHIPPING_FIELDS: { key: keyof ShippingDetails; label: string; placeholder?
   { key: "phone", label: "Phone", full: true },
 ];
 
-export function CartPageContent({ accountEmail }: { accountEmail: string | null }) {
+export function CartPageContent({ signedIn }: { signedIn: boolean }) {
   const { items, setQuantity, removeItem, subtotalCents } = useCart();
-  const [email, setEmail] = useState(accountEmail ?? "");
   const [shipping, setShipping] = useState<ShippingDetails>(EMPTY_SHIPPING);
   const [checkingOut, setCheckingOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,18 +54,11 @@ export function CartPageContent({ accountEmail }: { accountEmail: string | null 
   }
 
   async function handleCheckout() {
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail || !trimmedEmail.includes("@")) {
-      setError("Enter a valid email so we can send your receipt.");
-      return;
-    }
-
     setCheckingOut(true);
     setError(null);
     try {
       const { checkoutUrl } = await startCheckout(
         items.map((item) => ({ variantId: item.variantId, quantity: item.quantity })),
-        trimmedEmail,
         shipping
       );
       window.location.href = checkoutUrl;
@@ -126,51 +118,56 @@ export function CartPageContent({ accountEmail }: { accountEmail: string | null 
           <span>{formatPrice(subtotalCents, items[0]?.currency ?? "usd")}</span>
         </div>
 
-        <div className={styles.emailField}>
-          <label className={styles.emailLabel} htmlFor="checkout-email">
-            Email
-          </label>
-          <input
-            id="checkout-email"
-            type="email"
-            className={styles.emailInput}
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            readOnly={!!accountEmail}
-          />
-        </div>
-
-        <p className={styles.sectionLabel}>Shipping</p>
-        <div className={styles.fieldGrid}>
-          {SHIPPING_FIELDS.map((field) => (
-            <div key={field.key} className={styles.field} style={field.full ? { gridColumn: "1 / -1" } : undefined}>
-              <label className={styles.fieldLabel} htmlFor={`ship-${field.key}`}>
-                {field.label}
-              </label>
-              <input
-                id={`ship-${field.key}`}
-                className={styles.fieldInput}
-                placeholder={field.placeholder}
-                value={shipping[field.key] ?? ""}
-                onChange={(e) => updateShipping(field.key, e.target.value)}
-              />
+        {signedIn ? (
+          <>
+            <p className={styles.sectionLabel}>Shipping</p>
+            <div className={styles.fieldGrid}>
+              {SHIPPING_FIELDS.map((field) => (
+                <div
+                  key={field.key}
+                  className={styles.field}
+                  style={field.full ? { gridColumn: "1 / -1" } : undefined}
+                >
+                  <label className={styles.fieldLabel} htmlFor={`ship-${field.key}`}>
+                    {field.label}
+                  </label>
+                  <input
+                    id={`ship-${field.key}`}
+                    className={styles.fieldInput}
+                    placeholder={field.placeholder}
+                    value={shipping[field.key] ?? ""}
+                    onChange={(e) => updateShipping(field.key, e.target.value)}
+                  />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {error && <p className={styles.error}>{error}</p>}
+            {error && <p className={styles.error}>{error}</p>}
 
-        <Button onClick={handleCheckout} disabled={checkingOut} full>
-          {checkingOut ? "Redirecting…" : "Checkout"}
-        </Button>
-        <p className={styles.terms}>
-          By placing this order you agree to our{" "}
-          <Link href="/terms#shop" target="_blank" className={styles.termsLink}>
-            Terms &amp; Conditions
-          </Link>
-          .
-        </p>
+            <Button onClick={handleCheckout} disabled={checkingOut} full>
+              {checkingOut ? "Redirecting…" : "Checkout"}
+            </Button>
+            <p className={styles.terms}>
+              By placing this order you agree to our{" "}
+              <Link href="/terms#shop" target="_blank" className={styles.termsLink}>
+                Terms &amp; Conditions
+              </Link>
+              .
+            </p>
+          </>
+        ) : (
+          <div className={styles.signInPrompt}>
+            <p className={styles.signInText}>
+              Sign in to check out — it&rsquo;s how you track this order and see your tickets afterward.
+            </p>
+            <LinkButton href="/login?next=/cart" full>
+              Sign in to check out
+            </LinkButton>
+            <p className={styles.signInSwitch}>
+              New here? <Link href="/signup?next=/cart">Create an account</Link>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

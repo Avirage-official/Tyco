@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { GoogleAuthButton } from "../GoogleAuthButton";
 import styles from "../auth.module.css";
 
-export function SignupForm() {
+export function SignupForm({ next }: { next?: string }) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,13 +22,16 @@ export function SignupForm() {
     setError(null);
     setNotice(null);
 
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
+    if (next) callbackUrl.searchParams.set("next", next);
+
     const supabase = createClient();
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { display_name: displayName },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: callbackUrl.toString(),
       },
     });
 
@@ -39,7 +42,8 @@ export function SignupForm() {
     }
 
     if (data.session) {
-      router.push("/account");
+      const destination = next && next.startsWith("/") && !next.startsWith("//") ? next : "/account";
+      router.push(destination);
       router.refresh();
       return;
     }
@@ -50,7 +54,7 @@ export function SignupForm() {
 
   return (
     <>
-      <GoogleAuthButton />
+      <GoogleAuthButton next={next} />
       <div className={styles.divider}>or</div>
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.field}>

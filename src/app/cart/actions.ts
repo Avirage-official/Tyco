@@ -30,13 +30,8 @@ const REQUIRED_SHIPPING_FIELDS: (keyof ShippingDetails)[] = [
   "phone",
 ];
 
-export async function startCheckout(lines: CheckoutLine[], email: string, shipping: ShippingDetails) {
+export async function startCheckout(lines: CheckoutLine[], shipping: ShippingDetails) {
   if (lines.length === 0) throw new Error("Your cart is empty.");
-
-  const trimmedEmail = email.trim();
-  if (!trimmedEmail || !trimmedEmail.includes("@")) {
-    throw new Error("Enter a valid email so we can send your receipt.");
-  }
 
   for (const field of REQUIRED_SHIPPING_FIELDS) {
     if (!shipping[field] || !shipping[field]!.toString().trim()) {
@@ -44,14 +39,16 @@ export async function startCheckout(lines: CheckoutLine[], email: string, shippi
     }
   }
 
-  // Read the signed-in session (if any) from the regular, cookie-aware
-  // client — the service-role client below has no session context of its
-  // own, but an order still needs to be linkable back to an account for
-  // order history to find it.
+  // An account is required to check out — same reasoning as tickets: it's
+  // how a buyer tracks the order afterward, and the service-role client
+  // below has no session context of its own to link the order back to one.
   const sessionClient = await createClient();
   const {
     data: { user },
   } = await sessionClient.auth.getUser();
+  if (!user || !user.email) {
+    throw new Error("Sign in to check out.");
+  }
 
   const supabase = createAdminClient();
 
@@ -102,8 +99,8 @@ export async function startCheckout(lines: CheckoutLine[], email: string, shippi
   const { data: order, error: orderError } = await supabase
     .from("orders")
     .insert({
-      user_id: user?.id ?? null,
-      customer_email: trimmedEmail,
+      user_id: user.id,
+      customer_email: user.email,
       status: "pending",
       currency,
       total_cents: totalCents,
