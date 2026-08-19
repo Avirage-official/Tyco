@@ -3,26 +3,19 @@
   padding-block: var(--space-lg) var(--space-2xl);
 }
 
-.prose section + section {
-  margin-top: var(--space-xl);
-}
-
 .prose h2 {
   font-family: var(--font-display);
   font-size: 1.3rem;
+  margin-top: var(--space-xl);
   margin-bottom: var(--space-sm);
+}
+
+.prose h2:first-child {
+  margin-top: 0;
 }
 
 .prose p {
   color: var(--fg-muted);
   line-height: 1.6;
   margin-top: var(--space-sm);
-}
-
-.prose p:first-of-type {
-  margin-top: 0;
-}
-
-.prose strong {
-  color: var(--fg);
 }

@@ -868,12 +868,14 @@ create table if not exists public.site_settings (
   mission_goal_cents integer not null default 0,
   mission_blurb text,
   about_gallery jsonb not null default '[]'::jsonb,
+  legal_terms text,
   updated_at timestamptz not null default now(),
   constraint site_settings_singleton check (id)
 );
 
 alter table public.site_settings add column if not exists about_gallery jsonb not null default '[]'::jsonb;
 alter table public.site_settings add column if not exists mission_blurb text;
+alter table public.site_settings add column if not exists legal_terms text;
 
 insert into public.site_settings (id)
 values (true)

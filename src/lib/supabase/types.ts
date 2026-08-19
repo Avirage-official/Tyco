@@ -360,6 +360,7 @@ export interface Database {
           mission_goal_cents: number;
           mission_blurb: string | null;
           about_gallery: AboutSlide[];
+          legal_terms: string | null;
           updated_at: string;
         },
         {
@@ -371,6 +372,7 @@ export interface Database {
           mission_goal_cents?: number;
           mission_blurb?: string | null;
           about_gallery?: AboutSlide[];
+          legal_terms?: string | null;
           updated_at?: string;
         }
       >;
