@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { useCart } from "@/lib/cart/CartContext";
@@ -163,6 +164,13 @@ export function CartPageContent({ accountEmail }: { accountEmail: string | null 
         <Button onClick={handleCheckout} disabled={checkingOut} full>
           {checkingOut ? "Redirecting…" : "Checkout"}
         </Button>
+        <p className={styles.terms}>
+          By placing this order you agree to our{" "}
+          <Link href="/terms#shop" target="_blank" className={styles.termsLink}>
+            Terms &amp; Conditions
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );

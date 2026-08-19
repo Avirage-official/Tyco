@@ -7,6 +7,7 @@ const links = [
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About" },
   { href: "/account", label: "Account" },
+  { href: "/terms", label: "Terms & Conditions" },
 ];
 
 export function Footer() {
