@@ -138,6 +138,18 @@
   color: var(--accent);
 }
 
+.terms {
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  text-align: center;
+}
+
+.termsLink {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 .sectionLabel {
   font-size: 0.78rem;
   font-weight: 600;

@@ -124,6 +124,12 @@
   flex-shrink: 0;
 }
 
+.ticketPolicyLink {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 .ticketCta {
   display: inline-flex;
   align-items: center;

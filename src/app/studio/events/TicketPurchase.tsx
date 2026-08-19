@@ -57,8 +57,18 @@ export function TicketPurchase({
     <div className={styles.ticketPurchase}>
       <label className={styles.ticketPolicy}>
         <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
-        I understand this purchase is final — refunds are only given if approved by the event
-        organizers.
+        <span>
+          I agree to the{" "}
+          <Link
+            href="/terms#tickets"
+            target="_blank"
+            className={styles.ticketPolicyLink}
+            onClick={(e) => e.stopPropagation()}
+          >
+            ticket terms
+          </Link>{" "}
+          — this purchase is final, and refunds are only given if approved by the organizers.
+        </span>
       </label>
       <div className={styles.ticketPurchaseRow}>
         <div className={styles.qtyStepper}>
