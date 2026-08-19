@@ -17,7 +17,7 @@ export type EventInput = {
 
 function revalidateEvents() {
   revalidatePath("/admin/events");
-  revalidatePath("/studio/events");
+  revalidatePath("/studio");
 }
 
 // Single-currency site — SGD, not exposed as a form field.

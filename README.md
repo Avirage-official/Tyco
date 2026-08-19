@@ -102,19 +102,21 @@ on Vercel, backed by Supabase.
   `spotify_url` a floating corner player mounted only on that creator's
   page. Published products tied to the creator (`products.creator_id`)
   close the page out as a shop grid.
-- `/studio` and `/studio/events` — a Creators teaser (published creator
-  profiles, linking into their full `/creators/[slug]` pages) and events,
-  tabbed together under "Studio". Events split into an **Upcoming** list
-  (soonest first) and a **Past events** cover-art grid (most recent first)
-  so visitors can see what's already happened, not just what's next —
-  either section is omitted when it's empty. Upcoming events sell tickets:
-  pick a pax count, pay through the same Revolut flow as the shop (skipped
-  entirely for free events), and the ticket shows up in `/account/tickets`
-  with a short reference code and a pax badge — that's what the buyer shows
-  at the door. Buying a ticket requires being signed in, unlike shop
-  checkout, since the whole point is that it's tied to an account staff can
-  check in. Capacity (if the event has one) is tracked the same way shop
-  stock is: decremented only once payment actually clears, not at checkout.
+- `/studio` and `/studio/creators` — events and a Creators teaser (published
+  creator profiles, linking into their full `/creators/[slug]` pages),
+  tabbed together under "Happenings" — Events first, since that's the more
+  time-sensitive of the two. Upcoming events render as a gig list (a large
+  date block, and on hover/focus the row reveals the event's cover image
+  behind a scrim); past events are a numbered cover-art grid, most recent
+  first — either section is omitted when it's empty. Upcoming events sell
+  tickets: pick a pax count, pay through the same Revolut flow as the shop
+  (skipped entirely for free events), and the ticket shows up in
+  `/account/tickets` with a short reference code and a pax badge — that's
+  what the buyer shows at the door. Buying a ticket requires being signed
+  in, unlike shop checkout, since the whole point is that it's tied to an
+  account staff can check in. Capacity (if the event has one) is tracked
+  the same way shop stock is: decremented only once payment actually
+  clears, not at checkout.
 - `/shop` and `/shop/[id]` — retail product grid and product detail, with
   per-size stock (sold-out sizes show as struck through) and up to 5 photos
   per product in a thumbnail-driven gallery (`Gallery.tsx` — a vertical

@@ -59,7 +59,7 @@ export default async function TicketsPage({
           <EmptyState
             title="No tickets yet"
             description="Tickets you buy for upcoming events show up here — this is what you show at the door."
-            action={<LinkButton href="/studio/events">See what&rsquo;s on</LinkButton>}
+            action={<LinkButton href="/studio">See what&rsquo;s on</LinkButton>}
           />
         ) : (
           <ul className={styles.list}>

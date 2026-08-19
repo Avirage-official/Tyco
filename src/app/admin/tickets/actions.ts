@@ -53,5 +53,5 @@ export async function refundTicket(ticketId: string) {
 
   revalidatePath("/admin/tickets");
   revalidatePath("/admin/events");
-  revalidatePath("/studio/events");
+  revalidatePath("/studio");
 }

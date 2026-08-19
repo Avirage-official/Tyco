@@ -27,6 +27,18 @@ export function formatEventDateTime(iso: string | null) {
   });
 }
 
+/** Month/day/time split out separately — for a gig-list date block, where
+ * the day number is set large and the rest reads as supporting detail. */
+export function formatEventDateParts(iso: string) {
+  const date = new Date(iso);
+  return {
+    month: date.toLocaleDateString("en-US", { month: "short" }),
+    day: date.toLocaleDateString("en-US", { day: "numeric" }),
+    weekday: date.toLocaleDateString("en-US", { weekday: "short" }),
+    time: date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+  };
+}
+
 export function formatDuration(seconds: number | null | undefined) {
   if (!seconds || !Number.isFinite(seconds)) return "0:00";
   const m = Math.floor(seconds / 60);
