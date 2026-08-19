@@ -17,6 +17,9 @@ export default async function AdminEventsPage() {
       <div className={styles.headerRow}>
         <h2>Events</h2>
         <div className={styles.actions}>
+          <Link href="/admin/tickets" className={styles.linkBtn}>
+            View tickets
+          </Link>
           <Link href="/admin/checkin" className={styles.linkBtn}>
             Check in tickets
           </Link>
