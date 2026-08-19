@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { SmoothScroll } from "@/lib/motion/SmoothScroll";
 import { useRevealOnScroll } from "@/lib/motion/useScrollReveal";
-import { toYouTubeEmbedUrl } from "@/lib/embeds";
+import { detectPostEmbedPlatform, toYouTubeEmbedUrl } from "@/lib/embeds";
 import { formatPrice, isNew } from "@/lib/format";
 import { NewBadge } from "@/components/ui/NewBadge";
 import type { AboutSlide, CreatorType } from "@/lib/supabase/types";
 import { Chapter } from "./Chapter";
+import { PostEmbed } from "./PostEmbed";
 import { SpotifyWidget } from "./SpotifyWidget";
 import styles from "./CreatorPage.module.css";
 
@@ -119,23 +120,29 @@ export function CreatorPage({
           <Chapter key={item.url} background={item} />
         ))}
 
-        {works.map((work) => (
-          <Chapter
-            key={work.id}
-            background={work.cover_url ? { url: work.cover_url, type: "image" } : undefined}
-          >
-            <div className={styles.chapterCard}>
-              <p className="eyebrow">Works</p>
-              <h2 className={styles.workTitle}>{work.title}</h2>
-              {work.description && <p className={styles.bio}>{work.description}</p>}
-              {work.external_url && (
-                <a href={work.external_url} target="_blank" rel="noreferrer" className={styles.chip}>
-                  View
-                </a>
-              )}
-            </div>
-          </Chapter>
-        ))}
+        {works.map((work) => {
+          const postEmbedPlatform = work.external_url ? detectPostEmbedPlatform(work.external_url) : null;
+          return (
+            <Chapter
+              key={work.id}
+              background={work.cover_url ? { url: work.cover_url, type: "image" } : undefined}
+            >
+              <div className={styles.chapterCard}>
+                <p className="eyebrow">Works</p>
+                <h2 className={styles.workTitle}>{work.title}</h2>
+                {work.description && <p className={styles.bio}>{work.description}</p>}
+                {work.external_url &&
+                  (postEmbedPlatform ? (
+                    <PostEmbed url={work.external_url} className={styles.embedWrap} />
+                  ) : (
+                    <a href={work.external_url} target="_blank" rel="noreferrer" className={styles.chip}>
+                      View
+                    </a>
+                  ))}
+              </div>
+            </Chapter>
+          );
+        })}
 
         {youtubeEmbedUrl && (
           <section className={`container ${styles.youtubeSection}`}>
