@@ -135,7 +135,7 @@ export function EventForm({ event }: { event?: Event }) {
       <div className={styles.fieldRow}>
         <div className={styles.field}>
           <label className={styles.label} htmlFor="price">
-            Ticket price (USD)
+            Ticket price (SGD)
           </label>
           <input
             id="price"
