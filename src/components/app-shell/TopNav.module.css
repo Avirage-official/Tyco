@@ -28,6 +28,24 @@
   margin-left: var(--space-lg);
 }
 
+.rail {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.hoverPill {
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: var(--radius-pill);
+  transition: transform 0.28s cubic-bezier(0.65, 0, 0.35, 1), width 0.28s cubic-bezier(0.65, 0, 0.35, 1);
+  pointer-events: none;
+}
+
 .link {
   position: relative;
   font-size: 0.9rem;
@@ -54,6 +72,12 @@
   height: 2px;
   background: var(--accent);
   border-radius: var(--radius-pill);
+}
+
+/* Links inside .rail get their underline from the sliding .hoverPill
+   instead — showing both would draw two lines under the active one. */
+.rail .linkActive::after {
+  display: none;
 }
 
 .spacer {

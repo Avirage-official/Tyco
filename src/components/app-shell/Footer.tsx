@@ -4,10 +4,12 @@ import styles from "./Footer.module.css";
 
 const links = [
   { href: "/creators", label: "Creators" },
-  { href: "/studio", label: "Studio" },
+  { href: "/studio", label: "Happenings" },
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About" },
-  { href: "/account", label: "Account" },
+  { href: "/account", label: "Your account" },
+  { href: "/account/orders", label: "Your orders" },
+  { href: "/account/tickets", label: "Your tickets" },
   { href: "/terms", label: "Terms & Conditions" },
 ];
 

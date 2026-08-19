@@ -40,7 +40,7 @@ export function Marketing({
         <nav className={styles.quickLinks} aria-label="Quick links">
           <Link href="/creators">Creators</Link>
           <span aria-hidden>&middot;</span>
-          <Link href="/studio">Studio</Link>
+          <Link href="/studio">Happenings</Link>
           <span aria-hidden>&middot;</span>
           <Link href="/shop">Shop</Link>
         </nav>
