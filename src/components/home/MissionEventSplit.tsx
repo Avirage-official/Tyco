@@ -10,6 +10,7 @@ export type EventSlide = {
   id: string;
   title: string;
   location: string | null;
+  organizer: string | null;
   event_date: string;
   cover_url: string | null;
 };
@@ -108,6 +109,7 @@ export function MissionEventSplit({
             <p className={styles.eventMeta}>
               {[formatEventDateTime(current.event_date), current.location].filter(Boolean).join(" — ")}
             </p>
+            {current.organizer && <p className={styles.eventMeta}>Hosted by {current.organizer}</p>}
           </span>
         </Link>
       )}

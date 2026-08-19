@@ -14,7 +14,9 @@ export default async function StudioEventsPage() {
   const [{ data: upcoming }, { data: past }, { data: userData }] = await Promise.all([
     supabase
       .from("events")
-      .select("id, title, location, event_date, price_cents, currency, capacity, capacity_remaining")
+      .select(
+        "id, title, location, organizer, event_date, price_cents, currency, capacity, capacity_remaining"
+      )
       .eq("is_published", true)
       .gte("event_date", nowIso)
       .order("event_date", { ascending: true }),
@@ -52,6 +54,7 @@ export default async function StudioEventsPage() {
                 <div className={styles.eventMeta}>
                   <h3 className={styles.eventTitle}>{event.title}</h3>
                   {event.location && <p className={styles.eventLocation}>{event.location}</p>}
+                  {event.organizer && <p className={styles.eventOrganizer}>Hosted by {event.organizer}</p>}
                   <p className={styles.eventPrice}>
                     {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free"}
                   </p>

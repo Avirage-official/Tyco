@@ -193,6 +193,7 @@ export interface Database {
           title: string;
           description: string | null;
           location: string | null;
+          organizer: string | null;
           event_date: string;
           cover_url: string | null;
           ticket_url: string | null;
@@ -210,6 +211,7 @@ export interface Database {
           title: string;
           description?: string | null;
           location?: string | null;
+          organizer?: string | null;
           event_date: string;
           cover_url?: string | null;
           ticket_url?: string | null;

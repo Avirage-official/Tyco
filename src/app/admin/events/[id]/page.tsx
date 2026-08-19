@@ -7,7 +7,9 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
   const { supabase } = await requireAdmin();
   const { data: event } = await supabase
     .from("events")
-    .select("id, title, description, location, event_date, cover_url, ticket_url, price_cents, capacity")
+    .select(
+      "id, title, description, location, organizer, event_date, cover_url, ticket_url, price_cents, capacity"
+    )
     .eq("id", id)
     .single();
 

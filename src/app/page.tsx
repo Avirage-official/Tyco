@@ -37,7 +37,7 @@ async function getSpotlight(
 
   const { data: event } = await supabase
     .from("events")
-    .select("id, title, location, event_date, cover_url")
+    .select("id, title, location, organizer, event_date, cover_url")
     .eq("is_published", true)
     .gte("event_date", nowIso)
     .order("event_date", { ascending: true })
@@ -51,6 +51,7 @@ async function getSpotlight(
     href: "/studio/events",
     title: event.title,
     location: event.location,
+    organizer: event.organizer,
     date: event.event_date,
     coverUrl: event.cover_url,
   };
@@ -63,7 +64,7 @@ async function getUpcomingEvents(
 
   const { data: events } = await supabase
     .from("events")
-    .select("id, title, location, event_date, cover_url")
+    .select("id, title, location, organizer, event_date, cover_url")
     .eq("is_published", true)
     .gte("event_date", nowIso)
     .order("event_date", { ascending: true })

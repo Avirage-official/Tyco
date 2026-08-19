@@ -89,6 +89,13 @@
   margin-top: 0.2rem;
 }
 
+.eventOrganizer {
+  color: var(--fg-muted);
+  font-size: 0.8rem;
+  font-style: italic;
+  margin-top: 0.2rem;
+}
+
 .eventPrice {
   color: var(--fg-muted);
   font-size: 0.85rem;

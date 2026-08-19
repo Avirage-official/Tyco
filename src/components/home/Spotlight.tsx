@@ -7,6 +7,7 @@ export type SpotlightProps = {
   href: string;
   title: string;
   location: string | null;
+  organizer: string | null;
   date: string;
   coverUrl: string | null;
 };
@@ -28,6 +29,7 @@ export function Spotlight(props: SpotlightProps) {
         <p className={styles.meta}>
           {[formatEventDateTime(props.date), props.location].filter(Boolean).join(" · ")}
         </p>
+        {props.organizer && <p className={styles.meta}>Hosted by {props.organizer}</p>}
       </div>
     </Link>
   );
