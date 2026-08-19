@@ -15,7 +15,7 @@ export default async function CartPage() {
     <>
       <PageHeader eyebrow="Your bag" title="Cart" />
       <div className="container">
-        <CartPageContent accountEmail={user?.email ?? null} />
+        <CartPageContent signedIn={Boolean(user)} />
       </div>
     </>
   );
