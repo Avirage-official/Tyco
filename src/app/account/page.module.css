@@ -1,10 +1,19 @@
 .wrap {
   padding-bottom: var(--space-2xl);
+  max-width: 560px;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
 }
 
 .avatar {
-  width: 4rem;
-  height: 4rem;
+  width: 3.4rem;
+  height: 3.4rem;
+  flex-shrink: 0;
   border-radius: 50%;
   background: var(--accent);
   color: var(--on-accent);
@@ -12,17 +21,76 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.email {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+  margin-top: 0.1rem;
+}
+
+.hub {
+  border-top: 1px solid var(--border);
 }
 
 .row {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  margin-bottom: var(--space-lg);
+  width: 100%;
+  padding-block: var(--space-md);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  transition: background var(--dur) var(--ease);
 }
 
-.email {
+.row:hover {
+  background: var(--surface);
+}
+
+.rowButton {
+  font: inherit;
+  color: inherit;
+}
+
+.rowIcon {
+  flex-shrink: 0;
+  width: 1.4rem;
+  height: 1.4rem;
   color: var(--fg-muted);
-  font-size: 0.9rem;
+}
+
+.rowBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.rowLabel {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.rowDesc {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+
+.rowChevron {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--fg-muted);
+  transition: transform var(--dur) var(--ease);
+}
+
+.row:hover .rowChevron {
+  transform: translateX(3px);
+  color: var(--accent);
 }
