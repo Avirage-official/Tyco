@@ -1,0 +1,124 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  min-height: 82vh;
+  min-height: 82dvh;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  margin-top: var(--space-lg);
+  overflow: hidden;
+}
+
+.media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: var(--surface);
+  background-size: cover;
+  background-position: center;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    rgba(16, 14, 13, 0.15) 0%,
+    rgba(16, 14, 13, 0.35) 40%,
+    rgba(16, 14, 13, 0.96) 100%
+  );
+}
+
+.inner {
+  width: 100%;
+  padding-block: 0 var(--space-2xl);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.eyebrow::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.dateRow {
+  margin-top: var(--space-md);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.dateBig {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dateDetail {
+  color: var(--fg-muted);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.title {
+  margin-top: var(--space-xs);
+  font-size: clamp(2.6rem, 7vw, 5.2rem);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  max-width: 18ch;
+}
+
+.metaRow {
+  margin-top: var(--space-md);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem var(--space-sm);
+  color: var(--fg-muted);
+  font-size: 1rem;
+}
+
+.metaRow span:not(:last-child)::after {
+  content: "·";
+  margin-left: var(--space-sm);
+  color: var(--border);
+}
+
+.action {
+  margin-top: var(--space-lg);
+}
+
+@media (max-width: 640px) {
+  .hero {
+    min-height: 92vh;
+    min-height: 92dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media {
+    animation: none;
+  }
+}

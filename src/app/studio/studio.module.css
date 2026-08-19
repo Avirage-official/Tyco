@@ -3,74 +3,7 @@
   font-size: 1.2rem;
 }
 
-.grid {
-  display: grid;
-  gap: var(--space-md);
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-}
-
-.card {
-  position: relative;
-  display: block;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: var(--bg-raised);
-  transition: transform var(--dur) var(--ease);
-}
-
-.card:hover {
-  transform: translateY(-4px);
-}
-
-.cardMedia {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  display: block;
-  background: var(--surface);
-  background-size: cover;
-  background-position: center;
-}
-
-.cardIndex {
-  position: absolute;
-  top: var(--space-2xs);
-  left: var(--space-2xs);
-  padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-pill);
-  background: rgba(16, 14, 13, 0.72);
-  backdrop-filter: blur(4px);
-  color: var(--fg);
-  font-size: 0.7rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-}
-
-.cardBody {
-  padding: var(--space-sm);
-}
-
-.cardCategory {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.cardTitle {
-  margin-top: 0.3rem;
-  font-size: 1.05rem;
-}
-
-.cardTagline {
-  margin-top: 0.25rem;
-  color: var(--fg-muted);
-  font-size: 0.88rem;
-}
-
-/* -- gig list (upcoming events) -------------------------------------- */
+/* -- gig list (secondary upcoming dates) ------------------------------ */
 
 .gigList {
   display: flex;
@@ -209,13 +142,254 @@
     transform: none;
     transition: opacity 300ms ease;
   }
+}
 
-  .gigRow:hover .gigBg {
-    transform: none;
+/* -- past events filmstrip -------------------------------------------- */
+
+.filmstrip {
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: var(--space-sm);
+  margin: 0 calc(-1 * var(--space-sm));
+  padding-inline: var(--space-sm);
+  scrollbar-width: thin;
+}
+
+.filmCard {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  width: min(300px, 78vw);
+}
+
+.filmMedia {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+  transition: transform var(--dur) var(--ease);
+}
+
+.filmCard:hover .filmMedia {
+  transform: scale(1.02);
+}
+
+.filmIndex {
+  position: absolute;
+  top: var(--space-2xs);
+  left: var(--space-2xs);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: rgba(16, 14, 13, 0.72);
+  backdrop-filter: blur(4px);
+  color: var(--fg);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.filmBody {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--space-md) var(--space-sm);
+  background: linear-gradient(180deg, transparent, rgba(16, 14, 13, 0.92) 65%);
+}
+
+.filmDate {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.filmTitle {
+  margin-top: 0.25rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.filmLocation {
+  margin-top: 0.2rem;
+  color: var(--fg-muted);
+  font-size: 0.82rem;
+}
+
+/* -- creators: featured hero -------------------------------------------- */
+
+.creatorHero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  min-height: 62vh;
+  min-height: 62dvh;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  margin-bottom: var(--space-2xl);
+  overflow: hidden;
+}
+
+.creatorHeroMedia {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+}
+
+.creatorHeroScrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(16, 14, 13, 0.1) 0%, rgba(16, 14, 13, 0.96) 100%);
+}
+
+.creatorHeroBody {
+  width: 100%;
+  padding-block: 0 var(--space-xl);
+}
+
+.creatorHeroType {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.creatorHeroName {
+  margin-top: var(--space-xs);
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.creatorHeroTagline {
+  margin-top: var(--space-sm);
+  max-width: 42ch;
+  color: var(--fg-muted);
+  font-size: 1.05rem;
+}
+
+.creatorHeroLink {
+  margin-top: var(--space-md);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  transition: gap var(--dur) var(--ease);
+}
+
+.creatorHeroLink:hover {
+  gap: 0.75rem;
+}
+
+.creatorHeroLink svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* -- creators: grid ----------------------------------------------------- */
+
+.creatorGrid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.posterCard {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.posterCard:nth-child(5n + 1) {
+  grid-column: span 2;
+  aspect-ratio: 16 / 10;
+}
+
+@media (max-width: 640px) {
+  .posterCard:nth-child(5n + 1) {
+    grid-column: span 1;
+    aspect-ratio: 3 / 4;
   }
 }
 
-/* -- ticket purchase --------------------------------------------------- */
+.posterMedia {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-size: cover;
+  background-position: center;
+  transition: transform 600ms var(--ease);
+}
+
+.posterCard:hover .posterMedia {
+  transform: scale(1.05);
+}
+
+.posterScrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, transparent 40%, rgba(16, 14, 13, 0.92) 100%);
+}
+
+.posterBody {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--space-sm);
+}
+
+.posterType {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.posterName {
+  margin-top: 0.2rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.posterTagline {
+  margin-top: 0.2rem;
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+  opacity: 0;
+  max-height: 0;
+  transition: opacity var(--dur) var(--ease), max-height var(--dur) var(--ease);
+}
+
+.posterCard:hover .posterTagline,
+.posterCard:focus-visible .posterTagline {
+  opacity: 1;
+  max-height: 3rem;
+}
+
+/* -- ticket purchase ----------------------------------------------------- */
 
 .ticketPurchase {
   display: flex;

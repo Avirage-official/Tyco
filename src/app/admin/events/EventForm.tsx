@@ -15,6 +15,7 @@ type Event = {
   organizer: string | null;
   event_date: string;
   cover_url: string | null;
+  cover_video_url: string | null;
   ticket_url: string | null;
   price_cents: number;
   capacity: number | null;
@@ -40,6 +41,8 @@ export function EventForm({ event }: { event?: Event }) {
   const [capacity, setCapacity] = useState(event?.capacity != null ? String(event.capacity) : "");
   const coverUrl = event?.cover_url ?? null;
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const coverVideoUrl = event?.cover_video_url ?? null;
+  const [coverVideoFile, setCoverVideoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,6 +70,11 @@ export function EventForm({ event }: { event?: Event }) {
         finalCoverUrl = await uploadToBucket("covers", coverFile);
       }
 
+      let finalCoverVideoUrl = coverVideoUrl;
+      if (coverVideoFile) {
+        finalCoverVideoUrl = await uploadToBucket("covers", coverVideoFile);
+      }
+
       const input: EventInput = {
         title,
         description: description || null,
@@ -74,6 +82,7 @@ export function EventForm({ event }: { event?: Event }) {
         organizer: organizer || null,
         event_date: new Date(eventDate).toISOString(),
         cover_url: finalCoverUrl,
+        cover_video_url: finalCoverVideoUrl,
         ticket_url: ticketUrl || null,
         price_cents: priceCents,
         capacity: capacityValue,
@@ -222,6 +231,32 @@ export function EventForm({ event }: { event?: Event }) {
           accept="image/*"
           onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
         />
+      </div>
+
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="cover_video">
+          Cover video (optional)
+        </label>
+        {coverVideoUrl && (
+          <video
+            className={styles.preview}
+            src={coverVideoUrl}
+            muted
+            loop
+            autoPlay
+            playsInline
+          />
+        )}
+        <input
+          id="cover_video"
+          type="file"
+          accept="video/*"
+          onChange={(e) => setCoverVideoFile(e.target.files?.[0] ?? null)}
+        />
+        <p className={styles.hint}>
+          A short looping clip for this event&rsquo;s hero, if it&rsquo;s the next one coming up.
+          Falls back to the cover image when blank.
+        </p>
       </div>
 
       {error && <p className={styles.error}>{error}</p>}

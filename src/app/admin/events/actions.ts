@@ -10,6 +10,7 @@ export type EventInput = {
   organizer: string | null;
   event_date: string;
   cover_url: string | null;
+  cover_video_url: string | null;
   ticket_url: string | null;
   price_cents: number;
   capacity: number | null;

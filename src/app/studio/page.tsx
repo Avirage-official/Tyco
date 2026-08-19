@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatEventDateParts, formatPrice } from "@/lib/format";
+import { EventHero } from "./EventHero";
 import { TicketPurchase } from "./TicketPurchase";
 import styles from "./studio.module.css";
 
@@ -15,7 +16,7 @@ export default async function StudioEventsPage() {
     supabase
       .from("events")
       .select(
-        "id, title, location, organizer, event_date, cover_url, price_cents, currency, capacity, capacity_remaining"
+        "id, title, location, organizer, event_date, cover_url, cover_video_url, price_cents, currency, capacity, capacity_remaining"
       )
       .eq("is_published", true)
       .gte("event_date", nowIso)
@@ -31,10 +32,10 @@ export default async function StudioEventsPage() {
 
   const signedIn = Boolean(userData.user);
 
-  const hasUpcoming = upcoming && upcoming.length > 0;
+  const [featured, ...restUpcoming] = upcoming ?? [];
   const hasPast = past && past.length > 0;
 
-  if (!hasUpcoming && !hasPast) {
+  if (!featured && !hasPast) {
     return (
       <EmptyState
         title="No events on the calendar yet"
@@ -45,11 +46,13 @@ export default async function StudioEventsPage() {
 
   return (
     <div>
-      {hasUpcoming && (
-        <section>
-          <h2 className={styles.sectionTitle}>Upcoming</h2>
+      {featured && <EventHero event={featured} signedIn={signedIn} />}
+
+      {restUpcoming.length > 0 && (
+        <section style={{ marginTop: featured ? "var(--space-2xl)" : 0 }}>
+          <h2 className={styles.sectionTitle}>More dates</h2>
           <div className={styles.gigList}>
-            {upcoming.map((event) => {
+            {restUpcoming.map((event) => {
               const { month, day, weekday, time } = formatEventDateParts(event.event_date);
               return (
                 <div key={event.id} className={styles.gigRow}>
@@ -98,21 +101,21 @@ export default async function StudioEventsPage() {
       )}
 
       {hasPast && (
-        <section style={hasUpcoming ? { marginTop: "var(--space-2xl)" } : undefined}>
+        <section style={{ marginTop: "var(--space-2xl)" }}>
           <h2 className={styles.sectionTitle}>Past events</h2>
-          <div className={styles.grid}>
+          <div className={styles.filmstrip}>
             {past.map((event, i) => (
-              <div key={event.id} className={styles.card}>
+              <div key={event.id} className={styles.filmCard}>
                 <div
-                  className={styles.cardMedia}
+                  className={styles.filmMedia}
                   style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
                 >
-                  <span className={styles.cardIndex}>{String(i + 1).padStart(2, "0")}</span>
-                </div>
-                <div className={styles.cardBody}>
-                  <p className={styles.cardCategory}>{formatDate(event.event_date)}</p>
-                  <h3 className={styles.cardTitle}>{event.title}</h3>
-                  {event.location && <p className={styles.cardTagline}>{event.location}</p>}
+                  <span className={styles.filmIndex}>{String(i + 1).padStart(2, "0")}</span>
+                  <div className={styles.filmBody}>
+                    <p className={styles.filmDate}>{formatDate(event.event_date)}</p>
+                    <h3 className={styles.filmTitle}>{event.title}</h3>
+                    {event.location && <p className={styles.filmLocation}>{event.location}</p>}
+                  </div>
                 </div>
               </div>
             ))}
