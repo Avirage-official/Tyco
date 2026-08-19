@@ -1,19 +1,11 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/server";
-import { formatPrice } from "@/lib/format";
+import { formatDate, formatEventDateTime, formatPrice } from "@/lib/format";
 import { TicketPurchase } from "./TicketPurchase";
 import styles from "../studio.module.css";
 
 export const metadata: Metadata = { title: "Events" };
-
-function formatEventDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 export default async function StudioEventsPage() {
   const supabase = await createClient();
@@ -64,7 +56,7 @@ export default async function StudioEventsPage() {
                     {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free"}
                   </p>
                 </div>
-                <span className={styles.eventDate}>{formatEventDate(event.event_date)}</span>
+                <span className={styles.eventDate}>{formatEventDateTime(event.event_date)}</span>
                 <TicketPurchase
                   eventId={event.id}
                   priceCents={event.price_cents}
@@ -89,7 +81,7 @@ export default async function StudioEventsPage() {
                   style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
                 />
                 <div className={styles.cardBody}>
-                  <p className={styles.cardCategory}>{formatEventDate(event.event_date)}</p>
+                  <p className={styles.cardCategory}>{formatDate(event.event_date)}</p>
                   <h3 className={styles.cardTitle}>{event.title}</h3>
                   {event.location && <p className={styles.eventLocation}>{event.location}</p>}
                 </div>

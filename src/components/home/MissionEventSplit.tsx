@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { IconArrowRight, IconBoat } from "@/components/icons";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatEventDateTime, formatPrice } from "@/lib/format";
 import styles from "./MissionEventSplit.module.css";
 
 export type EventSlide = {
@@ -106,7 +106,7 @@ export function MissionEventSplit({
             <span className={styles.eyebrowLight}>Next up</span>
             <h2 className={styles.eventTitle}>{current.title}</h2>
             <p className={styles.eventMeta}>
-              {[formatDate(current.event_date), current.location].filter(Boolean).join(" — ")}
+              {[formatEventDateTime(current.event_date), current.location].filter(Boolean).join(" — ")}
             </p>
           </span>
         </Link>

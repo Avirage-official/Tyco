@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin/require-admin";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatEventDateTime, formatPrice } from "@/lib/format";
 import { PublishBadge } from "../PublishBadge";
 import { toggleEventPublish, deleteEvent } from "./actions";
 import styles from "../admin.module.css";
@@ -49,7 +49,7 @@ export default async function AdminEventsPage() {
               {events.map((event) => (
                 <tr key={event.id}>
                   <td className={styles.rowTitle}>{event.title}</td>
-                  <td className={styles.rowMeta}>{formatDate(event.event_date)}</td>
+                  <td className={styles.rowMeta}>{formatEventDateTime(event.event_date)}</td>
                   <td className={styles.rowMeta}>{event.location ?? "—"}</td>
                   <td className={styles.rowMeta}>
                     {event.price_cents > 0 ? formatPrice(event.price_cents) : "Free"}

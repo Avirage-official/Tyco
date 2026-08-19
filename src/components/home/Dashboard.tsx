@@ -5,7 +5,7 @@ import { Slideshow } from "@/components/home/Slideshow";
 import { FeaturedShop, type ShopItem } from "@/components/home/FeaturedShop";
 import { MissionEventSplit, type EventSlide } from "@/components/home/MissionEventSplit";
 import type { AboutSlide } from "@/lib/supabase/types";
-import { formatDate } from "@/lib/format";
+import { formatEventDateTime } from "@/lib/format";
 import styles from "./Dashboard.module.css";
 
 export type DashboardProps = {
@@ -38,7 +38,7 @@ export function Dashboard({
   const tickerItems: string[] = [];
   if (events[0]) {
     tickerItems.push(
-      `NEXT UP — ${events[0].title.toUpperCase()}, ${formatDate(events[0].event_date).toUpperCase()}`
+      `NEXT UP — ${events[0].title.toUpperCase()}, ${formatEventDateTime(events[0].event_date).toUpperCase()}`
     );
   }
   if (nextProject) {

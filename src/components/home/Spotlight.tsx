@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatDate } from "@/lib/format";
+import { formatEventDateTime } from "@/lib/format";
 import styles from "./Spotlight.module.css";
 
 export type SpotlightProps = {
@@ -26,7 +26,7 @@ export function Spotlight(props: SpotlightProps) {
         </span>
         <h2 className={styles.title}>{props.title}</h2>
         <p className={styles.meta}>
-          {[formatDate(props.date), props.location].filter(Boolean).join(" · ")}
+          {[formatEventDateTime(props.date), props.location].filter(Boolean).join(" · ")}
         </p>
       </div>
     </Link>
