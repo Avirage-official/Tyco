@@ -5,6 +5,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatPrice } from "@/lib/format";
+import { getMerchizeOrderProgress, type MerchizeProgressStep } from "@/lib/checkout/merchize";
+import { OrderProgressTracker } from "./OrderProgressTracker";
 import styles from "./orders.module.css";
 
 export const metadata: Metadata = { title: "Your orders" };
@@ -63,6 +65,25 @@ export default async function OrdersPage() {
 
   const variantById = new Map(variants.map((v) => [v.id, v]));
   const productById = new Map(products.map((p) => [p.id, p]));
+
+  // Live from Merchize, not stored — a handful of orders at a time, and it's
+  // the only way to show real fulfilment progress instead of just our own
+  // coarse "Paid" → "Fulfilled" status. Never let one order's lookup
+  // failure break the rest of the page.
+  const progressByOrder = new Map<string, MerchizeProgressStep[]>();
+  await Promise.all(
+    (orders ?? [])
+      .filter((o) => o.status === "paid" || o.status === "fulfilled")
+      .map(async (order) => {
+        try {
+          const progress = await getMerchizeOrderProgress(order.id);
+          if (progress?.order_progress) progressByOrder.set(order.id, progress.order_progress);
+        } catch {
+          // No progress data yet (or Merchize is unreachable) — the page
+          // just falls back to showing the plain status badge for this order.
+        }
+      })
+  );
 
   const itemsByOrder = new Map<string, OrderItemRow[]>();
   for (const item of items) {
@@ -125,6 +146,10 @@ export default async function OrdersPage() {
                   <span>Total</span>
                   <span className={styles.total}>{formatPrice(order.total_cents, order.currency)}</span>
                 </div>
+
+                {progressByOrder.has(order.id) && (
+                  <OrderProgressTracker steps={progressByOrder.get(order.id)!} />
+                )}
               </li>
             ))}
           </ul>

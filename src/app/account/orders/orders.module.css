@@ -132,3 +132,67 @@
 .total {
   font-weight: 700;
 }
+
+.progress {
+  display: flex;
+  margin-top: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border);
+}
+
+.progressStep {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.progressStep:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 0.44rem;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.progressStepDone:not(:last-child)::after {
+  background: var(--accent);
+}
+
+.progressDot {
+  position: relative;
+  z-index: 1;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg);
+}
+
+.progressStepDone .progressDot {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.progressLabel {
+  margin-top: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.progressStepDone .progressLabel {
+  color: var(--fg);
+}
+
+.progressDate {
+  margin-top: 0.15rem;
+  font-size: 0.64rem;
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}

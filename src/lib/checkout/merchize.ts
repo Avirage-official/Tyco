@@ -147,3 +147,45 @@ export async function getMerchizeOrderDetail(externalNumber: string): Promise<Me
 
   return body.data ?? null;
 }
+
+export type MerchizeProgressStep = {
+  event: string;
+  status: string;
+  expected?: string;
+  actual?: string;
+};
+
+export type MerchizeOrderProgress = {
+  order_progress?: MerchizeProgressStep[];
+};
+
+/**
+ * Fetches an order's fulfilment timeline at Merchize (GET
+ * /order/external/orders/order-progress) — order_imported, in_production,
+ * shipment_started, delivered, etc, each done/pending with a timestamp.
+ * Called live from the customer's orders page so they can see real
+ * progress instead of just our own "Paid" → "Fulfilled" status label.
+ */
+export async function getMerchizeOrderProgress(externalNumber: string): Promise<MerchizeOrderProgress | null> {
+  const baseUrl = requireEnv("MERCHIZE_API_BASE_URL").replace(/\/+$/, "");
+  const token = requireEnv("MERCHIZE_ACCESS_TOKEN");
+
+  const params = new URLSearchParams({ external_number: externalNumber, identifier: MERCHIZE_IDENTIFIER });
+  const res = await fetch(`${baseUrl}/order/external/orders/order-progress?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const rawBody = await res.text();
+  let body: { success?: boolean; message?: string; data?: MerchizeOrderProgress[] } | null = null;
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    body = null;
+  }
+
+  if (!res.ok || !body || body.success === false) {
+    throw new Error(`Merchize order progress lookup failed (${res.status}): ${body?.message ?? rawBody}`);
+  }
+
+  return body.data?.[0] ?? null;
+}
