@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin/require-admin";
 import { formatDate, formatPrice } from "@/lib/format";
-import { updateOrderStatus, resubmitOrderToMerchize } from "./actions";
+import { updateOrderStatus, resubmitOrderToMerchize, checkMerchizeStatus } from "./actions";
 import styles from "../admin.module.css";
 
 const STATUSES = ["pending", "paid", "fulfilled", "cancelled", "refunded"] as const;
@@ -11,7 +11,7 @@ export default async function AdminOrdersPage() {
     supabase
       .from("orders")
       .select(
-        "id, customer_email, status, currency, total_cents, created_at, merchize_status, tracking_number, tracking_url"
+        "id, customer_email, status, currency, total_cents, created_at, merchize_status, merchize_item_summary, tracking_number, tracking_url"
       )
       .order("created_at", { ascending: false }),
     supabase.from("order_items").select("order_id, quantity"),
@@ -71,6 +71,12 @@ export default async function AdminOrdersPage() {
                   </td>
                   <td className={styles.rowMeta}>
                     {order.merchize_status ?? "—"}
+                    {order.merchize_item_summary && (
+                      <>
+                        <br />
+                        {order.merchize_item_summary}
+                      </>
+                    )}
                     {order.tracking_number && (
                       <>
                         <br />
@@ -83,13 +89,20 @@ export default async function AdminOrdersPage() {
                         )}
                       </>
                     )}
-                    {!order.merchize_status && (order.status === "paid" || order.status === "fulfilled") && (
-                      <form action={resubmitOrderToMerchize.bind(null, order.id)}>
-                        <button type="submit" className={styles.linkBtn}>
-                          Resubmit to Merchize
-                        </button>
-                      </form>
-                    )}
+                    {(order.status === "paid" || order.status === "fulfilled") &&
+                      (order.merchize_status ? (
+                        <form action={checkMerchizeStatus.bind(null, order.id)}>
+                          <button type="submit" className={styles.linkBtn}>
+                            Check Merchize status
+                          </button>
+                        </form>
+                      ) : (
+                        <form action={resubmitOrderToMerchize.bind(null, order.id)}>
+                          <button type="submit" className={styles.linkBtn}>
+                            Resubmit to Merchize
+                          </button>
+                        </form>
+                      ))}
                   </td>
                 </tr>
               ))}
