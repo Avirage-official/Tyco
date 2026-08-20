@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin/require-admin";
 import { formatDate, formatPrice } from "@/lib/format";
-import { updateOrderStatus } from "./actions";
+import { updateOrderStatus, resubmitOrderToMerchize } from "./actions";
 import styles from "../admin.module.css";
 
 const STATUSES = ["pending", "paid", "fulfilled", "cancelled", "refunded"] as const;
@@ -82,6 +82,13 @@ export default async function AdminOrdersPage() {
                           order.tracking_number
                         )}
                       </>
+                    )}
+                    {!order.merchize_status && (order.status === "paid" || order.status === "fulfilled") && (
+                      <form action={resubmitOrderToMerchize.bind(null, order.id)}>
+                        <button type="submit" className={styles.linkBtn}>
+                          Resubmit to Merchize
+                        </button>
+                      </form>
                     )}
                   </td>
                 </tr>
