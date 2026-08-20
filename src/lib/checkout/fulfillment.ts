@@ -63,7 +63,7 @@ export async function submitOrderToMerchize(supabase: AdminClient, orderId: stri
     const variantById = new Map((variants ?? []).map((v) => [v.id, v]));
 
     const productIds = [...new Set((variants ?? []).map((v) => v.product_id))];
-    const { data: products } = await supabase.from("products").select("id, name, images").in("id", productIds);
+    const { data: products } = await supabase.from("products").select("id, images").in("id", productIds);
 
     const productById = new Map((products ?? []).map((p) => [p.id, p]));
 
@@ -80,14 +80,16 @@ export async function submitOrderToMerchize(supabase: AdminClient, orderId: stri
       }
 
       return {
-        name: product?.name ?? "Item",
+        // Stable per product across every order — Merchize groups items
+        // sharing this id into one product, in addition to the merchize_sku
+        // catalog match below.
+        productId: variant.product_id,
         sku: variant.sku,
         merchizeSku: variant.merchize_variant_code,
         price: item.unit_price_cents / 100,
         currency: order.currency,
         quantity: item.quantity,
         image,
-        attributes: [{ name: "Size", option: variant.size }],
       };
     });
 
