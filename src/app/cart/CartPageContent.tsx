@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { useCart } from "@/lib/cart/CartContext";
 import { formatPrice } from "@/lib/format";
+import { COUNTRIES } from "@/lib/shipping/countries";
 import { startCheckout, type ShippingDetails } from "./actions";
 import styles from "./cart.module.css";
 
@@ -21,7 +22,13 @@ const EMPTY_SHIPPING: ShippingDetails = {
   phone: "",
 };
 
-const SHIPPING_FIELDS: { key: keyof ShippingDetails; label: string; placeholder?: string; full?: boolean }[] = [
+const SHIPPING_FIELDS: {
+  key: keyof ShippingDetails;
+  label: string;
+  placeholder?: string;
+  full?: boolean;
+  type?: "text" | "country";
+}[] = [
   { key: "firstName", label: "First name" },
   { key: "lastName", label: "Last name" },
   { key: "address1", label: "Address", full: true },
@@ -29,7 +36,7 @@ const SHIPPING_FIELDS: { key: keyof ShippingDetails; label: string; placeholder?
   { key: "city", label: "City" },
   { key: "region", label: "State / Region" },
   { key: "postcode", label: "Postcode" },
-  { key: "countryCode", label: "Country code", placeholder: "e.g. US, GB, SG" },
+  { key: "countryCode", label: "Country", type: "country" },
   { key: "phone", label: "Phone", full: true },
 ];
 
@@ -131,13 +138,29 @@ export function CartPageContent({ signedIn }: { signedIn: boolean }) {
                   <label className={styles.fieldLabel} htmlFor={`ship-${field.key}`}>
                     {field.label}
                   </label>
-                  <input
-                    id={`ship-${field.key}`}
-                    className={styles.fieldInput}
-                    placeholder={field.placeholder}
-                    value={shipping[field.key] ?? ""}
-                    onChange={(e) => updateShipping(field.key, e.target.value)}
-                  />
+                  {field.type === "country" ? (
+                    <select
+                      id={`ship-${field.key}`}
+                      className={styles.fieldInput}
+                      value={shipping.countryCode}
+                      onChange={(e) => updateShipping("countryCode", e.target.value)}
+                    >
+                      <option value="">Select a country</option>
+                      {COUNTRIES.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      id={`ship-${field.key}`}
+                      className={styles.fieldInput}
+                      placeholder={field.placeholder}
+                      value={shipping[field.key] ?? ""}
+                      onChange={(e) => updateShipping(field.key, e.target.value)}
+                    />
+                  )}
                 </div>
               ))}
             </div>

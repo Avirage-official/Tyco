@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { createRevolutOrder } from "@/lib/checkout/revolut";
+import { COUNTRY_CODES } from "@/lib/shipping/countries";
 
 export type CheckoutLine = { variantId: string; quantity: number };
 
@@ -37,6 +38,10 @@ export async function startCheckout(lines: CheckoutLine[], shipping: ShippingDet
     if (!shipping[field] || !shipping[field]!.toString().trim()) {
       throw new Error("Fill in every shipping field so your order can be delivered.");
     }
+  }
+
+  if (!COUNTRY_CODES.has(shipping.countryCode)) {
+    throw new Error("Select a valid country from the list.");
   }
 
   // An account is required to check out — same reasoning as tickets: it's
