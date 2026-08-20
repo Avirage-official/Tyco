@@ -19,66 +19,87 @@ export type MerchizeShipping = {
   phone: string;
 };
 
-export type MerchizeLineItem = { variantCode: string; quantity: number };
+export type MerchizeLineItem = {
+  name: string;
+  sku?: string | null;
+  merchizeSku: string;
+  price: number;
+  currency: string;
+  quantity: number;
+  image: string;
+  attributes: { name: string; option: string }[];
+};
 
 /**
- * Creates a fulfilment order at Merchize. Called from the Revolut webhook
- * once an order is confirmed paid — see src/app/api/webhooks/revolut/route.ts.
+ * Creates a fulfilment order at Merchize via their "Import external orders"
+ * endpoint (POST /order/external/orders, Bearer auth with the Access Token
+ * from their dashboard's API Reference page). Called from
+ * submitOrderToMerchize once an order is confirmed paid.
  *
- * HONEST CAVEAT: Merchize's docs (as available when this was written) cover
- * auth (Bearer token) and webhook retry rules, but not the exact order-
- * creation request schema. The field names below (external_id, the
- * shipping.* fields, items[].variant_code) are a best-effort reconstruction
- * from their general order-import shape, not a confirmed spec. Place one
- * real order and check the Vercel function logs for this route if Merchize
- * rejects it — the fix is almost certainly a field name here, not the
- * surrounding logic.
+ * MERCHIZE_API_BASE_URL must be the full base URL shown on that page,
+ * including the store-specific path (e.g.
+ * https://bo-group-1-2.merchize.com/vnsnr6g/bo-api) — the bare domain alone
+ * doesn't route to a store and returns a Cloudflare 502.
  */
 export async function createMerchizeOrder({
-  externalId,
+  orderId,
   shipping,
   items,
 }: {
-  externalId: string;
+  orderId: string;
   shipping: MerchizeShipping;
   items: MerchizeLineItem[];
 }) {
   const baseUrl = requireEnv("MERCHIZE_API_BASE_URL").replace(/\/+$/, "");
   const token = requireEnv("MERCHIZE_ACCESS_TOKEN");
 
-  const res = await fetch(`${baseUrl}/api/beta/orders`, {
+  const res = await fetch(`${baseUrl}/order/external/orders`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      external_id: externalId,
-      is_test: process.env.MERCHIZE_MODE !== "live",
-      shipping_method: "standard",
-      shipping: {
-        email: shipping.email,
-        firstname: shipping.firstName,
-        lastname: shipping.lastName,
+      order_id: orderId,
+      identifier: "tyco.world",
+      // No sandbox/test flag exists in Merchize's documented schema — tag
+      // non-live submissions instead of inventing an unrecognized field.
+      tags: process.env.MERCHIZE_MODE === "live" ? [] : ["test"],
+      shipping_info: {
+        full_name: `${shipping.firstName} ${shipping.lastName}`.trim(),
         address_1: shipping.address1,
         address_2: shipping.address2 ?? "",
         city: shipping.city,
-        region: shipping.region,
+        state: shipping.region,
         postcode: shipping.postcode,
-        country_id: shipping.countryCode,
-        telephone: shipping.phone,
+        country: shipping.countryCode,
+        email: shipping.email,
+        phone: shipping.phone,
       },
       items: items.map((item) => ({
-        variant_code: item.variantCode,
+        name: item.name,
+        sku: item.sku ?? undefined,
+        merchize_sku: item.merchizeSku,
+        price: item.price,
+        currency: item.currency,
         quantity: item.quantity,
+        image: item.image,
+        attributes: item.attributes,
       })),
     }),
   });
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Merchize order creation failed (${res.status}): ${body}`);
+  const rawBody = await res.text();
+  let body: { success?: boolean; message?: string; data?: { _id?: string } } | null = null;
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    body = null;
   }
 
-  return res.json() as Promise<Record<string, unknown>>;
+  if (!res.ok || !body || body.success === false) {
+    throw new Error(`Merchize order creation failed (${res.status}): ${body?.message ?? rawBody}`);
+  }
+
+  return body;
 }

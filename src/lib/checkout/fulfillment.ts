@@ -1,6 +1,6 @@
 import "server-only";
 import type { createAdminClient } from "@/lib/supabase/admin";
-import { createMerchizeOrder, type MerchizeShipping } from "@/lib/checkout/merchize";
+import { createMerchizeOrder, type MerchizeLineItem, type MerchizeShipping } from "@/lib/checkout/merchize";
 import { logWebhookError } from "@/lib/checkout/webhookErrors";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
@@ -16,7 +16,7 @@ type AdminClient = ReturnType<typeof createAdminClient>;
 export async function submitOrderToMerchize(supabase: AdminClient, orderId: string) {
   const { data: order } = await supabase
     .from("orders")
-    .select("customer_email, shipping_address, status, merchize_status")
+    .select("customer_email, currency, shipping_address, status, merchize_status")
     .eq("id", orderId)
     .single();
 
@@ -43,31 +43,52 @@ export async function submitOrderToMerchize(supabase: AdminClient, orderId: stri
     return;
   }
 
-  const { data: items } = await supabase
+  const { data: orderItems } = await supabase
     .from("order_items")
-    .select("variant_id, quantity")
+    .select("variant_id, quantity, unit_price_cents")
     .eq("order_id", orderId);
 
-  if (!items || items.length === 0) {
+  if (!orderItems || orderItems.length === 0) {
     await logWebhookError("merchize", "Submit skipped — order has no line items", { orderId });
     return;
   }
 
   try {
-    const variantIds = items.map((item) => item.variant_id);
+    const variantIds = orderItems.map((item) => item.variant_id);
     const { data: variants } = await supabase
       .from("product_variants")
-      .select("id, merchize_variant_code")
+      .select("id, product_id, size, sku, merchize_variant_code")
       .in("id", variantIds);
 
-    const codeByVariant = new Map((variants ?? []).map((v) => [v.id, v.merchize_variant_code]));
+    const variantById = new Map((variants ?? []).map((v) => [v.id, v]));
 
-    const merchizeItems = items.map((item) => {
-      const code = codeByVariant.get(item.variant_id);
-      if (!code) {
+    const productIds = [...new Set((variants ?? []).map((v) => v.product_id))];
+    const { data: products } = await supabase.from("products").select("id, name, images").in("id", productIds);
+
+    const productById = new Map((products ?? []).map((p) => [p.id, p]));
+
+    const merchizeItems: MerchizeLineItem[] = orderItems.map((item) => {
+      const variant = variantById.get(item.variant_id);
+      if (!variant?.merchize_variant_code) {
         throw new Error(`No Merchize variant code set for product_variants.id=${item.variant_id}`);
       }
-      return { variantCode: code, quantity: item.quantity };
+
+      const product = productById.get(variant.product_id);
+      const image = product?.images?.[0];
+      if (!image) {
+        throw new Error(`No product image available for product_variants.id=${item.variant_id}`);
+      }
+
+      return {
+        name: product?.name ?? "Item",
+        sku: variant.sku,
+        merchizeSku: variant.merchize_variant_code,
+        price: item.unit_price_cents / 100,
+        currency: order.currency,
+        quantity: item.quantity,
+        image,
+        attributes: [{ name: "Size", option: variant.size }],
+      };
     });
 
     const shipping: MerchizeShipping = {
@@ -83,13 +104,12 @@ export async function submitOrderToMerchize(supabase: AdminClient, orderId: stri
       phone: shippingAddress.phone ?? "",
     };
 
-    const merchizeOrder = await createMerchizeOrder({ externalId: orderId, shipping, items: merchizeItems });
+    const merchizeOrder = await createMerchizeOrder({ orderId, shipping, items: merchizeItems });
 
     await supabase
       .from("orders")
       .update({
-        merchize_order_id:
-          (merchizeOrder.id as string | undefined) ?? (merchizeOrder.order_id as string | undefined) ?? null,
+        merchize_order_id: merchizeOrder.data?._id ?? null,
         merchize_status: "submitted",
       })
       .eq("id", orderId);
