@@ -849,6 +849,12 @@ alter table public.orders add column if not exists merchize_status text;
 alter table public.orders add column if not exists tracking_number text;
 alter table public.orders add column if not exists tracking_url text;
 
+-- merchize_item_summary holds the matched catalog item's title/variant from
+-- an on-demand "Check Merchize status" lookup (order-detail API) — the only
+-- easy way to confirm from the admin an order actually linked to the
+-- right existing catalog product instead of a new one.
+alter table public.orders add column if not exists merchize_item_summary text;
+
 create index if not exists orders_merchize_order_id_idx
   on public.orders (merchize_order_id) where merchize_order_id is not null;
 

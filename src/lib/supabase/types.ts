@@ -313,6 +313,7 @@ export interface Database {
           revolut_order_id: string | null;
           merchize_order_id: string | null;
           merchize_status: string | null;
+          merchize_item_summary: string | null;
           tracking_number: string | null;
           tracking_url: string | null;
           created_at: string;
@@ -330,6 +331,7 @@ export interface Database {
           revolut_order_id?: string | null;
           merchize_order_id?: string | null;
           merchize_status?: string | null;
+          merchize_item_summary?: string | null;
           tracking_number?: string | null;
           tracking_url?: string | null;
           created_at?: string;

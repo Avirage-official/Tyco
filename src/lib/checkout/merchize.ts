@@ -6,6 +6,12 @@ function requireEnv(name: string) {
   return value;
 }
 
+// Tags every order we send with this identifier and looks orders back up by
+// it — lets order-detail lookups disambiguate if our order_id (our own
+// orders.id, already unique) ever collided with another store's, per
+// Merchize's own docs for the identifier field.
+const MERCHIZE_IDENTIFIER = "tyco.world";
+
 export type MerchizeShipping = {
   email: string;
   firstName: string;
@@ -63,7 +69,7 @@ export async function createMerchizeOrder({
     },
     body: JSON.stringify({
       order_id: orderId,
-      identifier: "tyco.world",
+      identifier: MERCHIZE_IDENTIFIER,
       // No sandbox/test flag exists in Merchize's documented schema — tag
       // non-live submissions instead of inventing an unrecognized field.
       tags: process.env.MERCHIZE_MODE === "live" ? [] : ["test"],
@@ -103,4 +109,41 @@ export async function createMerchizeOrder({
   }
 
   return body;
+}
+
+export type MerchizeOrderDetail = {
+  order_status?: string;
+  items?: { title?: string; sku?: string; variant?: string }[];
+};
+
+/**
+ * Looks up an order's live fulfilment status at Merchize by the order_id we
+ * submitted it under (GET /order/external/orders/order-detail). Used to
+ * refresh merchize_status with Merchize's real status string on demand,
+ * rather than only ever finding out via their webhook — useful since their
+ * webhook retry is capped (5 attempts over 3 days per their docs) and a
+ * missed delivery would otherwise leave merchize_status stale forever.
+ */
+export async function getMerchizeOrderDetail(externalNumber: string): Promise<MerchizeOrderDetail | null> {
+  const baseUrl = requireEnv("MERCHIZE_API_BASE_URL").replace(/\/+$/, "");
+  const token = requireEnv("MERCHIZE_ACCESS_TOKEN");
+
+  const params = new URLSearchParams({ external_number: externalNumber, identifier: MERCHIZE_IDENTIFIER });
+  const res = await fetch(`${baseUrl}/order/external/orders/order-detail?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const rawBody = await res.text();
+  let body: { success?: boolean; message?: string; data?: MerchizeOrderDetail } | null = null;
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    body = null;
+  }
+
+  if (!res.ok || !body || body.success === false) {
+    throw new Error(`Merchize order lookup failed (${res.status}): ${body?.message ?? rawBody}`);
+  }
+
+  return body.data ?? null;
 }
