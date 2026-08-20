@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyRevolutSignature } from "@/lib/checkout/revolut";
-import { createMerchizeOrder, type MerchizeShipping } from "@/lib/checkout/merchize";
+import { submitOrderToMerchize } from "@/lib/checkout/fulfillment";
 import { logWebhookError } from "@/lib/checkout/webhookErrors";
 
 const PAYMENT_COMPLETED_EVENTS = new Set(["ORDER_COMPLETED", "ORDER_AUTHORISED"]);
@@ -141,9 +141,16 @@ export async function POST(request: Request) {
           p_quantity: item.quantity,
         });
       }
-
-      await submitToMerchize(supabase, updated.id, items ?? []);
     }
+
+    // Not gated on `updated` — a completed-payment delivery that arrives
+    // after the order was already marked paid (a retried delivery, or one
+    // that lost a race with another) must still get a chance to reach
+    // Merchize. submitOrderToMerchize is itself idempotent (it no-ops once
+    // merchize_status is set), so calling it on every such delivery is safe
+    // and closes the gap where a paid order could otherwise never be
+    // submitted.
+    await submitOrderToMerchize(supabase, orderMatch.id);
   } else if (PAYMENT_FAILED_EVENTS.has(eventType)) {
     await supabase.from("orders").update({ status: "cancelled" }).eq("id", orderMatch.id).eq("status", "pending");
   } else {
@@ -153,79 +160,4 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ received: true });
-}
-
-/**
- * Submits the now-paid order to Merchize for fulfilment. Never throws —
- * payment already succeeded and stock is already decremented by the time
- * this runs, so a Merchize-side failure must not block the 200 response to
- * Revolut (which would just cause them to retry a webhook whose payment-side
- * effects are already done). Failures are logged for manual follow-up.
- */
-async function submitToMerchize(
-  supabase: ReturnType<typeof createAdminClient>,
-  orderId: string,
-  items: { variant_id: string; quantity: number }[]
-) {
-  try {
-    const { data: order } = await supabase
-      .from("orders")
-      .select("customer_email, shipping_address")
-      .eq("id", orderId)
-      .single();
-
-    const shippingAddress = (order?.shipping_address ?? null) as Partial<MerchizeShipping> | null;
-    if (!order || !shippingAddress || !shippingAddress.address1) {
-      await logWebhookError("merchize", "Submit skipped — no shipping address on order", { orderId });
-      return;
-    }
-
-    if (items.length === 0) {
-      await logWebhookError("merchize", "Submit skipped — order has no line items", { orderId });
-      return;
-    }
-
-    const variantIds = items.map((item) => item.variant_id);
-    const { data: variants } = await supabase
-      .from("product_variants")
-      .select("id, merchize_variant_code")
-      .in("id", variantIds);
-
-    const codeByVariant = new Map((variants ?? []).map((v) => [v.id, v.merchize_variant_code]));
-
-    const merchizeItems = items.map((item) => {
-      const code = codeByVariant.get(item.variant_id);
-      if (!code) {
-        throw new Error(`No Merchize variant code set for product_variants.id=${item.variant_id}`);
-      }
-      return { variantCode: code, quantity: item.quantity };
-    });
-
-    const shipping: MerchizeShipping = {
-      email: order.customer_email ?? "",
-      firstName: shippingAddress.firstName ?? "",
-      lastName: shippingAddress.lastName ?? "",
-      address1: shippingAddress.address1 ?? "",
-      address2: shippingAddress.address2 ?? "",
-      city: shippingAddress.city ?? "",
-      region: shippingAddress.region ?? "",
-      postcode: shippingAddress.postcode ?? "",
-      countryCode: shippingAddress.countryCode ?? "",
-      phone: shippingAddress.phone ?? "",
-    };
-
-    const merchizeOrder = await createMerchizeOrder({ externalId: orderId, shipping, items: merchizeItems });
-
-    await supabase
-      .from("orders")
-      .update({
-        merchize_order_id:
-          (merchizeOrder.id as string | undefined) ?? (merchizeOrder.order_id as string | undefined) ?? null,
-        merchize_status: "submitted",
-      })
-      .eq("id", orderId);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    await logWebhookError("merchize", `Submission failed: ${message}`, { orderId });
-  }
 }
