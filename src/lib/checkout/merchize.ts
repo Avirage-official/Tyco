@@ -20,20 +20,22 @@ export type MerchizeShipping = {
 };
 
 export type MerchizeLineItem = {
-  name: string;
+  productId: string;
   sku?: string | null;
   merchizeSku: string;
   price: number;
   currency: string;
   quantity: number;
   image: string;
-  attributes: { name: string; option: string }[];
 };
 
 /**
- * Creates a fulfilment order at Merchize via their "Import external orders"
- * endpoint (POST /order/external/orders, Bearer auth with the Access Token
- * from their dashboard's API Reference page). Called from
+ * Creates a fulfilment order at Merchize via their "Import external orders
+ * from Merchize catalog" endpoint (POST /order/external/orders/catalog,
+ * Bearer auth with the Access Token from their dashboard's API Reference
+ * page). Unlike the plain /order/external/orders endpoint, this one matches
+ * items against an existing catalog product by merchize_sku (required here)
+ * instead of always creating a new product per order. Called from
  * submitOrderToMerchize once an order is confirmed paid.
  *
  * MERCHIZE_API_BASE_URL must be the full base URL shown on that page,
@@ -53,7 +55,7 @@ export async function createMerchizeOrder({
   const baseUrl = requireEnv("MERCHIZE_API_BASE_URL").replace(/\/+$/, "");
   const token = requireEnv("MERCHIZE_ACCESS_TOKEN");
 
-  const res = await fetch(`${baseUrl}/order/external/orders`, {
+  const res = await fetch(`${baseUrl}/order/external/orders/catalog`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -77,14 +79,13 @@ export async function createMerchizeOrder({
         phone: shipping.phone,
       },
       items: items.map((item) => ({
-        name: item.name,
+        product_id: item.productId,
         sku: item.sku ?? undefined,
         merchize_sku: item.merchizeSku,
         price: item.price,
         currency: item.currency,
         quantity: item.quantity,
         image: item.image,
-        attributes: item.attributes,
       })),
     }),
   });
