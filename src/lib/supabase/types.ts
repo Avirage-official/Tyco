@@ -21,6 +21,13 @@ type Table<Row, Insert, Update = Partial<Insert>> = {
 
 export type AboutSlide = { url: string; type: "image" | "video" };
 
+export type DashboardSlideImages = {
+  retail?: string;
+  happenings?: string;
+  creators?: string;
+  services?: string;
+};
+
 export type EventSlide = {
   id: string;
   title: string;
@@ -376,6 +383,7 @@ export interface Database {
           mission_blurb: string | null;
           about_gallery: AboutSlide[];
           legal_terms: string | null;
+          dashboard_slide_images: DashboardSlideImages;
           updated_at: string;
         },
         {
@@ -388,6 +396,7 @@ export interface Database {
           mission_blurb?: string | null;
           about_gallery?: AboutSlide[];
           legal_terms?: string | null;
+          dashboard_slide_images?: DashboardSlideImages;
           updated_at?: string;
         }
       >;

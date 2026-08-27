@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ShopCard, type ShopItem } from "@/components/home/FeaturedShop";
 import { IconArrowRight } from "@/components/icons";
-import type { CreatorType, EventSlide } from "@/lib/supabase/types";
+import type { CreatorType, DashboardSlideImages, EventSlide } from "@/lib/supabase/types";
 import { formatEventDateTime } from "@/lib/format";
 import styles from "./SwipeDashboard.module.css";
 
@@ -33,6 +33,7 @@ function SlideFrame({
   active,
   eyebrow,
   title,
+  image,
   href,
   linkLabel,
   children,
@@ -41,12 +42,19 @@ function SlideFrame({
   active: boolean;
   eyebrow: string;
   title: string;
+  image?: string;
   href?: string;
   linkLabel?: string;
   children: React.ReactNode;
 }) {
   return (
     <div className={styles.slide}>
+      {image && (
+        <div className={styles.slideBg} aria-hidden>
+          <span className={styles.slideBgImage} style={{ backgroundImage: `url(${image})` }} />
+          <span className={styles.slideBgScrim} />
+        </div>
+      )}
       <div className={styles.slideInner} data-active={active}>
         <div className={styles.slideHead}>
           <div className={styles.index}>
@@ -74,16 +82,31 @@ export function SwipeDashboard({
   shopItems,
   events,
   creators,
+  slideImages,
+  initialSlide = 0,
 }: {
   shopItems: ShopItem[];
   events: EventSlide[];
   creators: CreatorPreview[];
+  slideImages?: DashboardSlideImages;
+  initialSlide?: number;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState(initialSlide);
   const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
   const isJumping = useRef(false);
+
+  // Jump to the requested opening slide before first paint — no smooth
+  // animation, no flash of slide 0 first (this page may not even be Retail).
+  useLayoutEffect(() => {
+    const track = trackRef.current;
+    if (!track || initialSlide === 0) return;
+    isJumping.current = true;
+    track.scrollLeft = initialSlide * track.clientWidth;
+    isJumping.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function movePillTo(el: HTMLElement | null | undefined) {
     if (!el || !railRef.current) return;
@@ -143,7 +166,15 @@ export function SwipeDashboard({
       onKeyDown={onKeyDown}
     >
       <div className={styles.track} ref={trackRef}>
-        <SlideFrame index={0} active={active === 0} eyebrow="Retail" title="Wear the collective" href="/shop" linkLabel="Shop all">
+        <SlideFrame
+          index={0}
+          active={active === 0}
+          eyebrow="Retail"
+          title="Wear the collective"
+          image={slideImages?.retail}
+          href="/shop"
+          linkLabel="Shop all"
+        >
           {shopItems.length > 0 ? (
             <div className={styles.shopGrid}>
               {shopItems.slice(0, 4).map((item, i) => (
@@ -160,6 +191,7 @@ export function SwipeDashboard({
           active={active === 1}
           eyebrow="Happenings"
           title="What's on next"
+          image={slideImages?.happenings}
           href="/studio"
           linkLabel="See all happenings"
         >
@@ -191,6 +223,7 @@ export function SwipeDashboard({
           active={active === 2}
           eyebrow="Creators"
           title="The roster"
+          image={slideImages?.creators}
           href="/creators"
           linkLabel="Meet the roster"
         >
@@ -216,7 +249,13 @@ export function SwipeDashboard({
           )}
         </SlideFrame>
 
-        <SlideFrame index={3} active={active === 3} eyebrow="Services" title="Our services">
+        <SlideFrame
+          index={3}
+          active={active === 3}
+          eyebrow="Services"
+          title="Our services"
+          image={slideImages?.services}
+        >
           <div className={styles.comingSoon}>
             <p className={styles.comingSoonText}>Coming soon.</p>
             <p className={styles.emptyNote}>New ways to work with the collective, on the way.</p>

@@ -6,7 +6,7 @@ export default async function AdminSettingsPage() {
   const { data: settings } = await supabase
     .from("site_settings")
     .select(
-      "next_project_title, next_project_body, next_project_image_url, mission_raised_cents, mission_goal_cents, mission_blurb, about_gallery"
+      "next_project_title, next_project_body, next_project_image_url, mission_raised_cents, mission_goal_cents, mission_blurb, about_gallery, dashboard_slide_images"
     )
     .eq("id", true)
     .single();

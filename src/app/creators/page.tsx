@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { SwipeDashboard } from "@/components/home/SwipeDashboard";
+import { getSwipeDashboardData } from "@/lib/home/swipe-data";
 import { createClient } from "@/lib/supabase/server";
 import type { CreatorType } from "@/lib/supabase/types";
 import styles from "./creators.module.css";
@@ -19,20 +20,19 @@ const TYPE_LABELS: Record<CreatorType, string> = {
 
 export default async function CreatorsDirectoryPage() {
   const supabase = await createClient();
-  const { data: creators } = await supabase
-    .from("creators")
-    .select("slug, name, type, tagline, avatar_url, banner_url")
-    .eq("is_published", true)
-    .order("display_order", { ascending: true })
-    .order("created_at", { ascending: false });
+  const [{ data: creators }, swipeData] = await Promise.all([
+    supabase
+      .from("creators")
+      .select("slug, name, type, tagline, avatar_url, banner_url")
+      .eq("is_published", true)
+      .order("display_order", { ascending: true })
+      .order("created_at", { ascending: false }),
+    getSwipeDashboardData(supabase),
+  ]);
 
   return (
     <>
-      <PageHeader
-        eyebrow="The roster"
-        title="Creators"
-        description="The artists, designers, and creatives building under the Tyco house — each with their own space to tell their story and sell their work."
-      />
+      <SwipeDashboard {...swipeData} initialSlide={2} />
       <div className="container">
         {creators && creators.length > 0 ? (
           <div className={styles.grid}>

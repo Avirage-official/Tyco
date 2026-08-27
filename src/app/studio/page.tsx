@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { SwipeDashboard } from "@/components/home/SwipeDashboard";
+import { getSwipeDashboardData } from "@/lib/home/swipe-data";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatEventDateParts, formatPrice } from "@/lib/format";
 import { EventHero } from "./EventHero";
@@ -12,7 +14,7 @@ export default async function StudioEventsPage() {
   const supabase = await createClient();
   const nowIso = new Date().toISOString();
 
-  const [{ data: upcoming }, { data: past }, { data: userData }] = await Promise.all([
+  const [{ data: upcoming }, { data: past }, { data: userData }, swipeData] = await Promise.all([
     supabase
       .from("events")
       .select(
@@ -28,6 +30,7 @@ export default async function StudioEventsPage() {
       .lt("event_date", nowIso)
       .order("event_date", { ascending: false }),
     supabase.auth.getUser(),
+    getSwipeDashboardData(supabase),
   ]);
 
   const signedIn = Boolean(userData.user);
@@ -37,10 +40,13 @@ export default async function StudioEventsPage() {
 
   if (!featured && !hasPast) {
     return (
-      <EmptyState
-        title="No events on the calendar yet"
-        description="Past shows and upcoming dates published from Supabase will be listed here, soonest first."
-      />
+      <>
+        <SwipeDashboard {...swipeData} initialSlide={1} />
+        <EmptyState
+          title="No events on the calendar yet"
+          description="Past shows and upcoming dates published from Supabase will be listed here, soonest first."
+        />
+      </>
     );
   }
 
@@ -48,8 +54,10 @@ export default async function StudioEventsPage() {
     <div>
       {featured && <EventHero event={featured} signedIn={signedIn} />}
 
+      <SwipeDashboard {...swipeData} initialSlide={1} />
+
       {restUpcoming.length > 0 && (
-        <section style={{ marginTop: featured ? "var(--space-2xl)" : 0 }}>
+        <section style={{ marginTop: "var(--space-2xl)" }}>
           <h2 className={styles.sectionTitle}>More dates</h2>
           <div className={styles.gigList}>
             {restUpcoming.map((event) => {

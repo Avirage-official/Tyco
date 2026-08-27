@@ -1,34 +1,8 @@
 import { Marketing } from "@/components/home/Marketing";
 import { Dashboard, type DashboardProps } from "@/components/home/Dashboard";
 import type { SpotlightProps } from "@/components/home/Spotlight";
-import type { ShopItem } from "@/components/home/FeaturedShop";
-import type { EventSlide } from "@/lib/supabase/types";
+import { getSwipeDashboardData } from "@/lib/home/swipe-data";
 import { createClient } from "@/lib/supabase/server";
-
-const SHOP_FIELDS = "id, name, price_cents, currency, images, category, published_at";
-
-async function getFeaturedShop(
-  supabase: Awaited<ReturnType<typeof createClient>>
-): Promise<ShopItem[]> {
-  const { data: featured } = await supabase
-    .from("products")
-    .select(SHOP_FIELDS)
-    .eq("is_published", true)
-    .eq("is_featured", true)
-    .order("published_at", { ascending: false })
-    .limit(4);
-
-  if (featured && featured.length > 0) return featured;
-
-  const { data: recent } = await supabase
-    .from("products")
-    .select(SHOP_FIELDS)
-    .eq("is_published", true)
-    .order("created_at", { ascending: false })
-    .limit(4);
-
-  return recent ?? [];
-}
 
 async function getSpotlight(
   supabase: Awaited<ReturnType<typeof createClient>>
@@ -57,45 +31,12 @@ async function getSpotlight(
   };
 }
 
-async function getUpcomingEvents(
-  supabase: Awaited<ReturnType<typeof createClient>>
-): Promise<EventSlide[]> {
-  const nowIso = new Date().toISOString();
-
-  const { data: events } = await supabase
-    .from("events")
-    .select("id, title, location, organizer, event_date, cover_url")
-    .eq("is_published", true)
-    .gte("event_date", nowIso)
-    .order("event_date", { ascending: true })
-    .limit(5);
-
-  return events ?? [];
-}
-
-async function getFeaturedCreators(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const { data: creators } = await supabase
-    .from("creators")
-    .select("slug, name, type, tagline, avatar_url, banner_url")
-    .eq("is_published", true)
-    .order("display_order", { ascending: true })
-    .order("created_at", { ascending: false })
-    .limit(3);
-
-  return creators ?? [];
-}
-
 async function getDashboardData(
   supabase: Awaited<ReturnType<typeof createClient>>,
   name: string
 ): Promise<DashboardProps> {
-  const [events, shopItems, creators] = await Promise.all([
-    getUpcomingEvents(supabase),
-    getFeaturedShop(supabase),
-    getFeaturedCreators(supabase),
-  ]);
-
-  return { name, events, shopItems, creators };
+  const swipeData = await getSwipeDashboardData(supabase);
+  return { name, ...swipeData };
 }
 
 export default async function Home() {

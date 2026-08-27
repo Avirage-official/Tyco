@@ -1,7 +1,7 @@
 import { VideoHero } from "@/components/home/VideoHero";
 import { SwipeDashboard, type CreatorPreview } from "@/components/home/SwipeDashboard";
 import type { ShopItem } from "@/components/home/FeaturedShop";
-import type { EventSlide } from "@/lib/supabase/types";
+import type { DashboardSlideImages, EventSlide } from "@/lib/supabase/types";
 import styles from "./Dashboard.module.css";
 
 export type DashboardProps = {
@@ -9,9 +9,10 @@ export type DashboardProps = {
   events: EventSlide[];
   shopItems: ShopItem[];
   creators: CreatorPreview[];
+  slideImages: DashboardSlideImages;
 };
 
-export function Dashboard({ name, events, shopItems, creators }: DashboardProps) {
+export function Dashboard({ name, events, shopItems, creators, slideImages }: DashboardProps) {
   return (
     <>
       <VideoHero size="compact">
@@ -19,7 +20,7 @@ export function Dashboard({ name, events, shopItems, creators }: DashboardProps)
         <h1 className={styles.heroTitle}>Welcome back, {name}</h1>
       </VideoHero>
 
-      <SwipeDashboard events={events} shopItems={shopItems} creators={creators} />
+      <SwipeDashboard events={events} shopItems={shopItems} creators={creators} slideImages={slideImages} />
     </>
   );
 }
