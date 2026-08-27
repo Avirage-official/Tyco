@@ -4,11 +4,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteFromBucket, uploadToBucket } from "@/lib/supabase/upload";
 import { Button } from "@/components/ui/Button";
-import type { AboutSlide } from "@/lib/supabase/types";
+import type { AboutSlide, DashboardSlideImages } from "@/lib/supabase/types";
 import { updateSiteSettings } from "./actions";
 import styles from "../admin.module.css";
 
 const MAX_SLIDES = 8;
+
+const SWIPE_SLIDES: { key: keyof DashboardSlideImages; label: string }[] = [
+  { key: "retail", label: "Retail" },
+  { key: "happenings", label: "Happenings" },
+  { key: "creators", label: "Creators" },
+  { key: "services", label: "Services" },
+];
 
 type Settings = {
   next_project_title: string | null;
@@ -18,6 +25,7 @@ type Settings = {
   mission_goal_cents: number;
   mission_blurb: string | null;
   about_gallery: AboutSlide[];
+  dashboard_slide_images: DashboardSlideImages;
 } | null;
 
 export function SettingsForm({ settings }: { settings: Settings }) {
@@ -31,6 +39,12 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   const [missionBlurb, setMissionBlurb] = useState(settings?.mission_blurb ?? "");
   const [slides, setSlides] = useState<AboutSlide[]>(settings?.about_gallery ?? []);
   const [slideFiles, setSlideFiles] = useState<File[]>([]);
+  const [swipeImages, setSwipeImages] = useState<DashboardSlideImages>(
+    settings?.dashboard_slide_images ?? {}
+  );
+  const [swipeImageFiles, setSwipeImageFiles] = useState<Partial<Record<keyof DashboardSlideImages, File>>>(
+    {}
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,6 +53,38 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   // get mutated in the meantime.
   const initialSlideUrls = useRef(new Set((settings?.about_gallery ?? []).map((s) => s.url))).current;
   const initialImageUrl = useRef(imageUrl).current;
+  const initialSwipeImages = useRef(settings?.dashboard_slide_images ?? {}).current;
+
+  const swipeImagePreviews = useMemo(() => {
+    const previews: Partial<Record<keyof DashboardSlideImages, string>> = {};
+    for (const { key } of SWIPE_SLIDES) {
+      const file = swipeImageFiles[key];
+      if (file) previews[key] = URL.createObjectURL(file);
+    }
+    return previews;
+  }, [swipeImageFiles]);
+
+  useEffect(() => {
+    return () => Object.values(swipeImagePreviews).forEach((url) => url && URL.revokeObjectURL(url));
+  }, [swipeImagePreviews]);
+
+  function setSwipeImageFile(key: keyof DashboardSlideImages, file: File | null) {
+    setSwipeImageFiles((prev) => {
+      const next = { ...prev };
+      if (file) next[key] = file;
+      else delete next[key];
+      return next;
+    });
+  }
+
+  function removeSwipeImage(key: keyof DashboardSlideImages) {
+    setSwipeImages((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+    setSwipeImageFile(key, null);
+  }
 
   const remainingSlots = MAX_SLIDES - slides.length - slideFiles.length;
 
@@ -89,6 +135,12 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         })
       );
 
+      const finalSwipeImages: DashboardSlideImages = { ...swipeImages };
+      for (const { key } of SWIPE_SLIDES) {
+        const file = swipeImageFiles[key];
+        if (file) finalSwipeImages[key] = await uploadToBucket("about", file);
+      }
+
       await updateSiteSettings({
         next_project_title: title || null,
         next_project_body: body || null,
@@ -97,6 +149,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         mission_goal_cents: Math.round(Number(goal) * 100) || 0,
         mission_blurb: missionBlurb || null,
         about_gallery: [...slides, ...newSlides],
+        dashboard_slide_images: finalSwipeImages,
       });
 
       // Save succeeded — now safe to clean up whatever it orphaned. Best
@@ -106,6 +159,11 @@ export function SettingsForm({ settings }: { settings: Settings }) {
       const toDelete = removedSlideUrls.map((url) => deleteFromBucket("about", url));
       if (finalImageUrl !== initialImageUrl && initialImageUrl) {
         toDelete.push(deleteFromBucket("portfolio", initialImageUrl));
+      }
+      for (const { key } of SWIPE_SLIDES) {
+        const oldUrl = initialSwipeImages[key];
+        const newUrl = finalSwipeImages[key];
+        if (oldUrl && oldUrl !== newUrl) toDelete.push(deleteFromBucket("about", oldUrl));
       }
       await Promise.allSettled(toDelete);
 
@@ -208,6 +266,48 @@ export function SettingsForm({ settings }: { settings: Settings }) {
           <p className={styles.hint}>Remove a slide to add another — {MAX_SLIDES} max.</p>
         )}
       </div>
+
+      <h3 style={{ marginTop: "var(--space-lg)" }}>Explore section backgrounds</h3>
+      <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>
+        Background photo for each slide of the swipeable Retail / Happenings / Creators / Services
+        section — shown on the dashboard and reused as the hero on /shop, /studio, and /creators.
+        Optional — a slide with no image just keeps a plain background.
+      </p>
+
+      {SWIPE_SLIDES.map(({ key, label }) => {
+        const previewUrl = swipeImagePreviews[key] ?? swipeImages[key];
+        return (
+          <div key={key} className={styles.field}>
+            <label className={styles.label} htmlFor={`swipe-${key}`}>
+              {label}
+            </label>
+            {previewUrl && (
+              <div className={styles.imageThumb} style={{ maxWidth: 220 }}>
+                <div className={styles.preview} style={{ backgroundImage: `url(${previewUrl})` }} />
+                <div className={styles.imageThumbControls}>
+                  <button
+                    type="button"
+                    className={styles.imageThumbBtn}
+                    onClick={() => removeSwipeImage(key)}
+                    aria-label={`Remove ${label} background`}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            )}
+            <input
+              id={`swipe-${key}`}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                setSwipeImageFile(key, e.target.files?.[0] ?? null);
+                e.target.value = "";
+              }}
+            />
+          </div>
+        );
+      })}
 
       <h3 style={{ marginTop: "var(--space-lg)" }}>Next project teaser</h3>
       <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>

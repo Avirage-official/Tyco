@@ -879,6 +879,7 @@ create table if not exists public.site_settings (
   mission_blurb text,
   about_gallery jsonb not null default '[]'::jsonb,
   legal_terms text,
+  dashboard_slide_images jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now(),
   constraint site_settings_singleton check (id)
 );
@@ -886,6 +887,11 @@ create table if not exists public.site_settings (
 alter table public.site_settings add column if not exists about_gallery jsonb not null default '[]'::jsonb;
 alter table public.site_settings add column if not exists mission_blurb text;
 alter table public.site_settings add column if not exists legal_terms text;
+-- Background photo per swipeable-dashboard slide — {retail, happenings,
+-- creators, services}, each an optional storage URL. The same swiper (and
+-- these same backgrounds) is reused as the hero on /shop, /studio, and
+-- /creators, landing on the slide matching that page.
+alter table public.site_settings add column if not exists dashboard_slide_images jsonb not null default '{}'::jsonb;
 
 insert into public.site_settings (id)
 values (true)
