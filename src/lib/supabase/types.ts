@@ -21,6 +21,15 @@ type Table<Row, Insert, Update = Partial<Insert>> = {
 
 export type AboutSlide = { url: string; type: "image" | "video" };
 
+export type EventSlide = {
+  id: string;
+  title: string;
+  location: string | null;
+  organizer: string | null;
+  event_date: string;
+  cover_url: string | null;
+};
+
 export type CreatorType =
   | "musician"
   | "visual_artist"

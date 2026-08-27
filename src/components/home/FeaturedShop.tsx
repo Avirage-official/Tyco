@@ -44,7 +44,7 @@ function useImageCycle(count: number, offsetMs: number) {
   return index;
 }
 
-function ShopCard({ item, position }: { item: ShopItem; position: number }) {
+export function ShopCard({ item, position }: { item: ShopItem; position: number }) {
   const activeImage = useImageCycle(item.images.length, position * STAGGER_MS);
 
   return (
