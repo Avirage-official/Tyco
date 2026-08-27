@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { uploadToBucket } from "@/lib/supabase/upload";
+import { deleteFromBucket, uploadToBucket } from "@/lib/supabase/upload";
 import { Button } from "@/components/ui/Button";
 import type { AboutSlide } from "@/lib/supabase/types";
 import { updateSiteSettings } from "./actions";
@@ -33,6 +33,12 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   const [slideFiles, setSlideFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Captured once on mount — the storage objects a save might orphan, so we
+  // know what to clean up afterward regardless of how `slides`/`imageUrl`
+  // get mutated in the meantime.
+  const initialSlideUrls = useRef(new Set((settings?.about_gallery ?? []).map((s) => s.url))).current;
+  const initialImageUrl = useRef(imageUrl).current;
 
   const remainingSlots = MAX_SLIDES - slides.length - slideFiles.length;
 
@@ -92,6 +98,16 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         mission_blurb: missionBlurb || null,
         about_gallery: [...slides, ...newSlides],
       });
+
+      // Save succeeded — now safe to clean up whatever it orphaned. Best
+      // effort: a cleanup failure shouldn't surface as a save failure.
+      const keptSlideUrls = new Set(slides.map((s) => s.url));
+      const removedSlideUrls = [...initialSlideUrls].filter((url) => !keptSlideUrls.has(url));
+      const toDelete = removedSlideUrls.map((url) => deleteFromBucket("about", url));
+      if (finalImageUrl !== initialImageUrl && initialImageUrl) {
+        toDelete.push(deleteFromBucket("portfolio", initialImageUrl));
+      }
+      await Promise.allSettled(toDelete);
 
       router.refresh();
     } catch (err) {

@@ -24,3 +24,19 @@ export async function uploadToBucket(bucket: string, file: File) {
 
   return publicUrl;
 }
+
+/**
+ * Deletes a previously-uploaded object given its public URL. Best-effort —
+ * callers should treat failures as non-fatal cleanup, not a reason to fail
+ * whatever save already succeeded.
+ */
+export async function deleteFromBucket(bucket: string, publicUrl: string) {
+  const marker = `/storage/v1/object/public/${bucket}/`;
+  const index = publicUrl.indexOf(marker);
+  if (index === -1) return;
+  const path = decodeURIComponent(publicUrl.slice(index + marker.length));
+
+  const supabase = createClient();
+  const { error } = await supabase.storage.from(bucket).remove([path]);
+  if (error) throw error;
+}
