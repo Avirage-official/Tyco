@@ -1,5 +1,14 @@
 .footer {
-  border-top: 1px solid var(--border);
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--border) 55%, transparent) 20%,
+    color-mix(in srgb, var(--border) 55%, transparent) 80%,
+    transparent
+  );
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: 100% 1px;
   padding-top: var(--space-2xl);
   padding-bottom: var(--space-lg);
   margin-top: var(--space-2xl);
@@ -27,7 +36,16 @@
   flex-direction: column;
   gap: var(--space-lg);
   padding-top: var(--space-lg);
-  border-top: 1px solid var(--border);
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--border) 55%, transparent) 20%,
+    color-mix(in srgb, var(--border) 55%, transparent) 80%,
+    transparent
+  );
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: 100% 1px;
 }
 
 @media (min-width: 640px) {
@@ -89,7 +107,16 @@
   gap: var(--space-2xs);
   margin-top: var(--space-lg);
   padding-top: var(--space-md);
-  border-top: 1px solid var(--border);
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--border) 55%, transparent) 20%,
+    color-mix(in srgb, var(--border) 55%, transparent) 80%,
+    transparent
+  );
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: 100% 1px;
   font-size: 0.76rem;
   color: var(--fg-muted);
 }
