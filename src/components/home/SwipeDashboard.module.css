@@ -1,0 +1,352 @@
+.wrap {
+  position: relative;
+  outline: none;
+}
+
+.track {
+  display: flex;
+  width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  flex: 0 0 100%;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+}
+
+.slideInner {
+  width: 100%;
+  max-width: var(--shell-max);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+  padding-block: var(--space-2xl) calc(var(--space-2xl) + 3.5rem);
+  opacity: 0.35;
+  transform: translateY(18px);
+  transition: opacity 550ms var(--ease), transform 550ms var(--ease);
+}
+
+.slideInner[data-active="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.slideHead {
+  margin-bottom: var(--space-xl);
+}
+
+.index {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.indexNum {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.indexDash {
+  width: 1.25rem;
+  height: 1px;
+  background: var(--border);
+}
+
+.indexLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.slideTitle {
+  margin-top: var(--space-sm);
+  font-size: clamp(2rem, 5vw, 3.4rem);
+}
+
+.slideBody {
+  min-height: 220px;
+}
+
+.slideLink {
+  margin-top: var(--space-xl);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  color: var(--fg);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.slideLinkLabel {
+  position: relative;
+}
+
+.slideLinkLabel::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -0.3em;
+  height: 1px;
+  background: var(--accent);
+  transition: right 320ms var(--ease);
+}
+
+.slideLink:hover .slideLinkLabel::after,
+.slideLink:focus-visible .slideLinkLabel::after {
+  right: 0;
+}
+
+.slideLinkIcon {
+  width: 18px;
+  height: 18px;
+  transition: transform 320ms var(--ease);
+}
+
+.slideLink:hover .slideLinkIcon,
+.slideLink:focus-visible .slideLinkIcon {
+  transform: translateX(4px);
+}
+
+.emptyNote {
+  color: var(--fg-muted);
+  font-size: 0.95rem;
+}
+
+/* ============ retail slide ============ */
+.shopGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-md);
+}
+
+/* ============ happenings slide ============ */
+.eventList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-width: 640px;
+}
+
+.eventCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm);
+  background: var(--bg-raised);
+  border-radius: var(--radius-md);
+  transition: transform var(--dur) var(--ease);
+}
+
+.eventCard:hover {
+  transform: translateY(-3px);
+}
+
+.eventCover {
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--surface);
+  filter: grayscale(1) contrast(1.08);
+}
+
+.eventBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.eventTitle {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+.eventMeta {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+}
+
+/* ============ creators slide ============ */
+.creatorRow {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.creatorCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 150px;
+}
+
+.creatorMedia {
+  aspect-ratio: 3 / 4;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--surface);
+  border-radius: var(--radius-md);
+  transition: transform var(--dur) var(--ease);
+}
+
+.creatorCard:hover .creatorMedia {
+  transform: translateY(-4px);
+}
+
+.creatorType {
+  margin-top: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.creatorName {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+/* ============ services slide ============ */
+.comingSoon {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.comingSoonText {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.8rem;
+  color: var(--accent);
+}
+
+/* ============ nav controls ============ */
+.nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--space-lg);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+}
+
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  color: var(--fg);
+  background: color-mix(in srgb, var(--bg) 65%, transparent);
+  backdrop-filter: blur(6px);
+  transition: border-color var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+
+.arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+.arrowLeft {
+  transform: scaleX(-1);
+}
+
+.arrow:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.arrow:disabled {
+  opacity: 0.3;
+}
+
+.tabs {
+  position: relative;
+  display: flex;
+  padding: 0.3rem;
+  background: color-mix(in srgb, var(--bg) 65%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.tabPill {
+  position: absolute;
+  top: 0.3rem;
+  bottom: 0.3rem;
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  transition: transform 320ms cubic-bezier(0.65, 0, 0.35, 1), width 320ms cubic-bezier(0.65, 0, 0.35, 1);
+  z-index: 0;
+}
+
+.tab {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  color: var(--fg-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color var(--dur) var(--ease);
+}
+
+.tab[data-active="true"] {
+  color: var(--on-accent);
+}
+
+.tabNum {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+}
+
+@media (max-width: 640px) {
+  .tabLabel {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    scroll-behavior: auto;
+  }
+  .slideInner {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+  .tabPill {
+    transition: none;
+  }
+}
