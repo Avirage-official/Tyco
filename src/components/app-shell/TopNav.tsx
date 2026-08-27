@@ -22,7 +22,7 @@ export async function TopNav() {
             <Link href="/login" className={styles.link}>
               Login
             </Link>
-            <Link href="/signup" className={styles.link}>
+            <Link href="/signup" className={`${styles.link} ${styles.signup}`}>
               Sign up
             </Link>
           </div>

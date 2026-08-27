@@ -1,13 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Fraunces, Jost } from "next/font/google";
 import { AppShell } from "@/components/app-shell/AppShell";
 import { SplashScreen } from "@/components/brand/SplashScreen";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+// Display: expressive editorial serif (stands in for the licensed "Museum"
+// until real font files/license are supplied — see globals.css comment).
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
   style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+// Body/UI: geometric sans, an open-source reinterpretation of Futura.
+const jost = Jost({
+  variable: "--font-jost",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -39,7 +50,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${fraunces.variable} ${jost.variable}`}>
       <body>
         <SplashScreen />
         <AppShell>{children}</AppShell>

@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CrestLogo } from "./CrestLogo";
 import styles from "./SplashScreen.module.css";
 
 const FLAG = "tyco-splash-seen";
-const HOLD_MS = 1700;
-const FADE_MS = 500;
+const HOLD_MS = 1900;
+const FADE_MS = 650;
 
 export function SplashScreen() {
   const [phase, setPhase] = useState<"hidden" | "visible" | "leaving">("hidden");
@@ -35,7 +34,17 @@ export function SplashScreen() {
       className={`${styles.overlay} ${phase === "leaving" ? styles.leaving : ""}`}
       aria-hidden={phase === "leaving"}
     >
-      <CrestLogo size={190} playing />
+      <div className={styles.stage}>
+        <p className={styles.eyebrow}>Creative collective</p>
+        <h1 className={styles.mark}>
+          <span className={styles.markClip}>
+            <span className={styles.markInner}>
+              Tyc<em>o</em>
+            </span>
+          </span>
+        </h1>
+        <span className={styles.rule} aria-hidden />
+      </div>
     </div>
   );
 }
