@@ -48,11 +48,24 @@
 
 .link {
   position: relative;
-  font-size: 0.9rem;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: baseline;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   color: var(--fg-muted);
   padding-block: var(--space-2xs);
   transition: color var(--dur) var(--ease);
+}
+
+.linkIndex {
+  margin-right: 0.5em;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--accent);
 }
 
 .link:hover {
@@ -88,6 +101,21 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
+}
+
+.signup {
+  display: inline-flex;
+  align-items: center;
+  height: 2.1rem;
+  padding-inline: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.signup:hover {
+  border-color: var(--fg);
+  color: var(--fg);
 }
 
 /* ============ menu dropdown ============ */

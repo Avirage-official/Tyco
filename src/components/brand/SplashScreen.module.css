@@ -6,12 +6,77 @@
   align-items: center;
   justify-content: center;
   background: var(--bg);
-  animation: overlayIn 250ms var(--ease) both;
+  animation: overlayIn 200ms var(--ease) both;
 }
 
+/* A curtain-style wipe up, rather than a plain fade — the black recedes
+   from the bottom edge so the page underneath reveals itself. */
 .leaving {
-  animation: overlayOut 500ms var(--ease) both;
+  animation: overlayOut 650ms cubic-bezier(0.76, 0, 0.24, 1) both;
   pointer-events: none;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  opacity: 0;
+  animation: fadeUp 500ms var(--ease) 150ms both;
+}
+
+.mark {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.markClip {
+  display: block;
+  overflow: hidden;
+}
+
+.markInner {
+  display: inline-flex;
+  align-items: baseline;
+  font-size: clamp(2.6rem, 10vw, 4.4rem);
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  transform: translateY(105%);
+  animation: markUp 700ms cubic-bezier(0.16, 1, 0.3, 1) 260ms both;
+}
+
+.markInner em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.rule {
+  width: 3rem;
+  height: 2px;
+  background: var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.rule::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  /* Timed to land at 100% right as HOLD_MS elapses in SplashScreen.tsx —
+     keep this in step with that constant if it changes. */
+  animation: fill 1500ms linear 300ms both;
 }
 
 @keyframes overlayIn {
@@ -25,12 +90,33 @@
 
 @keyframes overlayOut {
   from {
-    opacity: 1;
-    transform: scale(1);
+    clip-path: inset(0 0 0 0);
   }
   to {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+@keyframes fadeUp {
+  from {
     opacity: 0;
-    transform: scale(1.04);
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes markUp {
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fill {
+  to {
+    transform: scaleX(1);
   }
 }
 
@@ -39,6 +125,22 @@
     animation: none;
   }
   .leaving {
-    animation: overlayOut 200ms linear both;
+    animation: overlayOutReduced 200ms linear both;
+  }
+  .eyebrow,
+  .markInner,
+  .rule::after {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes overlayOutReduced {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }

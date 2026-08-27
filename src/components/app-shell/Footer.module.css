@@ -1,52 +1,112 @@
 .footer {
   border-top: 1px solid var(--border);
-  padding-block: var(--space-lg);
+  padding-top: var(--space-2xl);
+  padding-bottom: var(--space-lg);
   margin-top: var(--space-2xl);
+}
+
+.top {
+  padding-bottom: var(--space-lg);
+}
+
+.statement {
+  max-width: 26ch;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 3.6vw, 2.4rem);
+  line-height: 1.15;
+}
+
+.statement em {
+  font-style: italic;
+  color: var(--accent);
 }
 
 .inner {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border);
 }
 
 @media (min-width: 640px) {
   .inner {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.coord {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.columns {
+  display: flex;
+  gap: var(--space-2xl);
+  flex-wrap: wrap;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 8rem;
+}
+
+.colLabel {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--space-3xs);
+}
+
+.col a {
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  transition: color var(--dur) var(--ease);
+}
+
+.col a:hover {
+  color: var(--fg);
+}
+
+.bottom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border);
+  font-size: 0.76rem;
+  color: var(--fg-muted);
+}
+
+@media (min-width: 640px) {
+  .bottom {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
   }
 }
 
-.links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-md);
-}
-
-.links a {
-  font-size: 0.85rem;
+.legal {
   color: var(--fg-muted);
+  transition: color var(--dur) var(--ease);
 }
 
-.links a:hover {
+.legal:hover {
   color: var(--fg);
-}
-
-.meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.tagline {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.95rem;
-  color: var(--fg-muted);
-}
-
-.copyright {
-  font-size: 0.76rem;
-  color: var(--fg-muted);
 }

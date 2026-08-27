@@ -4,11 +4,13 @@
   justify-content: center;
   gap: 0.5rem;
   height: 2.85rem;
-  padding-inline: 1.4rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.88rem;
+  padding-inline: 1.5rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
   transition: transform var(--dur) var(--ease), background var(--dur) var(--ease),
     color var(--dur) var(--ease), border-color var(--dur) var(--ease);

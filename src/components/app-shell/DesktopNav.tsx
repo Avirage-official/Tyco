@@ -7,11 +7,11 @@ import { createClient } from "@/lib/supabase/client";
 import styles from "./TopNav.module.css";
 
 const flatLinks = [
-  { href: "/studio", label: "Happenings" },
-  { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About" },
-  { href: "/account/tickets", label: "Your tickets" },
-  { href: "/account/orders", label: "Your orders" },
+  { href: "/studio", label: "Happenings", index: "01" },
+  { href: "/shop", label: "Shop", index: "02" },
+  { href: "/about", label: "About", index: "03" },
+  { href: "/account/tickets", label: "Your tickets", index: "04" },
+  { href: "/account/orders", label: "Your orders", index: "05" },
 ];
 
 function linkMatches(pathname: string, href: string) {
@@ -104,6 +104,9 @@ export function DesktopNav({ signedIn }: { signedIn: boolean }) {
               onMouseEnter={(e) => movePillTo(e.currentTarget)}
               onFocus={(e) => movePillTo(e.currentTarget)}
             >
+              <span className={styles.linkIndex} aria-hidden>
+                {item.index}
+              </span>
               {item.label}
             </Link>
           );

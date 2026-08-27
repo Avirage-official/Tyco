@@ -27,9 +27,18 @@
   --on-accent: var(--paper);
   --on-ink: var(--paper);
 
-  /* -- type --------------------------------------------------------------- */
-  --font-display: var(--font-inter), "Segoe UI", sans-serif;
-  --font-body: var(--font-inter), "Segoe UI", sans-serif;
+  /* -- type ----------------------------------------------------------------
+     Brand type is Museum (display) + Futura (body/UI) — both licensed,
+     non-Google-Fonts foundry releases. Until real font files/license are in
+     the repo, these tokens point at free open-source stand-ins with the
+     same character: Fraunces (expressive editorial serif, in place of
+     Museum's flared-glyphic humanist sans) and Jost (an open reinterpretation
+     of Futura's geometric construction). Swap the `next/font/google` calls
+     in layout.tsx for self-hosted @font-face rules once the real files
+     arrive — every component reads through these two tokens, never a font
+     name directly, so that's a two-file change. */
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-jost), "Segoe UI", sans-serif;
 
   /* -- scale ---------------------------------------------------------- */
   --space-3xs: 0.25rem;

@@ -46,25 +46,44 @@ export function Marketing({
         </nav>
       </VideoHero>
 
-      <section className={styles.aboutSection}>
-        <span className={styles.aboutImage} aria-hidden />
-        <span className={styles.aboutOverlay} aria-hidden />
-        <div className={`container ${styles.aboutInner}`}>
-          <p className="eyebrow">Who we are</p>
-          <h2 className={styles.aboutTitle}>
-            An artistic collective, not a label with a merch table.
-          </h2>
-          <p className={styles.aboutBody}>
-            TYCO is a Singapore-based artistic collective operating across music
-            production, fashion design, live events, and brand collaborations —
-            each revenue stream feeding our annual community mission fund.
-            We&apos;re not a nonprofit. We&apos;re artists who make money and
-            choose where it goes.
-          </p>
-          <div className={styles.aboutActions}>
-            <LinkButton href="/about" variant="ghost">
-              Read our full story
-            </LinkButton>
+      <section className={styles.about}>
+        <div className={`container ${styles.aboutGrid}`}>
+          <div className={styles.aboutMedia}>
+            <span className={styles.aboutImage} aria-hidden />
+            <svg className={`${styles.mark} ${styles.markTl}`} viewBox="0 0 24 24" aria-hidden>
+              <path d="M12 0V8M12 24V16M0 12H8M24 12H16" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <svg className={`${styles.mark} ${styles.markBr}`} viewBox="0 0 24 24" aria-hidden>
+              <path d="M12 0V8M12 24V16M0 12H8M24 12H16" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span className={styles.coord} aria-hidden>
+              1.3521&deg;N / 103.8198&deg;E — Singapore
+            </span>
+          </div>
+
+          <div className={styles.aboutContent}>
+            <div className={styles.index}>
+              <span className={styles.indexNum}>01</span>
+              <span className={styles.indexDash} aria-hidden />
+              <span className={styles.indexLabel}>Who we are</span>
+            </div>
+            <h2 className={styles.aboutTitle}>
+              An artistic collective, not a <em>label</em> with a merch table.
+            </h2>
+            <p className={styles.aboutBody}>
+              TYCO is a Singapore-based artistic collective operating across music
+              production, fashion design, live events, and brand collaborations —
+              each revenue stream feeding our annual community mission fund.
+              We&apos;re not a nonprofit. We&apos;re artists who make money and
+              choose where it goes.
+            </p>
+            <div className={styles.aboutActions}>
+              <LinkButton href="/about" variant="ghost">
+                Read our full story
+              </LinkButton>
+            </div>
           </div>
         </div>
       </section>
