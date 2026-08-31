@@ -28,6 +28,13 @@ export type DashboardSlideImages = {
   services?: string;
 };
 
+export type DashboardSlideVisibility = {
+  retail?: boolean;
+  happenings?: boolean;
+  creators?: boolean;
+  services?: boolean;
+};
+
 export type EventSlide = {
   id: string;
   title: string;
@@ -384,6 +391,7 @@ export interface Database {
           about_gallery: AboutSlide[];
           legal_terms: string | null;
           dashboard_slide_images: DashboardSlideImages;
+          dashboard_hidden_slides: DashboardSlideVisibility;
           updated_at: string;
         },
         {
@@ -397,6 +405,7 @@ export interface Database {
           about_gallery?: AboutSlide[];
           legal_terms?: string | null;
           dashboard_slide_images?: DashboardSlideImages;
+          dashboard_hidden_slides?: DashboardSlideVisibility;
           updated_at?: string;
         }
       >;

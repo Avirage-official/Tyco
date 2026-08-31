@@ -4,7 +4,12 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ShopCard, type ShopItem } from "@/components/home/FeaturedShop";
 import { IconArrowRight } from "@/components/icons";
-import type { CreatorType, DashboardSlideImages, EventSlide } from "@/lib/supabase/types";
+import type {
+  CreatorType,
+  DashboardSlideImages,
+  DashboardSlideVisibility,
+  EventSlide,
+} from "@/lib/supabase/types";
 import { formatEventDateTime } from "@/lib/format";
 import styles from "./SwipeDashboard.module.css";
 
@@ -27,6 +32,15 @@ const CREATOR_TYPE_LABELS: Record<CreatorType, string> = {
 };
 
 const LABELS = ["Retail", "Happenings", "Creators", "Services"];
+
+function ComingSoon({ note }: { note: string }) {
+  return (
+    <div className={styles.comingSoon}>
+      <p className={styles.comingSoonText}>Coming soon.</p>
+      <p className={styles.emptyNote}>{note}</p>
+    </div>
+  );
+}
 
 function SlideFrame({
   index,
@@ -83,12 +97,14 @@ export function SwipeDashboard({
   events,
   creators,
   slideImages,
+  hiddenSlides,
   initialSlide = 0,
 }: {
   shopItems: ShopItem[];
   events: EventSlide[];
   creators: CreatorPreview[];
   slideImages?: DashboardSlideImages;
+  hiddenSlides?: DashboardSlideVisibility;
   initialSlide?: number;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -172,10 +188,12 @@ export function SwipeDashboard({
           eyebrow="Retail"
           title="Wear the collective"
           image={slideImages?.retail}
-          href="/shop"
-          linkLabel="Shop all"
+          href={hiddenSlides?.retail ? undefined : "/shop"}
+          linkLabel={hiddenSlides?.retail ? undefined : "Shop all"}
         >
-          {shopItems.length > 0 ? (
+          {hiddenSlides?.retail ? (
+            <ComingSoon note="The rack is being refreshed — check back shortly." />
+          ) : shopItems.length > 0 ? (
             <div className={styles.shopGrid}>
               {shopItems.slice(0, 4).map((item, i) => (
                 <ShopCard key={item.id} item={item} position={i} />
@@ -192,10 +210,12 @@ export function SwipeDashboard({
           eyebrow="Happenings"
           title="What's on next"
           image={slideImages?.happenings}
-          href="/studio"
-          linkLabel="See all happenings"
+          href={hiddenSlides?.happenings ? undefined : "/studio"}
+          linkLabel={hiddenSlides?.happenings ? undefined : "See all happenings"}
         >
-          {events.length > 0 ? (
+          {hiddenSlides?.happenings ? (
+            <ComingSoon note="The calendar is being updated — check back shortly." />
+          ) : events.length > 0 ? (
             <div className={styles.eventList}>
               {events.slice(0, 2).map((ev) => (
                 <Link key={ev.id} href="/studio" className={styles.eventCard}>
@@ -224,10 +244,12 @@ export function SwipeDashboard({
           eyebrow="Creators"
           title="The roster"
           image={slideImages?.creators}
-          href="/creators"
-          linkLabel="Meet the roster"
+          href={hiddenSlides?.creators ? undefined : "/creators"}
+          linkLabel={hiddenSlides?.creators ? undefined : "Meet the roster"}
         >
-          {creators.length > 0 ? (
+          {hiddenSlides?.creators ? (
+            <ComingSoon note="The roster page is being updated — check back shortly." />
+          ) : creators.length > 0 ? (
             <div className={styles.creatorRow}>
               {creators.slice(0, 3).map((creator) => (
                 <Link key={creator.slug} href={`/creators/${creator.slug}`} className={styles.creatorCard}>
@@ -256,10 +278,7 @@ export function SwipeDashboard({
           title="Our services"
           image={slideImages?.services}
         >
-          <div className={styles.comingSoon}>
-            <p className={styles.comingSoonText}>Coming soon.</p>
-            <p className={styles.emptyNote}>New ways to work with the collective, on the way.</p>
-          </div>
+          <ComingSoon note="New ways to work with the collective, on the way." />
         </SlideFrame>
       </div>
 

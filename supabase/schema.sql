@@ -892,6 +892,11 @@ alter table public.site_settings add column if not exists legal_terms text;
 -- these same backgrounds) is reused as the hero on /shop, /studio, and
 -- /creators, landing on the slide matching that page.
 alter table public.site_settings add column if not exists dashboard_slide_images jsonb not null default '{}'::jsonb;
+-- Per-slide admin kill switch — {retail, happenings, creators, services},
+-- each an optional boolean. true hides that slide's real content behind a
+-- "coming soon" placeholder (e.g. mid-incident or between iterations)
+-- without removing the slide/tab itself.
+alter table public.site_settings add column if not exists dashboard_hidden_slides jsonb not null default '{}'::jsonb;
 
 insert into public.site_settings (id)
 values (true)
