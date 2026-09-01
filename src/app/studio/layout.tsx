@@ -11,7 +11,7 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
         title="Happenings"
         description="The creative work in progress, and every event we've thrown or have coming up."
       />
-      <div className={`container ${styles.shell}`}>
+      <div className={styles.shell}>
         <StudioSidebar />
         <div className={styles.shellContent}>
           <div className={styles.mobileTabs}>
