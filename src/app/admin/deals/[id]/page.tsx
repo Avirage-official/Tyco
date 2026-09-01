@@ -11,7 +11,7 @@ export default async function EditDealPage({ params }: { params: Promise<{ id: s
     supabase
       .from("deals")
       .select(
-        "id, vendor_id, subcategory_id, title, description, cover_url, locations, vendor_rate_cents, margin_percent, redemptions_per_cycle"
+        "id, vendor_id, subcategory_id, title, description, cover_url, locations, vendor_rate_cents, margin_percent, original_price_cents, redemptions_per_cycle"
       )
       .eq("id", id)
       .single(),

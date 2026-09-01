@@ -4,34 +4,20 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ShopCard, type ShopItem } from "@/components/home/FeaturedShop";
 import { IconArrowRight } from "@/components/icons";
-import type {
-  CreatorType,
-  DashboardSlideImages,
-  DashboardSlideVisibility,
-  EventSlide,
-} from "@/lib/supabase/types";
-import { formatEventDateTime } from "@/lib/format";
+import type { DashboardSlideImages, DashboardSlideVisibility, EventSlide } from "@/lib/supabase/types";
+import { formatEventDateTime, formatPrice } from "@/lib/format";
 import styles from "./SwipeDashboard.module.css";
 
-export type CreatorPreview = {
-  slug: string;
-  name: string;
-  type: CreatorType;
-  tagline: string | null;
-  avatar_url: string | null;
-  banner_url: string | null;
+export type DealPreview = {
+  id: string;
+  title: string;
+  vendorName: string;
+  cover_url: string | null;
+  member_price_cents: number;
+  currency: string;
 };
 
-const CREATOR_TYPE_LABELS: Record<CreatorType, string> = {
-  musician: "Musician",
-  visual_artist: "Visual artist",
-  influencer: "Influencer",
-  designer: "Designer",
-  photographer: "Photographer",
-  other: "Creator",
-};
-
-const LABELS = ["Retail", "Happenings", "Creators", "Services"];
+const LABELS = ["Retail", "Happenings"];
 
 function ComingSoon({ note }: { note: string }) {
   return (
@@ -95,14 +81,14 @@ function SlideFrame({
 export function SwipeDashboard({
   shopItems,
   events,
-  creators,
+  deals,
   slideImages,
   hiddenSlides,
   initialSlide = 0,
 }: {
   shopItems: ShopItem[];
   events: EventSlide[];
-  creators: CreatorPreview[];
+  deals: DealPreview[];
   slideImages?: DashboardSlideImages;
   hiddenSlides?: DashboardSlideVisibility;
   initialSlide?: number;
@@ -215,70 +201,59 @@ export function SwipeDashboard({
         >
           {hiddenSlides?.happenings ? (
             <ComingSoon note="The calendar is being updated — check back shortly." />
-          ) : events.length > 0 ? (
-            <div className={styles.eventList}>
-              {events.slice(0, 2).map((ev) => (
-                <Link key={ev.id} href="/studio" className={styles.eventCard}>
-                  <span
-                    className={styles.eventCover}
-                    style={ev.cover_url ? { backgroundImage: `url(${ev.cover_url})` } : undefined}
-                    aria-hidden
-                  />
-                  <span className={styles.eventBody}>
-                    <span className={styles.eventTitle}>{ev.title}</span>
-                    <span className={styles.eventMeta}>
-                      {[formatEventDateTime(ev.event_date), ev.location].filter(Boolean).join(" — ")}
-                    </span>
-                  </span>
-                </Link>
-              ))}
-            </div>
           ) : (
-            <p className={styles.emptyNote}>Nothing on the calendar yet — check back soon.</p>
-          )}
-        </SlideFrame>
+            <div className={styles.happeningsSplit}>
+              <div className={styles.happeningsColumn}>
+                <p className={styles.happeningsColumnLabel}>Events</p>
+                {events.length > 0 ? (
+                  <div className={styles.eventList}>
+                    {events.slice(0, 2).map((ev) => (
+                      <Link key={ev.id} href="/studio" className={styles.eventCard}>
+                        <span
+                          className={styles.eventCover}
+                          style={ev.cover_url ? { backgroundImage: `url(${ev.cover_url})` } : undefined}
+                          aria-hidden
+                        />
+                        <span className={styles.eventBody}>
+                          <span className={styles.eventTitle}>{ev.title}</span>
+                          <span className={styles.eventMeta}>
+                            {[formatEventDateTime(ev.event_date), ev.location].filter(Boolean).join(" — ")}
+                          </span>
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={styles.emptyNote}>Nothing on the calendar yet — check back soon.</p>
+                )}
+              </div>
 
-        <SlideFrame
-          index={2}
-          active={active === 2}
-          eyebrow="Creators"
-          title="The roster"
-          image={slideImages?.creators}
-          href={hiddenSlides?.creators ? undefined : "/creators"}
-          linkLabel={hiddenSlides?.creators ? undefined : "Meet the roster"}
-        >
-          {hiddenSlides?.creators ? (
-            <ComingSoon note="The roster page is being updated — check back shortly." />
-          ) : creators.length > 0 ? (
-            <div className={styles.creatorRow}>
-              {creators.slice(0, 3).map((creator) => (
-                <Link key={creator.slug} href={`/creators/${creator.slug}`} className={styles.creatorCard}>
-                  <span
-                    className={styles.creatorMedia}
-                    style={
-                      (creator.avatar_url ?? creator.banner_url)
-                        ? { backgroundImage: `url(${creator.avatar_url ?? creator.banner_url})` }
-                        : undefined
-                    }
-                  />
-                  <span className={styles.creatorType}>{CREATOR_TYPE_LABELS[creator.type]}</span>
-                  <span className={styles.creatorName}>{creator.name}</span>
-                </Link>
-              ))}
+              <div className={styles.happeningsColumn}>
+                <p className={styles.happeningsColumnLabel}>Deals</p>
+                {deals.length > 0 ? (
+                  <div className={styles.eventList}>
+                    {deals.slice(0, 2).map((deal) => (
+                      <Link key={deal.id} href="/studio" className={styles.eventCard}>
+                        <span
+                          className={styles.eventCover}
+                          style={deal.cover_url ? { backgroundImage: `url(${deal.cover_url})` } : undefined}
+                          aria-hidden
+                        />
+                        <span className={styles.eventBody}>
+                          <span className={styles.eventTitle}>{deal.title}</span>
+                          <span className={styles.eventMeta}>
+                            {deal.vendorName} — {formatPrice(deal.member_price_cents, deal.currency)}
+                          </span>
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={styles.emptyNote}>New deals are on their way.</p>
+                )}
+              </div>
             </div>
-          ) : (
-            <p className={styles.emptyNote}>The roster is filling up.</p>
           )}
-        </SlideFrame>
-
-        <SlideFrame
-          index={3}
-          active={active === 3}
-          eyebrow="Services"
-          title="Our services"
-          image={slideImages?.services}
-        >
-          <ComingSoon note="New ways to work with the collective, on the way." />
         </SlideFrame>
       </div>
 

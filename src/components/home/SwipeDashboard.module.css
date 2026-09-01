@@ -181,6 +181,33 @@
 }
 
 /* ============ happenings slide ============ */
+.happeningsSplit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+@media (min-width: 760px) {
+  .happeningsSplit {
+    flex-direction: row;
+    gap: var(--space-2xl);
+  }
+}
+
+.happeningsColumn {
+  flex: 1;
+  min-width: 0;
+}
+
+.happeningsColumnLabel {
+  margin-bottom: var(--space-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
 .eventList {
   display: flex;
   flex-direction: column;
@@ -228,48 +255,7 @@
   font-size: 0.85rem;
 }
 
-/* ============ creators slide ============ */
-.creatorRow {
-  display: flex;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-}
-
-.creatorCard {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  width: 150px;
-}
-
-.creatorMedia {
-  aspect-ratio: 3 / 4;
-  background-size: cover;
-  background-position: center;
-  background-color: var(--surface);
-  border-radius: var(--radius-md);
-  transition: transform var(--dur) var(--ease);
-}
-
-.creatorCard:hover .creatorMedia {
-  transform: translateY(-4px);
-}
-
-.creatorType {
-  margin-top: 0.3rem;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.creatorName {
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-}
-
-/* ============ services slide ============ */
+/* ============ hidden-slide placeholder ============ */
 .comingSoon {
   display: flex;
   flex-direction: column;

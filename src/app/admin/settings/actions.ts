@@ -25,5 +25,4 @@ export async function updateSiteSettings(input: SiteSettingsInput) {
   revalidatePath("/about");
   revalidatePath("/shop");
   revalidatePath("/studio");
-  revalidatePath("/creators");
 }

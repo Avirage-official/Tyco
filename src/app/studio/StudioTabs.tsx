@@ -7,7 +7,7 @@ import styles from "./StudioTabs.module.css";
 
 const tabs = [
   { href: "/studio", label: "Events" },
-  { href: "/studio/creators", label: "Creators" },
+  { href: "/studio/deals", label: "Deals" },
 ];
 
 export function StudioTabs() {
