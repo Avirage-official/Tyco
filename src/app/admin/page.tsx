@@ -4,7 +4,7 @@ import styles from "./admin.module.css";
 
 async function countPublished(
   supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"],
-  table: "creators" | "portfolio_items" | "events" | "products"
+  table: "deals" | "portfolio_items" | "events" | "products"
 ) {
   const { count } = await supabase
     .from(table)
@@ -16,8 +16,8 @@ async function countPublished(
 export default async function AdminDashboard() {
   const { supabase } = await requireAdmin();
 
-  const [creators, portfolio, events, products, pendingOrders, webhookErrors] = await Promise.all([
-    countPublished(supabase, "creators"),
+  const [deals, portfolio, events, products, pendingOrders, webhookErrors] = await Promise.all([
+    countPublished(supabase, "deals"),
     countPublished(supabase, "portfolio_items"),
     countPublished(supabase, "events"),
     countPublished(supabase, "products"),
@@ -33,7 +33,7 @@ export default async function AdminDashboard() {
   ]);
 
   const stats = [
-    { label: "Published creators", value: creators, href: "/admin/creators" },
+    { label: "Published deals", value: deals, href: "/admin/deals" },
     { label: "Portfolio items", value: portfolio, href: "/admin/portfolio" },
     { label: "Published events", value: events, href: "/admin/events" },
     { label: "Products live", value: products, href: "/admin/products" },

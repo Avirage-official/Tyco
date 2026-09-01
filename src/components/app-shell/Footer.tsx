@@ -3,7 +3,6 @@ import { Wordmark } from "./Wordmark";
 import styles from "./Footer.module.css";
 
 const exploreLinks = [
-  { href: "/creators", label: "Creators" },
   { href: "/studio", label: "Happenings" },
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About" },

@@ -13,8 +13,6 @@ const MAX_SLIDES = 8;
 const SWIPE_SLIDES: { key: keyof DashboardSlideImages; label: string }[] = [
   { key: "retail", label: "Retail" },
   { key: "happenings", label: "Happenings" },
-  { key: "creators", label: "Creators" },
-  { key: "services", label: "Services" },
 ];
 
 type Settings = {
@@ -278,11 +276,11 @@ export function SettingsForm({ settings }: { settings: Settings }) {
 
       <h3 style={{ marginTop: "var(--space-lg)" }}>Explore sections</h3>
       <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>
-        Background photo and visibility for each slide of the swipeable Retail / Happenings /
-        Creators / Services section — shown on the dashboard and reused as the hero on /shop,
-        /studio, and /creators. Hide a slide to show a &ldquo;Coming soon&rdquo; placeholder
-        instead of its real content, e.g. mid-incident or between iterations — the slide and its
-        tab stay in place, only the content swaps.
+        Background photo and visibility for each slide of the swipeable Retail / Happenings
+        section — shown on the dashboard and reused as the hero on /shop and /studio. Hide a
+        slide to show a &ldquo;Coming soon&rdquo; placeholder instead of its real content, e.g.
+        mid-incident or between iterations — the slide and its tab stay in place, only the
+        content swaps.
       </p>
 
       {SWIPE_SLIDES.map(({ key, label }) => {

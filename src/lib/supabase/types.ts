@@ -24,15 +24,11 @@ export type AboutSlide = { url: string; type: "image" | "video" };
 export type DashboardSlideImages = {
   retail?: string;
   happenings?: string;
-  creators?: string;
-  services?: string;
 };
 
 export type DashboardSlideVisibility = {
   retail?: boolean;
   happenings?: boolean;
-  creators?: boolean;
-  services?: boolean;
 };
 
 export type Vendor = {
@@ -84,6 +80,7 @@ export type Deal = {
   locations: string[];
   vendor_rate_cents: number;
   margin_percent: number;
+  original_price_cents: number | null;
   currency: string;
   redemptions_per_cycle: number;
   is_published: boolean;
@@ -136,14 +133,6 @@ export type EventSlide = {
   cover_url: string | null;
 };
 
-export type CreatorType =
-  | "musician"
-  | "visual_artist"
-  | "influencer"
-  | "designer"
-  | "photographer"
-  | "other";
-
 export type EventTicket = {
   id: string;
   event_id: string;
@@ -182,92 +171,6 @@ export interface Database {
           username?: string | null;
           display_name?: string | null;
           avatar_url?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        }
-      >;
-      creators: Table<
-        {
-          id: string;
-          slug: string;
-          name: string;
-          type: CreatorType;
-          tagline: string | null;
-          bio: string | null;
-          location: string | null;
-          website_url: string | null;
-          instagram_url: string | null;
-          tiktok_url: string | null;
-          youtube_url: string | null;
-          spotify_url: string | null;
-          avatar_url: string | null;
-          banner_url: string | null;
-          gallery: AboutSlide[];
-          tags: string[];
-          display_order: number;
-          is_featured: boolean;
-          is_published: boolean;
-          published_at: string | null;
-          created_at: string;
-          updated_at: string;
-        },
-        {
-          id?: string;
-          slug: string;
-          name: string;
-          type: CreatorType;
-          tagline?: string | null;
-          bio?: string | null;
-          location?: string | null;
-          website_url?: string | null;
-          instagram_url?: string | null;
-          tiktok_url?: string | null;
-          youtube_url?: string | null;
-          spotify_url?: string | null;
-          avatar_url?: string | null;
-          banner_url?: string | null;
-          gallery?: AboutSlide[];
-          tags?: string[];
-          display_order?: number;
-          is_featured?: boolean;
-          is_published?: boolean;
-          published_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        }
-      >;
-      creator_admin_notes: Table<
-        { creator_id: string; notes: string | null; created_at: string; updated_at: string },
-        { creator_id: string; notes?: string | null; created_at?: string; updated_at?: string }
-      >;
-      creator_works: Table<
-        {
-          id: string;
-          creator_id: string;
-          title: string;
-          description: string | null;
-          cover_url: string | null;
-          media_url: string | null;
-          media_type: "image" | "video" | null;
-          external_url: string | null;
-          display_order: number;
-          is_published: boolean;
-          published_at: string | null;
-          created_at: string;
-          updated_at: string;
-        },
-        {
-          id?: string;
-          creator_id: string;
-          title: string;
-          description?: string | null;
-          cover_url?: string | null;
-          media_url?: string | null;
-          media_type?: "image" | "video" | null;
-          external_url?: string | null;
-          display_order?: number;
-          is_published?: boolean;
-          published_at?: string | null;
           created_at?: string;
           updated_at?: string;
         }
@@ -370,7 +273,6 @@ export interface Database {
           currency: string;
           images: string[];
           category: string | null;
-          creator_id: string | null;
           is_featured: boolean;
           is_published: boolean;
           published_at: string | null;
@@ -385,7 +287,6 @@ export interface Database {
           currency?: string;
           images?: string[];
           category?: string | null;
-          creator_id?: string | null;
           is_featured?: boolean;
           is_published?: boolean;
           published_at?: string | null;
@@ -556,6 +457,7 @@ export interface Database {
           locations?: string[];
           vendor_rate_cents: number;
           margin_percent?: number;
+          original_price_cents?: number | null;
           currency?: string;
           redemptions_per_cycle: number;
           is_published?: boolean;

@@ -1,25 +1,25 @@
 import "server-only";
 import type { createClient } from "@/lib/supabase/server";
 import type { ShopItem } from "@/components/home/FeaturedShop";
-import type { CreatorPreview } from "@/components/home/SwipeDashboard";
+import type { DealPreview } from "@/components/home/SwipeDashboard";
 import type { DashboardSlideImages, DashboardSlideVisibility, EventSlide } from "@/lib/supabase/types";
 
 const SHOP_FIELDS = "id, name, price_cents, currency, images, category, published_at";
 
 /**
- * Everything the swipeable Retail/Happenings/Creators/Services section
- * needs — shared because the same swiper is embedded on the homepage and
- * reused as the hero on /shop, /studio, and /creators.
+ * Everything the swipeable Retail/Happenings section needs — shared because
+ * the same swiper is embedded on the homepage and reused as the hero on
+ * /shop and /studio.
  */
 export async function getSwipeDashboardData(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const [shopItems, events, creators, { slideImages, hiddenSlides }] = await Promise.all([
+  const [shopItems, events, deals, { slideImages, hiddenSlides }] = await Promise.all([
     getFeaturedShop(supabase),
     getUpcomingEvents(supabase),
-    getFeaturedCreators(supabase),
+    getFeaturedDeals(supabase),
     getSlideSettings(supabase),
   ]);
 
-  return { shopItems, events, creators, slideImages, hiddenSlides };
+  return { shopItems, events, deals, slideImages, hiddenSlides };
 }
 
 async function getFeaturedShop(
@@ -61,18 +61,30 @@ async function getUpcomingEvents(
   return events ?? [];
 }
 
-async function getFeaturedCreators(
+async function getFeaturedDeals(
   supabase: Awaited<ReturnType<typeof createClient>>
-): Promise<CreatorPreview[]> {
-  const { data: creators } = await supabase
-    .from("creators")
-    .select("slug, name, type, tagline, avatar_url, banner_url")
+): Promise<DealPreview[]> {
+  const { data: deals } = await supabase
+    .from("deals")
+    .select("id, title, cover_url, vendor_id, vendor_rate_cents, margin_percent, currency")
     .eq("is_published", true)
-    .order("display_order", { ascending: true })
     .order("created_at", { ascending: false })
-    .limit(3);
+    .limit(4);
 
-  return creators ?? [];
+  if (!deals || deals.length === 0) return [];
+
+  const vendorIds = [...new Set(deals.map((d) => d.vendor_id))];
+  const { data: vendors } = await supabase.from("vendors").select("id, name").in("id", vendorIds);
+  const vendorName = new Map((vendors ?? []).map((v) => [v.id, v.name]));
+
+  return deals.map((deal) => ({
+    id: deal.id,
+    title: deal.title,
+    vendorName: vendorName.get(deal.vendor_id) ?? "Vendor",
+    cover_url: deal.cover_url,
+    member_price_cents: Math.round(deal.vendor_rate_cents * (1 + deal.margin_percent / 100)),
+    currency: deal.currency,
+  }));
 }
 
 async function getSlideSettings(

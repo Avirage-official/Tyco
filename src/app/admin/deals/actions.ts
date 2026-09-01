@@ -12,6 +12,7 @@ export type DealInput = {
   locations: string[];
   vendor_rate_cents: number;
   margin_percent: number;
+  original_price_cents: number | null;
   redemptions_per_cycle: number;
 };
 

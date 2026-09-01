@@ -25,6 +25,7 @@ type Deal = {
   locations: string[];
   vendor_rate_cents: number;
   margin_percent: number;
+  original_price_cents: number | null;
   redemptions_per_cycle: number;
 };
 
@@ -57,6 +58,9 @@ export function DealForm({
   const [marginPercent, setMarginPercent] = useState(
     deal ? String(deal.margin_percent) : "10"
   );
+  const [originalPrice, setOriginalPrice] = useState(
+    deal?.original_price_cents != null ? (deal.original_price_cents / 100).toFixed(2) : ""
+  );
   const [redemptionsPerCycle, setRedemptionsPerCycle] = useState(
     deal ? String(deal.redemptions_per_cycle) : ""
   );
@@ -70,6 +74,9 @@ export function DealForm({
     : 0;
   const checkoutTotalCents = Math.round(memberPriceCents * (1 + gatewayFeePercent / 100));
   const tycoMarginCents = memberPriceCents - vendorRateCents;
+  const originalPriceCents = originalPrice.trim() ? Math.round(parseFloat(originalPrice) * 100) : null;
+  const savingsCents =
+    originalPriceCents != null ? originalPriceCents - memberPriceCents : null;
 
   function updateLocation(index: number, value: string) {
     setLocations((prev) => prev.map((l, i) => (i === index ? value : l)));
@@ -93,6 +100,9 @@ export function DealForm({
       if (!Number.isFinite(marginPct) || marginPct < 0) {
         throw new Error("Enter a valid margin percent.");
       }
+      if (originalPriceCents != null && (!Number.isFinite(originalPriceCents) || originalPriceCents < 0)) {
+        throw new Error("Enter a valid compare-at price, or leave it blank.");
+      }
       const redemptionsValue = Number(redemptionsPerCycle);
       if (!Number.isInteger(redemptionsValue) || redemptionsValue <= 0) {
         throw new Error("Redemptions per cycle must be a whole number greater than 0.");
@@ -114,6 +124,7 @@ export function DealForm({
         locations: cleanLocations,
         vendor_rate_cents: vendorRateCents,
         margin_percent: marginPct,
+        original_price_cents: originalPriceCents,
         redemptions_per_cycle: redemptionsValue,
       };
 
@@ -296,9 +307,34 @@ export function DealForm({
         </div>
       </div>
 
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="original_price">
+          Compare-at price (SGD, optional)
+        </label>
+        <input
+          id="original_price"
+          type="number"
+          min="0"
+          step="0.01"
+          className={styles.input}
+          value={originalPrice}
+          onChange={(e) => setOriginalPrice(e.target.value)}
+        />
+        <p className={styles.hint}>
+          The vendor&rsquo;s normal walk-in price. Shown crossed out next to the member price —
+          leave blank to skip the savings line.
+        </p>
+      </div>
+
       <div className={styles.stat}>
         <p className={styles.statLabel}>Auto-calculated</p>
         <p className={styles.rowMeta}>Member sees: {formatPrice(memberPriceCents, "sgd")}</p>
+        {savingsCents != null && (
+          <p className={styles.rowMeta}>
+            Compare-at: {formatPrice(originalPriceCents!, "sgd")}
+            {savingsCents > 0 && <> — saves {formatPrice(savingsCents, "sgd")}</>}
+          </p>
+        )}
         <p className={styles.rowMeta}>
           Checkout total ({gatewayFeePercent}% gateway fee): {formatPrice(checkoutTotalCents, "sgd")}
         </p>
