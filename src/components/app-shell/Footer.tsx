@@ -12,6 +12,7 @@ const accountLinks = [
   { href: "/account", label: "Your account" },
   { href: "/account/orders", label: "Your orders" },
   { href: "/account/tickets", label: "Your tickets" },
+  { href: "/account/deals", label: "Your deals" },
 ];
 
 export function Footer() {

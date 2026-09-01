@@ -58,9 +58,50 @@ export async function POST(request: Request) {
 
   const supabase = createAdminClient();
 
-  // A Revolut order id belongs to exactly one of these two tables — look
-  // both up rather than relying on any prefix trick, since Revolut's own
+  // A Revolut order id belongs to exactly one of these three tables — look
+  // each up rather than relying on any prefix trick, since Revolut's own
   // id carries no signal about which kind of purchase it was.
+  const { data: dealMatch } = await supabase
+    .from("deal_redemptions")
+    .select("id, deal_cycle_id")
+    .eq("revolut_order_id", revolutOrderId)
+    .maybeSingle();
+
+  if (dealMatch) {
+    if (PAYMENT_COMPLETED_EVENTS.has(eventType)) {
+      // Same atomic conditional update as the ticket/order branches below —
+      // only the request that actually flips pending -> paid increments the
+      // cycle's redemption count, so a retried webhook delivery can never
+      // double-count against the monthly cap.
+      const { data: updated } = await supabase
+        .from("deal_redemptions")
+        .update({ status: "paid" })
+        .eq("id", dealMatch.id)
+        .eq("status", "pending")
+        .select("id")
+        .maybeSingle();
+
+      if (updated) {
+        await supabase.rpc("increment_deal_cycle_redemptions", {
+          p_cycle_id: dealMatch.deal_cycle_id,
+          p_quantity: 1,
+        });
+      }
+    } else if (PAYMENT_FAILED_EVENTS.has(eventType)) {
+      await supabase
+        .from("deal_redemptions")
+        .update({ status: "cancelled" })
+        .eq("id", dealMatch.id)
+        .eq("status", "pending");
+    } else {
+      await logWebhookError("revolut", `Unhandled event type for a deal redemption: ${eventType}`, {
+        revolutOrderId,
+      });
+    }
+
+    return NextResponse.json({ received: true });
+  }
+
   const { data: ticketMatch } = await supabase
     .from("event_tickets")
     .select("id")

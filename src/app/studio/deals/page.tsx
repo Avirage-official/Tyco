@@ -2,36 +2,56 @@ import type { Metadata } from "next";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
+import { DealRedeem } from "./DealRedeem";
 import styles from "../studio.module.css";
 
 export const metadata: Metadata = { title: "Deals" };
 
+// First of the current calendar month, UTC — matches the server-side
+// date_trunc('month', now())::date used by get_or_create_deal_cycle. Only
+// used here to show remaining redemptions; the real cap check happens
+// again, authoritatively, inside startDealCheckout at purchase time.
+function currentCycleStart() {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString().slice(0, 10);
+}
+
 export default async function StudioDealsPage() {
   const supabase = await createClient();
 
-  const [{ data: categories }, { data: subcategories }, { data: deals }, { data: vendors }] =
-    await Promise.all([
-      supabase
-        .from("deal_categories")
-        .select("id, name, display_order, is_hidden")
-        .order("display_order"),
-      supabase
-        .from("deal_subcategories")
-        .select("id, category_id, name, is_hidden")
-        .order("display_order"),
-      supabase
-        .from("deals")
-        .select(
-          "id, title, cover_url, subcategory_id, vendor_id, locations, vendor_rate_cents, margin_percent, original_price_cents, currency, redemptions_per_cycle"
-        )
-        .eq("is_published", true)
-        .order("created_at", { ascending: false }),
-      supabase.from("vendors").select("id, name"),
-    ]);
+  const [
+    { data: categories },
+    { data: subcategories },
+    { data: deals },
+    { data: vendors },
+    { data: cycles },
+    { data: userData },
+  ] = await Promise.all([
+    supabase.from("deal_categories").select("id, name, display_order, is_hidden").order("display_order"),
+    supabase
+      .from("deal_subcategories")
+      .select("id, category_id, name, is_hidden")
+      .order("display_order"),
+    supabase
+      .from("deals")
+      .select(
+        "id, title, cover_url, subcategory_id, vendor_id, locations, vendor_rate_cents, margin_percent, original_price_cents, currency, redemptions_per_cycle"
+      )
+      .eq("is_published", true)
+      .order("created_at", { ascending: false }),
+    supabase.from("vendors").select("id, name"),
+    supabase
+      .from("deal_cycles")
+      .select("deal_id, redemptions_cap, redemptions_used")
+      .eq("cycle_start", currentCycleStart()),
+    supabase.auth.getUser(),
+  ]);
 
   const visibleCategories = (categories ?? []).filter((c) => !c.is_hidden);
   const subcategoryById = new Map((subcategories ?? []).map((s) => [s.id, s]));
   const vendorName = new Map((vendors ?? []).map((v) => [v.id, v.name]));
+  const cycleByDealId = new Map((cycles ?? []).map((c) => [c.deal_id, c]));
+  const signedIn = Boolean(userData.user);
 
   const visibleDeals = (deals ?? []).filter((deal) => {
     const sub = subcategoryById.get(deal.subcategory_id);
@@ -70,6 +90,9 @@ export default async function StudioDealsPage() {
                 deal.vendor_rate_cents * (1 + deal.margin_percent / 100)
               );
               const sub = subcategoryById.get(deal.subcategory_id);
+              const cycle = cycleByDealId.get(deal.id);
+              const capRemaining =
+                (cycle?.redemptions_cap ?? deal.redemptions_per_cycle) - (cycle?.redemptions_used ?? 0);
 
               return (
                 <div key={deal.id} className={styles.posterCard}>
@@ -92,6 +115,15 @@ export default async function StudioDealsPage() {
                           {formatPrice(deal.original_price_cents, deal.currency)}
                         </span>
                       )}
+                    </div>
+                    <div className={styles.dealAction}>
+                      <DealRedeem
+                        dealId={deal.id}
+                        memberPriceCents={memberPriceCents}
+                        currency={deal.currency}
+                        capRemaining={capRemaining}
+                        signedIn={signedIn}
+                      />
                     </div>
                   </div>
                 </div>
