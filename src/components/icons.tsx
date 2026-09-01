@@ -143,6 +143,45 @@ export function IconCheck(props: IconProps) {
   );
 }
 
+export function IconCalendar(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="4.5" y="6" width="15" height="13.5" rx="1.5" />
+      <path d="M4.5 10h15" />
+      <path d="M8.2 4.2v3.4M15.8 4.2v3.4" />
+      <circle cx="12" cy="15" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function IconClock(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12.2" r="7.7" />
+      <path d="M12 7.7v4.7l3.4 2" />
+      <circle cx="12" cy="4.2" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function IconPin(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 3.5c3.3 0 6 2.6 6 6.2 0 4.4-4.4 8.6-6 10.8-1.6-2.2-6-6.4-6-10.8 0-3.6 2.7-6.2 6-6.2Z" />
+      <circle cx="12" cy="9.6" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function IconTag(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12.5 4.5H6.8a1 1 0 0 0-1 1v5.7a1 1 0 0 0 .3.7l8 8a1 1 0 0 0 1.4 0l5.4-5.4a1 1 0 0 0 0-1.4l-8-8a1 1 0 0 0-.4-.3Z" />
+      <circle cx="9" cy="9" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function IconBoat(props: IconProps) {
   return (
     <svg {...base} {...props}>

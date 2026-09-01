@@ -1,5 +1,7 @@
 import { PageHeader } from "@/components/ui/PageHeader";
+import { StudioSidebar } from "./StudioSidebar";
 import { StudioTabs } from "./StudioTabs";
+import styles from "./studio.module.css";
 
 export default function StudioLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,9 +11,14 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
         title="Happenings"
         description="The creative work in progress, and every event we've thrown or have coming up."
       />
-      <div className="container">
-        <StudioTabs />
-        <div style={{ paddingBlock: "var(--space-lg)" }}>{children}</div>
+      <div className={`container ${styles.shell}`}>
+        <StudioSidebar />
+        <div className={styles.shellContent}>
+          <div className={styles.mobileTabs}>
+            <StudioTabs />
+          </div>
+          {children}
+        </div>
       </div>
     </>
   );

@@ -3,144 +3,192 @@
   font-size: 1.2rem;
 }
 
-/* -- gig list (secondary upcoming dates) ------------------------------ */
+/* -- sidebar shell ------------------------------------------------------ */
 
-.gigList {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid var(--border);
+.shell {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+  padding-block: var(--space-lg);
 }
 
-.gigRow {
+@media (min-width: 900px) {
+  .shell {
+    grid-template-columns: 220px 1fr;
+  }
+}
+
+.shellContent {
+  min-width: 0;
+}
+
+.mobileTabs {
+  margin-bottom: var(--space-lg);
+}
+
+@media (min-width: 900px) {
+  .mobileTabs {
+    display: none;
+  }
+}
+
+/* -- event grid (secondary upcoming dates, "marketplace" style) -------- */
+
+.eventGrid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.eventCard {
   position: relative;
   isolation: isolate;
   display: flex;
-  align-items: center;
-  gap: var(--space-lg);
-  padding-block: var(--space-lg);
-  border-bottom: 1px solid var(--border);
+  flex-direction: column;
+  min-height: 320px;
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
   overflow: hidden;
+  background: var(--surface);
 }
 
-.gigBg {
+.eventCardMedia {
   position: absolute;
   inset: 0;
   z-index: -2;
-  display: block;
   background-size: cover;
   background-position: center;
-  opacity: 0.14;
-  transform: scale(1.04);
-  transition: opacity 500ms var(--ease), transform 500ms var(--ease);
+  filter: grayscale(1) contrast(1.08);
+  transition: transform 600ms var(--ease);
 }
 
-.gigRow:hover .gigBg {
-  opacity: 0.55;
-  transform: scale(1);
+.eventCard:hover .eventCardMedia {
+  transform: scale(1.05);
 }
 
-.gigScrim {
+.eventCardScrim {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(
-    90deg,
-    var(--bg) 15%,
-    rgba(16, 14, 13, 0.88) 55%,
-    rgba(16, 14, 13, 0.6) 100%
-  );
+  background: linear-gradient(180deg, rgba(16, 14, 13, 0.15) 0%, rgba(16, 14, 13, 0.95) 78%);
 }
 
-.gigDate {
-  flex-shrink: 0;
-  width: 4.5rem;
+.eventCardScrim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(200deg, var(--red-deep) -10%, transparent 55%);
+  mix-blend-mode: multiply;
+  opacity: 0.4;
+}
+
+.eventCardTop {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
+  justify-content: space-between;
 }
 
-.gigDateMonth {
+.eventCardDate {
   font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent);
 }
 
-.gigDateDay {
-  font-family: var(--font-display);
-  font-size: 2.6rem;
+.eventCardBody {
+  margin-top: auto;
+}
+
+.eventCardTitle {
+  font-size: 1.3rem;
   font-weight: 700;
-  line-height: 1.05;
-  font-variant-numeric: tabular-nums;
+  color: var(--paper);
 }
 
-.gigDateTime {
+.eventCardMeta {
   margin-top: 0.3rem;
-  font-size: 0.7rem;
-  line-height: 1.4;
-  color: var(--fg-muted);
-  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--paper) 72%, transparent);
+  font-size: 0.85rem;
 }
 
-.gigMeta {
-  flex: 1;
-  min-width: 0;
-}
-
-.gigTitle {
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-
-.gigLocation {
-  margin-top: 0.3rem;
-  color: var(--fg-muted);
-  font-size: 0.9rem;
-}
-
-.gigOrganizer {
-  margin-top: 0.15rem;
-  color: var(--fg-muted);
-  font-size: 0.8rem;
-  font-style: italic;
-}
-
-.gigPrice {
+.eventCardPrice {
   margin-top: 0.5rem;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--accent);
 }
 
-.gigAction {
-  flex-shrink: 0;
+.eventCardAction {
+  margin-top: var(--space-sm);
 }
 
-@media (max-width: 720px) {
-  .gigRow {
-    flex-wrap: wrap;
-  }
+/* -- waveform (ambient hover cue, events only) -------------------------- */
 
-  .gigDate {
-    width: 3.6rem;
-  }
+.waveform {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 20px;
+}
 
-  .gigDateDay {
-    font-size: 2.1rem;
-  }
+.waveformBar {
+  width: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  transform-origin: bottom;
+  transform: scaleY(0.45);
+  transition: transform 200ms var(--ease);
+}
 
-  .gigAction {
-    width: 100%;
-    padding-left: calc(3.6rem + var(--space-lg));
+.waveformBar:nth-child(1) {
+  height: 6px;
+}
+.waveformBar:nth-child(2) {
+  height: 12px;
+  animation-delay: 90ms;
+}
+.waveformBar:nth-child(3) {
+  height: 18px;
+  animation-delay: 180ms;
+}
+.waveformBar:nth-child(4) {
+  height: 10px;
+  animation-delay: 60ms;
+}
+.waveformBar:nth-child(5) {
+  height: 16px;
+  animation-delay: 240ms;
+}
+.waveformBar:nth-child(6) {
+  height: 8px;
+  animation-delay: 130ms;
+}
+
+.eventCard:hover .waveformBar,
+.eventCard:focus-within .waveformBar {
+  animation: waveformPulse 850ms ease-in-out infinite;
+}
+
+@keyframes waveformPulse {
+  0%,
+  100% {
+    transform: scaleY(0.45);
+  }
+  50% {
+    transform: scaleY(1.15);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gigBg {
-    transform: none;
-    transition: opacity 300ms ease;
+  .eventCardMedia {
+    transition: none;
+  }
+  .eventCard:hover .waveformBar,
+  .eventCard:focus-within .waveformBar {
+    animation: none;
+    transform: scaleY(0.8);
   }
 }
 

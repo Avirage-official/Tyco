@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatEventDateParts, formatPrice } from "@/lib/format";
 import { EventHero } from "./EventHero";
 import { TicketPurchase } from "./TicketPurchase";
+import { Waveform } from "./Waveform";
 import styles from "./studio.module.css";
 
 export const metadata: Metadata = { title: "Events" };
@@ -18,7 +19,7 @@ export default async function StudioEventsPage() {
     supabase
       .from("events")
       .select(
-        "id, title, location, organizer, event_date, cover_url, cover_video_url, price_cents, currency, capacity, capacity_remaining"
+        "id, title, description, location, organizer, event_date, cover_url, cover_video_url, price_cents, currency, capacity, capacity_remaining"
       )
       .eq("is_published", true)
       .gte("event_date", nowIso)
@@ -59,47 +60,42 @@ export default async function StudioEventsPage() {
       {restUpcoming.length > 0 && (
         <section style={{ marginTop: "var(--space-2xl)" }}>
           <h2 className={styles.sectionTitle}>More dates</h2>
-          <div className={styles.gigList}>
+          <div className={styles.eventGrid}>
             {restUpcoming.map((event) => {
               const { month, day, weekday, time } = formatEventDateParts(event.event_date);
               return (
-                <div key={event.id} className={styles.gigRow}>
-                  {event.cover_url && (
-                    <span
-                      className={styles.gigBg}
-                      style={{ backgroundImage: `url(${event.cover_url})` }}
-                      aria-hidden
-                    />
-                  )}
-                  <span className={styles.gigScrim} aria-hidden />
+                <div key={event.id} className={styles.eventCard}>
+                  <span
+                    className={styles.eventCardMedia}
+                    style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
+                    aria-hidden
+                  />
+                  <span className={styles.eventCardScrim} aria-hidden />
 
-                  <div className={styles.gigDate}>
-                    <span className={styles.gigDateMonth}>{month}</span>
-                    <span className={styles.gigDateDay}>{day}</span>
-                    <span className={styles.gigDateTime}>
-                      {weekday}
-                      <br />
-                      {time}
+                  <div className={styles.eventCardTop}>
+                    <span className={styles.eventCardDate}>
+                      {month} {day}
                     </span>
+                    <Waveform />
                   </div>
 
-                  <div className={styles.gigMeta}>
-                    <h3 className={styles.gigTitle}>{event.title}</h3>
-                    {event.location && <p className={styles.gigLocation}>{event.location}</p>}
-                    {event.organizer && <p className={styles.gigOrganizer}>Hosted by {event.organizer}</p>}
-                    <p className={styles.gigPrice}>
+                  <div className={styles.eventCardBody}>
+                    <h3 className={styles.eventCardTitle}>{event.title}</h3>
+                    <p className={styles.eventCardMeta}>
+                      {[weekday + " · " + time, event.location].filter(Boolean).join(" — ")}
+                    </p>
+                    <p className={styles.eventCardPrice}>
                       {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free entry"}
                     </p>
-                  </div>
-
-                  <div className={styles.gigAction}>
-                    <TicketPurchase
-                      eventId={event.id}
-                      priceCents={event.price_cents}
-                      currency={event.currency}
-                      capacityRemaining={event.capacity != null ? event.capacity_remaining : null}
-                      signedIn={signedIn}
-                    />
+                    <div className={styles.eventCardAction}>
+                      <TicketPurchase
+                        eventId={event.id}
+                        priceCents={event.price_cents}
+                        currency={event.currency}
+                        capacityRemaining={event.capacity != null ? event.capacity_remaining : null}
+                        signedIn={signedIn}
+                      />
+                    </div>
                   </div>
                 </div>
               );
