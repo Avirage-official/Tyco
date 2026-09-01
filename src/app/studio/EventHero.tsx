@@ -1,4 +1,3 @@
-import { IconCalendar, IconClock, IconPin, IconTicket } from "@/components/icons";
 import { formatEventDateParts, formatPrice } from "@/lib/format";
 import { TicketPurchase } from "./TicketPurchase";
 import styles from "./EventHero.module.css";
@@ -25,6 +24,12 @@ export function EventHero({ event, signedIn }: { event: HeroEvent; signedIn: boo
       ? event.capacity - event.capacity_remaining
       : null;
 
+  const metaParts = [
+    event.location,
+    event.organizer && `Hosted by ${event.organizer}`,
+    event.capacity != null && `${event.capacity_remaining} seats left`,
+  ].filter(Boolean) as string[];
+
   return (
     <section className={styles.hero}>
       <p className={styles.eyebrow}>Next up</p>
@@ -42,68 +47,39 @@ export function EventHero({ event, signedIn }: { event: HeroEvent; signedIn: boo
           />
         )}
         <span className={styles.scrim} aria-hidden />
-
-        {(event.location || event.organizer) && (
-          <div className={styles.tagRow}>
-            {event.location && (
-              <span className={styles.tag}>
-                <IconPin className={styles.tagIcon} />
-                {event.location}
-              </span>
-            )}
-            {event.organizer && <span className={styles.tag}>{event.organizer}</span>}
-          </div>
-        )}
       </div>
 
       <div className={styles.body}>
         <div className={styles.main}>
-          <h1 className={styles.title}>{event.title}</h1>
-          {event.description && <p className={styles.description}>{event.description}</p>}
-
-          <div className={styles.infoGrid}>
-            <div className={styles.infoCard}>
-              <IconCalendar className={styles.infoIcon} />
-              <span className={styles.infoLabel}>Date</span>
-              <span className={styles.infoValue}>
-                {month} {day}
-              </span>
-            </div>
-            <div className={styles.infoCard}>
-              <IconClock className={styles.infoIcon} />
-              <span className={styles.infoLabel}>Time</span>
-              <span className={styles.infoValue}>{time}</span>
-            </div>
-            {event.location && (
-              <div className={styles.infoCard}>
-                <IconPin className={styles.infoIcon} />
-                <span className={styles.infoLabel}>Venue</span>
-                <span className={styles.infoValue}>{event.location}</span>
-              </div>
-            )}
-            <div className={styles.infoCard}>
-              <IconTicket className={styles.infoIcon} />
-              <span className={styles.infoLabel}>Seats</span>
-              <span className={styles.infoValue}>
-                {event.capacity != null ? `${event.capacity_remaining} left` : "Open"}
-              </span>
-            </div>
+          <div className={styles.dateRow}>
+            <span className={styles.dateBig}>
+              {month} {day}
+            </span>
+            <span className={styles.dateDetail}>
+              {weekday} · {time}
+            </span>
           </div>
 
-          {(event.organizer || going !== null) && (
-            <div className={styles.hostCard}>
-              {event.organizer && <span>Hosted by {event.organizer}</span>}
-              {going !== null && <span>{going} going</span>}
+          <h1 className={styles.title}>{event.title}</h1>
+
+          {metaParts.length > 0 && (
+            <div className={styles.metaRow}>
+              {metaParts.map((part) => (
+                <span key={part}>{part}</span>
+              ))}
             </div>
           )}
+
+          {event.description && <p className={styles.description}>{event.description}</p>}
+
+          {going !== null && <p className={styles.going}>{going} going</p>}
         </div>
 
-        <div className={styles.bookingCard}>
+        <div className={styles.bookingPanel}>
           <p className={styles.bookingPrice}>
             {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free"}
             {event.price_cents > 0 && <span className={styles.bookingPriceUnit}>/pax</span>}
           </p>
-          <p className={styles.bookingHint}>{weekday}, {month} {day}</p>
           <div className={styles.bookingAction}>
             <TicketPurchase
               eventId={event.id}
