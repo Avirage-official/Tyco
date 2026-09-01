@@ -57,11 +57,11 @@ export function WhoWeAreHero({ slides }: { slides: AboutSlide[] }) {
 
       <div className={`container ${styles.frame}`}>
         <p className={styles.blurb}>
-          TYCO is a Singapore-based artistic collective operating across music
-          production, fashion design, live events, and brand collaborations —
-          each revenue stream feeding our annual community mission fund.
-          We&apos;re not a nonprofit. We&apos;re artists who make money and
-          choose where it goes.
+          TYCO is a Southeast Asia-rooted creative collective — part
+          community, part commerce. We put out apparel that carries the
+          culture, back the creators building it, and we&apos;re opening up
+          real access to the studios, bars, and lessons creatives already
+          spend on.
         </p>
 
         <div className={styles.bottom}>
