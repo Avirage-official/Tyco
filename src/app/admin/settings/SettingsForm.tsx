@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteFromBucket, uploadToBucket } from "@/lib/supabase/upload";
 import { Button } from "@/components/ui/Button";
-import type { AboutSlide, DashboardSlideImages } from "@/lib/supabase/types";
+import type { AboutSlide, DashboardSlideImages, DashboardSlideVisibility } from "@/lib/supabase/types";
 import { updateSiteSettings } from "./actions";
 import styles from "../admin.module.css";
 
@@ -26,6 +26,7 @@ type Settings = {
   mission_blurb: string | null;
   about_gallery: AboutSlide[];
   dashboard_slide_images: DashboardSlideImages;
+  dashboard_hidden_slides: DashboardSlideVisibility;
 } | null;
 
 export function SettingsForm({ settings }: { settings: Settings }) {
@@ -44,6 +45,9 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   );
   const [swipeImageFiles, setSwipeImageFiles] = useState<Partial<Record<keyof DashboardSlideImages, File>>>(
     {}
+  );
+  const [hiddenSlides, setHiddenSlides] = useState<DashboardSlideVisibility>(
+    settings?.dashboard_hidden_slides ?? {}
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +88,10 @@ export function SettingsForm({ settings }: { settings: Settings }) {
       return next;
     });
     setSwipeImageFile(key, null);
+  }
+
+  function toggleHidden(key: keyof DashboardSlideVisibility, hidden: boolean) {
+    setHiddenSlides((prev) => ({ ...prev, [key]: hidden }));
   }
 
   const remainingSlots = MAX_SLIDES - slides.length - slideFiles.length;
@@ -150,6 +158,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         mission_blurb: missionBlurb || null,
         about_gallery: [...slides, ...newSlides],
         dashboard_slide_images: finalSwipeImages,
+        dashboard_hidden_slides: hiddenSlides,
       });
 
       // Save succeeded — now safe to clean up whatever it orphaned. Best
@@ -267,15 +276,18 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         )}
       </div>
 
-      <h3 style={{ marginTop: "var(--space-lg)" }}>Explore section backgrounds</h3>
+      <h3 style={{ marginTop: "var(--space-lg)" }}>Explore sections</h3>
       <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>
-        Background photo for each slide of the swipeable Retail / Happenings / Creators / Services
-        section — shown on the dashboard and reused as the hero on /shop, /studio, and /creators.
-        Optional — a slide with no image just keeps a plain background.
+        Background photo and visibility for each slide of the swipeable Retail / Happenings /
+        Creators / Services section — shown on the dashboard and reused as the hero on /shop,
+        /studio, and /creators. Hide a slide to show a &ldquo;Coming soon&rdquo; placeholder
+        instead of its real content, e.g. mid-incident or between iterations — the slide and its
+        tab stay in place, only the content swaps.
       </p>
 
       {SWIPE_SLIDES.map(({ key, label }) => {
         const previewUrl = swipeImagePreviews[key] ?? swipeImages[key];
+        const hidden = Boolean(hiddenSlides[key]);
         return (
           <div key={key} className={styles.field}>
             <label className={styles.label} htmlFor={`swipe-${key}`}>
@@ -305,6 +317,16 @@ export function SettingsForm({ settings }: { settings: Settings }) {
                 e.target.value = "";
               }}
             />
+            <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "var(--space-xs)" }}>
+              <input
+                type="checkbox"
+                checked={hidden}
+                onChange={(e) => toggleHidden(key, e.target.checked)}
+              />
+              <span style={{ fontSize: "0.85rem" }}>
+                Hide {label} (show &ldquo;Coming soon&rdquo; instead)
+              </span>
+            </label>
           </div>
         );
       })}

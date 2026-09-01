@@ -1,7 +1,7 @@
 import { VideoHero } from "@/components/home/VideoHero";
 import { SwipeDashboard, type CreatorPreview } from "@/components/home/SwipeDashboard";
 import type { ShopItem } from "@/components/home/FeaturedShop";
-import type { DashboardSlideImages, EventSlide } from "@/lib/supabase/types";
+import type { DashboardSlideImages, DashboardSlideVisibility, EventSlide } from "@/lib/supabase/types";
 import styles from "./Dashboard.module.css";
 
 export type DashboardProps = {
@@ -10,9 +10,17 @@ export type DashboardProps = {
   shopItems: ShopItem[];
   creators: CreatorPreview[];
   slideImages: DashboardSlideImages;
+  hiddenSlides: DashboardSlideVisibility;
 };
 
-export function Dashboard({ name, events, shopItems, creators, slideImages }: DashboardProps) {
+export function Dashboard({
+  name,
+  events,
+  shopItems,
+  creators,
+  slideImages,
+  hiddenSlides,
+}: DashboardProps) {
   return (
     <>
       <VideoHero size="compact">
@@ -20,7 +28,13 @@ export function Dashboard({ name, events, shopItems, creators, slideImages }: Da
         <h1 className={styles.heroTitle}>Welcome back, {name}</h1>
       </VideoHero>
 
-      <SwipeDashboard events={events} shopItems={shopItems} creators={creators} slideImages={slideImages} />
+      <SwipeDashboard
+        events={events}
+        shopItems={shopItems}
+        creators={creators}
+        slideImages={slideImages}
+        hiddenSlides={hiddenSlides}
+      />
     </>
   );
 }

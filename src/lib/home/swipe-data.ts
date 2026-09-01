@@ -2,7 +2,7 @@ import "server-only";
 import type { createClient } from "@/lib/supabase/server";
 import type { ShopItem } from "@/components/home/FeaturedShop";
 import type { CreatorPreview } from "@/components/home/SwipeDashboard";
-import type { DashboardSlideImages, EventSlide } from "@/lib/supabase/types";
+import type { DashboardSlideImages, DashboardSlideVisibility, EventSlide } from "@/lib/supabase/types";
 
 const SHOP_FIELDS = "id, name, price_cents, currency, images, category, published_at";
 
@@ -12,14 +12,14 @@ const SHOP_FIELDS = "id, name, price_cents, currency, images, category, publishe
  * reused as the hero on /shop, /studio, and /creators.
  */
 export async function getSwipeDashboardData(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const [shopItems, events, creators, slideImages] = await Promise.all([
+  const [shopItems, events, creators, { slideImages, hiddenSlides }] = await Promise.all([
     getFeaturedShop(supabase),
     getUpcomingEvents(supabase),
     getFeaturedCreators(supabase),
-    getSlideImages(supabase),
+    getSlideSettings(supabase),
   ]);
 
-  return { shopItems, events, creators, slideImages };
+  return { shopItems, events, creators, slideImages, hiddenSlides };
 }
 
 async function getFeaturedShop(
@@ -75,14 +75,17 @@ async function getFeaturedCreators(
   return creators ?? [];
 }
 
-async function getSlideImages(
+async function getSlideSettings(
   supabase: Awaited<ReturnType<typeof createClient>>
-): Promise<DashboardSlideImages> {
+): Promise<{ slideImages: DashboardSlideImages; hiddenSlides: DashboardSlideVisibility }> {
   const { data } = await supabase
     .from("site_settings")
-    .select("dashboard_slide_images")
+    .select("dashboard_slide_images, dashboard_hidden_slides")
     .eq("id", true)
     .maybeSingle();
 
-  return data?.dashboard_slide_images ?? {};
+  return {
+    slideImages: data?.dashboard_slide_images ?? {},
+    hiddenSlides: data?.dashboard_hidden_slides ?? {},
+  };
 }

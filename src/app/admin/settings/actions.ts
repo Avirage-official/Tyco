@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin/require-admin";
-import type { AboutSlide, DashboardSlideImages } from "@/lib/supabase/types";
+import type { AboutSlide, DashboardSlideImages, DashboardSlideVisibility } from "@/lib/supabase/types";
 
 export type SiteSettingsInput = {
   next_project_title: string | null;
@@ -13,6 +13,7 @@ export type SiteSettingsInput = {
   mission_blurb: string | null;
   about_gallery: AboutSlide[];
   dashboard_slide_images: DashboardSlideImages;
+  dashboard_hidden_slides: DashboardSlideVisibility;
 };
 
 export async function updateSiteSettings(input: SiteSettingsInput) {
