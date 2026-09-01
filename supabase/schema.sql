@@ -897,6 +897,10 @@ alter table public.site_settings add column if not exists dashboard_slide_images
 -- "coming soon" placeholder (e.g. mid-incident or between iterations)
 -- without removing the slide/tab itself.
 alter table public.site_settings add column if not exists dashboard_hidden_slides jsonb not null default '{}'::jsonb;
+-- Default payment-gateway fee percent applied on top of a deal's member
+-- price at checkout (see deal_redemptions below) — snapshotted onto each
+-- redemption at purchase time so a later change never rewrites history.
+alter table public.site_settings add column if not exists deal_gateway_fee_percent numeric(5,2) not null default 3.00;
 
 insert into public.site_settings (id)
 values (true)
@@ -927,6 +931,452 @@ drop trigger if exists set_site_settings_updated_at on public.site_settings;
 create trigger set_site_settings_updated_at
   before update on public.site_settings
   for each row execute function public.set_updated_at();
+
+-- ----------------------------------------------------------------------------
+-- vendors — the merchant side of a deal (Membership Deals Network). Split
+-- into a public-safe row (name only) + admin-only notes, same reasoning as
+-- creators / creator_admin_notes: contact info should never come back
+-- through a public "show me this deal" query.
+-- ----------------------------------------------------------------------------
+create table if not exists public.vendors (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.vendors enable row level security;
+
+drop policy if exists "active vendors are public" on public.vendors;
+create policy "active vendors are public"
+  on public.vendors for select
+  using (is_active = true);
+
+drop policy if exists "admins manage vendors" on public.vendors;
+create policy "admins manage vendors"
+  on public.vendors for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_vendors_updated_at on public.vendors;
+create trigger set_vendors_updated_at
+  before update on public.vendors
+  for each row execute function public.set_updated_at();
+
+create table if not exists public.vendor_admin_notes (
+  vendor_id uuid primary key references public.vendors (id) on delete cascade,
+  contact_name text,
+  contact_email text,
+  contact_phone text,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.vendor_admin_notes enable row level security;
+
+drop policy if exists "admins manage vendor notes" on public.vendor_admin_notes;
+create policy "admins manage vendor notes"
+  on public.vendor_admin_notes for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_vendor_admin_notes_updated_at on public.vendor_admin_notes;
+create trigger set_vendor_admin_notes_updated_at
+  before update on public.vendor_admin_notes
+  for each row execute function public.set_updated_at();
+
+-- ----------------------------------------------------------------------------
+-- deal_categories / deal_subcategories — two-level taxonomy for the deals
+-- network, admin-hideable at either level. Rows stay selectable even when
+-- hidden (same "coming soon" pattern as dashboard_hidden_slides above) — the
+-- app decides what to render, hiding isn't done by withholding the row.
+-- ----------------------------------------------------------------------------
+create table if not exists public.deal_categories (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  name text not null,
+  display_order integer not null default 0,
+  is_hidden boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.deal_categories enable row level security;
+
+drop policy if exists "deal categories are public" on public.deal_categories;
+create policy "deal categories are public"
+  on public.deal_categories for select
+  using (true);
+
+drop policy if exists "admins manage deal categories" on public.deal_categories;
+create policy "admins manage deal categories"
+  on public.deal_categories for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_deal_categories_updated_at on public.deal_categories;
+create trigger set_deal_categories_updated_at
+  before update on public.deal_categories
+  for each row execute function public.set_updated_at();
+
+create table if not exists public.deal_subcategories (
+  id uuid primary key default gen_random_uuid(),
+  category_id uuid not null references public.deal_categories (id) on delete cascade,
+  slug text not null,
+  name text not null,
+  display_order integer not null default 0,
+  is_hidden boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.deal_subcategories drop constraint if exists deal_subcategories_category_slug_key;
+alter table public.deal_subcategories add constraint deal_subcategories_category_slug_key
+  unique (category_id, slug);
+
+alter table public.deal_subcategories enable row level security;
+
+drop policy if exists "deal subcategories are public" on public.deal_subcategories;
+create policy "deal subcategories are public"
+  on public.deal_subcategories for select
+  using (true);
+
+drop policy if exists "admins manage deal subcategories" on public.deal_subcategories;
+create policy "admins manage deal subcategories"
+  on public.deal_subcategories for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_deal_subcategories_updated_at on public.deal_subcategories;
+create trigger set_deal_subcategories_updated_at
+  before update on public.deal_subcategories
+  for each row execute function public.set_updated_at();
+
+create index if not exists deal_subcategories_category_id_idx
+  on public.deal_subcategories (category_id, display_order);
+
+-- Seed the initial category/subcategory taxonomy. Safe to re-run.
+insert into public.deal_categories (slug, name, display_order) values
+  ('look-grooming', 'Look & Grooming', 1),
+  ('fitness-wellness', 'Fitness & Wellness', 2),
+  ('creative-tools-studios', 'Creative Tools & Studios', 3),
+  ('food-social', 'Food & Social', 4),
+  ('skills-learning', 'Skills & Learning', 5),
+  ('work-money', 'Work & Money', 6),
+  ('fashion-retail', 'Fashion & Retail', 7)
+on conflict (slug) do nothing;
+
+insert into public.deal_subcategories (category_id, slug, name, display_order)
+select c.id, v.slug, v.name, v.display_order
+from (values
+  ('look-grooming', 'barbers', 'Barbers / hairdressers', 1),
+  ('look-grooming', 'skincare-aesthetics', 'Skincare / facials / aesthetics', 2),
+  ('look-grooming', 'nail-studios', 'Nail studios', 3),
+  ('look-grooming', 'tailoring-alterations', 'Tailoring / alterations', 4),
+  ('look-grooming', 'dry-cleaning-laundry', 'Dry cleaning / laundry', 5),
+  ('fitness-wellness', 'gyms-fitness-studios', 'Gyms / fitness studios', 1),
+  ('fitness-wellness', 'martial-arts', 'Muay Thai / boxing / martial arts', 2),
+  ('fitness-wellness', 'yoga-pilates', 'Yoga / pilates', 3),
+  ('fitness-wellness', 'massage-recovery', 'Massage / recovery', 4),
+  ('creative-tools-studios', 'photography-studios', 'Photography studio rentals', 1),
+  ('creative-tools-studios', 'videography-studios', 'Videography / production studio rentals', 2),
+  ('creative-tools-studios', 'recording-podcast-studios', 'Recording / podcast studios', 3),
+  ('creative-tools-studios', 'rehearsal-dance-studios', 'Rehearsal / dance studios', 4),
+  ('creative-tools-studios', 'print-shops', 'Print shops', 5),
+  ('creative-tools-studios', 'framing-art-supply', 'Framing / art supply stores', 6),
+  ('food-social', 'cafes-coworking', 'Cafes / coworking-friendly spots', 1),
+  ('food-social', 'bars-lounges', 'Bars / lounges', 2),
+  ('food-social', 'restaurants', 'Restaurants', 3),
+  ('skills-learning', 'music-lessons', 'Music lessons', 1),
+  ('skills-learning', 'dance-lessons', 'Dance lessons', 2),
+  ('skills-learning', 'language-classes', 'Language classes', 3),
+  ('skills-learning', 'design-software-courses', 'Design/software courses', 4),
+  ('work-money', 'coworking-spaces', 'Coworking spaces (day passes)', 1),
+  ('work-money', 'freelancer-tools', 'Freelancer accounting/invoicing tools', 2),
+  ('work-money', 'business-registration', 'Business registration / ACRA-adjacent services', 3),
+  ('fashion-retail', 'sneaker-cleaning', 'Sneaker cleaning/customization', 1),
+  ('fashion-retail', 'vintage-thrift', 'Vintage/thrift stores', 2),
+  ('fashion-retail', 'jewelry-repair', 'Jewelry/accessories repair', 3)
+) as v(category_slug, slug, name, display_order)
+join public.deal_categories c on c.slug = v.category_slug
+on conflict (category_id, slug) do nothing;
+
+-- ----------------------------------------------------------------------------
+-- deals — vendor_rate_cents + margin_percent are the two admin inputs;
+-- everything else (member price, gateway fee, checkout total) is derived in
+-- the app, never hand-entered. margin_percent defaults to 10% but is
+-- editable per deal.
+-- ----------------------------------------------------------------------------
+create table if not exists public.deals (
+  id uuid primary key default gen_random_uuid(),
+  vendor_id uuid not null references public.vendors (id) on delete cascade,
+  subcategory_id uuid not null references public.deal_subcategories (id) on delete restrict,
+  title text not null,
+  description text,
+  cover_url text,
+  locations text[] not null default '{}',
+  vendor_rate_cents integer not null,
+  margin_percent numeric(5,2) not null default 10.00,
+  currency text not null default 'usd',
+  redemptions_per_cycle integer not null,
+  is_published boolean not null default false,
+  published_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.deals drop constraint if exists deals_vendor_rate_non_negative;
+alter table public.deals add constraint deals_vendor_rate_non_negative
+  check (vendor_rate_cents >= 0);
+
+alter table public.deals drop constraint if exists deals_margin_non_negative;
+alter table public.deals add constraint deals_margin_non_negative
+  check (margin_percent >= 0);
+
+alter table public.deals drop constraint if exists deals_redemptions_per_cycle_positive;
+alter table public.deals add constraint deals_redemptions_per_cycle_positive
+  check (redemptions_per_cycle > 0);
+
+alter table public.deals enable row level security;
+
+drop policy if exists "published deals are public" on public.deals;
+create policy "published deals are public"
+  on public.deals for select
+  using (is_published = true);
+
+drop policy if exists "admins manage deals" on public.deals;
+create policy "admins manage deals"
+  on public.deals for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_deals_updated_at on public.deals;
+create trigger set_deals_updated_at
+  before update on public.deals
+  for each row execute function public.set_updated_at();
+
+drop trigger if exists set_deals_published_at on public.deals;
+create trigger set_deals_published_at
+  before insert or update on public.deals
+  for each row execute function public.set_published_at();
+
+create index if not exists deals_subcategory_id_idx on public.deals (subcategory_id);
+create index if not exists deals_vendor_id_idx on public.deals (vendor_id);
+create index if not exists deals_published_idx on public.deals (is_published);
+
+-- ----------------------------------------------------------------------------
+-- deal_cycles — one row per deal per calendar month. Materializes "this
+-- month's pool" (cap copied from deals.redemptions_per_cycle at cycle
+-- creation) and preserves history for monthly vendor payouts once the cycle
+-- rolls over — nothing is overwritten on reset, a new row is made.
+-- ----------------------------------------------------------------------------
+create table if not exists public.deal_cycles (
+  id uuid primary key default gen_random_uuid(),
+  deal_id uuid not null references public.deals (id) on delete cascade,
+  cycle_start date not null,
+  redemptions_cap integer not null,
+  redemptions_used integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.deal_cycles drop constraint if exists deal_cycles_deal_cycle_start_key;
+alter table public.deal_cycles add constraint deal_cycles_deal_cycle_start_key
+  unique (deal_id, cycle_start);
+
+alter table public.deal_cycles drop constraint if exists deal_cycles_used_non_negative;
+alter table public.deal_cycles add constraint deal_cycles_used_non_negative
+  check (redemptions_used >= 0);
+
+alter table public.deal_cycles drop constraint if exists deal_cycles_used_le_cap;
+alter table public.deal_cycles add constraint deal_cycles_used_le_cap
+  check (redemptions_used <= redemptions_cap);
+
+alter table public.deal_cycles enable row level security;
+
+drop policy if exists "deal cycles are public" on public.deal_cycles;
+create policy "deal cycles are public"
+  on public.deal_cycles for select
+  using (true);
+
+drop policy if exists "admins manage deal cycles" on public.deal_cycles;
+create policy "admins manage deal cycles"
+  on public.deal_cycles for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_deal_cycles_updated_at on public.deal_cycles;
+create trigger set_deal_cycles_updated_at
+  before update on public.deal_cycles
+  for each row execute function public.set_updated_at();
+
+create index if not exists deal_cycles_deal_id_idx on public.deal_cycles (deal_id, cycle_start);
+
+-- Finds this month's cycle for a deal, creating it (capped from the deal's
+-- current redemptions_per_cycle) the first time it's needed that month.
+create or replace function public.get_or_create_deal_cycle(p_deal_id uuid)
+returns public.deal_cycles
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_cycle public.deal_cycles;
+  v_cap integer;
+  v_start date := date_trunc('month', now())::date;
+begin
+  select redemptions_per_cycle into v_cap from public.deals where id = p_deal_id;
+
+  if v_cap is null then
+    raise exception 'Deal not found';
+  end if;
+
+  insert into public.deal_cycles (deal_id, cycle_start, redemptions_cap)
+  values (p_deal_id, v_start, v_cap)
+  on conflict (deal_id, cycle_start) do nothing;
+
+  select * into v_cycle
+  from public.deal_cycles
+  where deal_id = p_deal_id and cycle_start = v_start;
+
+  return v_cycle;
+end;
+$$;
+
+grant execute on function public.get_or_create_deal_cycle(uuid) to anon, authenticated;
+
+-- Called only from the checkout webhook handler once a redemption payment is
+-- confirmed — same "clamp, never oversell" pattern as decrement_variant_stock.
+create or replace function public.increment_deal_cycle_redemptions(p_cycle_id uuid, p_quantity integer default 1)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.deal_cycles
+  set redemptions_used = least(redemptions_cap, redemptions_used + p_quantity)
+  where id = p_cycle_id;
+$$;
+
+grant execute on function public.increment_deal_cycle_redemptions(uuid, integer) to service_role;
+
+-- ----------------------------------------------------------------------------
+-- deal_redemptions — one row per member purchase. Pricing is snapshotted at
+-- purchase time (vendor rate, margin, gateway fee) so a later change to the
+-- deal never rewrites historical payout numbers. Same shape as event_tickets:
+-- reference_code for the member to show, approved_at / approved_by for the
+-- vendor-counter approval step (MVP: TYCO staff taps approve on the vendor's
+-- behalf — see /admin/deal-checkins).
+-- ----------------------------------------------------------------------------
+create table if not exists public.deal_redemptions (
+  id uuid primary key default gen_random_uuid(),
+  deal_id uuid not null references public.deals (id) on delete cascade,
+  deal_cycle_id uuid not null references public.deal_cycles (id) on delete restrict,
+  vendor_id uuid not null references public.vendors (id) on delete restrict,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  vendor_rate_cents integer not null,
+  margin_percent numeric(5,2) not null,
+  member_price_cents integer not null,
+  gateway_fee_percent numeric(5,2) not null,
+  gateway_fee_cents integer not null,
+  total_cents integer not null,
+  tyco_margin_cents integer not null,
+  currency text not null default 'usd',
+  status text not null default 'pending',
+  revolut_order_id text,
+  reference_code text not null default upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8)),
+  approved_at timestamptz,
+  approved_by uuid references auth.users (id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.deal_redemptions drop constraint if exists deal_redemptions_prices_non_negative;
+alter table public.deal_redemptions add constraint deal_redemptions_prices_non_negative
+  check (
+    vendor_rate_cents >= 0 and member_price_cents >= 0 and gateway_fee_cents >= 0
+    and total_cents >= 0 and tyco_margin_cents >= 0
+  );
+
+alter table public.deal_redemptions drop constraint if exists deal_redemptions_status_check;
+alter table public.deal_redemptions add constraint deal_redemptions_status_check
+  check (status in ('pending', 'paid', 'cancelled', 'refunded'));
+
+alter table public.deal_redemptions drop constraint if exists deal_redemptions_reference_code_key;
+alter table public.deal_redemptions add constraint deal_redemptions_reference_code_key
+  unique (reference_code);
+
+alter table public.deal_redemptions enable row level security;
+
+drop policy if exists "members see their own deal redemptions" on public.deal_redemptions;
+create policy "members see their own deal redemptions"
+  on public.deal_redemptions for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "members create their own deal redemptions" on public.deal_redemptions;
+create policy "members create their own deal redemptions"
+  on public.deal_redemptions for insert
+  with check (auth.uid() = user_id and status = 'pending');
+
+drop policy if exists "admins manage all deal redemptions" on public.deal_redemptions;
+create policy "admins manage all deal redemptions"
+  on public.deal_redemptions for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_deal_redemptions_updated_at on public.deal_redemptions;
+create trigger set_deal_redemptions_updated_at
+  before update on public.deal_redemptions
+  for each row execute function public.set_updated_at();
+
+create index if not exists deal_redemptions_deal_id_idx on public.deal_redemptions (deal_id);
+create index if not exists deal_redemptions_deal_cycle_id_idx on public.deal_redemptions (deal_cycle_id);
+create index if not exists deal_redemptions_vendor_id_idx on public.deal_redemptions (vendor_id);
+create index if not exists deal_redemptions_user_id_idx on public.deal_redemptions (user_id);
+create index if not exists deal_redemptions_reference_code_idx on public.deal_redemptions (reference_code);
+
+-- The vendor-counter approval step. Admin-only for now (MVP: TYCO staff taps
+-- this on the vendor's behalf) — refuses to double-approve, same guard as
+-- check_in_ticket.
+create or replace function public.approve_deal_redemption(p_redemption_id uuid)
+returns public.deal_redemptions
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_redemption public.deal_redemptions;
+begin
+  if not public.is_admin() then
+    raise exception 'Not authorized';
+  end if;
+
+  select * into v_redemption from public.deal_redemptions where id = p_redemption_id for update;
+
+  if v_redemption.id is null then
+    raise exception 'Redemption not found';
+  end if;
+
+  if v_redemption.status != 'paid' then
+    raise exception 'Redemption is not paid';
+  end if;
+
+  if v_redemption.approved_at is not null then
+    raise exception 'Redemption already approved';
+  end if;
+
+  update public.deal_redemptions
+  set approved_at = now(), approved_by = auth.uid()
+  where id = p_redemption_id
+  returning * into v_redemption;
+
+  return v_redemption;
+end;
+$$;
+
+grant execute on function public.approve_deal_redemption(uuid) to authenticated;
 
 -- ----------------------------------------------------------------------------
 -- webhook_errors — a scoped-down debug log. Not a catch-all error tracker;
@@ -971,7 +1421,8 @@ values
   ('portfolio', 'portfolio', true),
   ('products', 'products', true),
   ('about', 'about', true),
-  ('creators', 'creators', true)
+  ('creators', 'creators', true),
+  ('deals', 'deals', true)
 on conflict (id) do nothing;
 
 -- The 'tracks' and 'artists' buckets (audio files, artist photos/video)
@@ -982,10 +1433,10 @@ delete from storage.buckets where id in ('tracks', 'artists');
 drop policy if exists "public read for tyco buckets" on storage.objects;
 create policy "public read for tyco buckets"
   on storage.objects for select
-  using (bucket_id in ('covers', 'portfolio', 'products', 'about', 'creators'));
+  using (bucket_id in ('covers', 'portfolio', 'products', 'about', 'creators', 'deals'));
 
 drop policy if exists "admins manage tyco bucket objects" on storage.objects;
 create policy "admins manage tyco bucket objects"
   on storage.objects for all
-  using (bucket_id in ('covers', 'portfolio', 'products', 'about', 'creators') and public.is_admin())
-  with check (bucket_id in ('covers', 'portfolio', 'products', 'about', 'creators') and public.is_admin());
+  using (bucket_id in ('covers', 'portfolio', 'products', 'about', 'creators', 'deals') and public.is_admin())
+  with check (bucket_id in ('covers', 'portfolio', 'products', 'about', 'creators', 'deals') and public.is_admin());
