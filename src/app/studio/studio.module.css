@@ -443,12 +443,15 @@
 .ticketCta {
   display: inline-flex;
   align-items: center;
-  padding: 0.55rem 1.1rem;
-  border-radius: var(--radius-pill);
+  justify-content: center;
+  padding: 0.65rem 1.1rem;
+  border-radius: var(--radius-sm);
   background: var(--accent);
   color: var(--on-accent);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   white-space: nowrap;
   transition: background var(--dur) var(--ease);
 }
@@ -481,7 +484,7 @@
   align-items: center;
   gap: 0.75rem;
   border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   padding: 0.35rem 0.9rem;
   font-variant-numeric: tabular-nums;
   background: var(--bg);
