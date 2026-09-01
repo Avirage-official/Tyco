@@ -35,6 +35,98 @@ export type DashboardSlideVisibility = {
   services?: boolean;
 };
 
+export type Vendor = {
+  id: string;
+  name: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type VendorAdminNotes = {
+  vendor_id: string;
+  contact_name: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DealCategory = {
+  id: string;
+  slug: string;
+  name: string;
+  display_order: number;
+  is_hidden: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DealSubcategory = {
+  id: string;
+  category_id: string;
+  slug: string;
+  name: string;
+  display_order: number;
+  is_hidden: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Deal = {
+  id: string;
+  vendor_id: string;
+  subcategory_id: string;
+  title: string;
+  description: string | null;
+  cover_url: string | null;
+  locations: string[];
+  vendor_rate_cents: number;
+  margin_percent: number;
+  currency: string;
+  redemptions_per_cycle: number;
+  is_published: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DealCycle = {
+  id: string;
+  deal_id: string;
+  cycle_start: string;
+  redemptions_cap: number;
+  redemptions_used: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DealRedemptionStatus = "pending" | "paid" | "cancelled" | "refunded";
+
+export type DealRedemption = {
+  id: string;
+  deal_id: string;
+  deal_cycle_id: string;
+  vendor_id: string;
+  user_id: string;
+  vendor_rate_cents: number;
+  margin_percent: number;
+  member_price_cents: number;
+  gateway_fee_percent: number;
+  gateway_fee_cents: number;
+  total_cents: number;
+  tyco_margin_cents: number;
+  currency: string;
+  status: DealRedemptionStatus;
+  revolut_order_id: string | null;
+  reference_code: string;
+  approved_at: string | null;
+  approved_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type EventSlide = {
   id: string;
   title: string;
@@ -392,6 +484,7 @@ export interface Database {
           legal_terms: string | null;
           dashboard_slide_images: DashboardSlideImages;
           dashboard_hidden_slides: DashboardSlideVisibility;
+          deal_gateway_fee_percent: number;
           updated_at: string;
         },
         {
@@ -406,6 +499,105 @@ export interface Database {
           legal_terms?: string | null;
           dashboard_slide_images?: DashboardSlideImages;
           dashboard_hidden_slides?: DashboardSlideVisibility;
+          deal_gateway_fee_percent?: number;
+          updated_at?: string;
+        }
+      >;
+      vendors: Table<
+        Vendor,
+        { id?: string; name: string; is_active?: boolean; created_at?: string; updated_at?: string }
+      >;
+      vendor_admin_notes: Table<
+        VendorAdminNotes,
+        {
+          vendor_id: string;
+          contact_name?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        }
+      >;
+      deal_categories: Table<
+        DealCategory,
+        {
+          id?: string;
+          slug: string;
+          name: string;
+          display_order?: number;
+          is_hidden?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        }
+      >;
+      deal_subcategories: Table<
+        DealSubcategory,
+        {
+          id?: string;
+          category_id: string;
+          slug: string;
+          name: string;
+          display_order?: number;
+          is_hidden?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        }
+      >;
+      deals: Table<
+        Deal,
+        {
+          id?: string;
+          vendor_id: string;
+          subcategory_id: string;
+          title: string;
+          description?: string | null;
+          cover_url?: string | null;
+          locations?: string[];
+          vendor_rate_cents: number;
+          margin_percent?: number;
+          currency?: string;
+          redemptions_per_cycle: number;
+          is_published?: boolean;
+          published_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        }
+      >;
+      deal_cycles: Table<
+        DealCycle,
+        {
+          id?: string;
+          deal_id: string;
+          cycle_start: string;
+          redemptions_cap: number;
+          redemptions_used?: number;
+          created_at?: string;
+          updated_at?: string;
+        }
+      >;
+      deal_redemptions: Table<
+        DealRedemption,
+        {
+          id?: string;
+          deal_id: string;
+          deal_cycle_id: string;
+          vendor_id: string;
+          user_id: string;
+          vendor_rate_cents: number;
+          margin_percent: number;
+          member_price_cents: number;
+          gateway_fee_percent: number;
+          gateway_fee_cents: number;
+          total_cents: number;
+          tyco_margin_cents: number;
+          currency?: string;
+          status?: DealRedemptionStatus;
+          revolut_order_id?: string | null;
+          reference_code?: string;
+          approved_at?: string | null;
+          approved_by?: string | null;
+          created_at?: string;
           updated_at?: string;
         }
       >;
@@ -443,6 +635,18 @@ export interface Database {
       check_in_ticket: {
         Args: { p_ticket_id: string };
         Returns: EventTicket;
+      };
+      get_or_create_deal_cycle: {
+        Args: { p_deal_id: string };
+        Returns: DealCycle;
+      };
+      increment_deal_cycle_redemptions: {
+        Args: { p_cycle_id: string; p_quantity: number };
+        Returns: undefined;
+      };
+      approve_deal_redemption: {
+        Args: { p_redemption_id: string };
+        Returns: DealRedemption;
       };
     };
     Enums: Record<string, never>;
