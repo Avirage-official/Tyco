@@ -2,3 +2,10 @@
   margin-top: var(--space-xs);
   font-size: clamp(2.4rem, 6vw, 4rem);
 }
+
+.heroSubtitle {
+  margin-top: var(--space-md);
+  max-width: 44ch;
+  font-size: 1.05rem;
+  color: var(--fg-muted);
+}

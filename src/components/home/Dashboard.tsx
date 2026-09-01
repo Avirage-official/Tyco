@@ -26,6 +26,10 @@ export function Dashboard({
       <VideoHero size="compact">
         <p className="eyebrow">Tyco</p>
         <h1 className={styles.heroTitle}>Welcome back, {name}</h1>
+        <p className={styles.heroSubtitle}>
+          Apparel, creators, and real access to the studios and services
+          creatives already spend on — all in one place.
+        </p>
       </VideoHero>
 
       <SwipeDashboard

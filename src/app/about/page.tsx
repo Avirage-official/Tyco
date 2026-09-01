@@ -46,21 +46,21 @@ export default function AboutPage() {
 
       <section className={`container ${styles.manifesto}`}>
         <h2 className={styles.manifestoTitle}>
-          Creativity and social responsibility, inseparable.
+          Community and commerce, working together.
         </h2>
         <div className={styles.manifestoBody}>
           <div className={styles.manifestoText}>
             <p>
-              TYCO is a Singapore-based artistic collective founded on the principle that
-              creativity and social responsibility are inseparable. We operate across
-              music production, fashion design, live events, and brand collaborations —
-              each revenue stream feeding our annual community mission fund. We&apos;re
-              not a nonprofit. We&apos;re artists who make money and choose where it goes.
+              TYCO is a Southeast Asia-rooted creative collective — part community, part
+              commerce. We make apparel that carries the brand&apos;s identity, back the
+              creators and events building culture around us, and we&apos;re opening up
+              real access: discounted rates at the studios, barbers, bars, and lessons
+              creatives already spend on, through partner vendors who back the same scene.
             </p>
             <p>
-              Through music, design, events, and partnerships, we build culture that
-              funds itself forward. Every release, every piece, every night we create —
-              it moves something.
+              Retail funds the collective today. Membership makes the lifestyle more
+              affordable tomorrow. As the audience and creative network around us grow,
+              so does what we&apos;re able to build together.
             </p>
           </div>
           <ul className={styles.principles}>
