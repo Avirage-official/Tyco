@@ -321,6 +321,10 @@
   text-decoration: line-through;
 }
 
+.dealAction {
+  margin-top: var(--space-sm);
+}
+
 .posterCard {
   position: relative;
   isolation: isolate;

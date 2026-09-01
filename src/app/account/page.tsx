@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { createClient } from "@/lib/supabase/server";
-import { IconArrowRight, IconBag, IconShield, IconTicket } from "@/components/icons";
+import { IconArrowRight, IconBag, IconShield, IconTag, IconTicket } from "@/components/icons";
 import { SignOutRow } from "./SignOutButton";
 import styles from "./page.module.css";
 
@@ -57,6 +57,15 @@ export default async function AccountPage() {
             <span className={styles.rowBody}>
               <span className={styles.rowLabel}>Your tickets</span>
               <span className={styles.rowDesc}>Show these at the door</span>
+            </span>
+            <IconArrowRight className={styles.rowChevron} />
+          </Link>
+
+          <Link href="/account/deals" className={styles.row}>
+            <IconTag className={styles.rowIcon} />
+            <span className={styles.rowBody}>
+              <span className={styles.rowLabel}>Your deals</span>
+              <span className={styles.rowDesc}>Show these at the vendor counter</span>
             </span>
             <IconArrowRight className={styles.rowChevron} />
           </Link>
