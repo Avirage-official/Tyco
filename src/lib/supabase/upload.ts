@@ -26,15 +26,25 @@ export async function uploadToBucket(bucket: string, file: File) {
 }
 
 /**
+ * Recovers a bucket-relative storage path from a public URL, or null if the
+ * URL doesn't look like it belongs to that bucket. Shared by the browser
+ * (deleteFromBucket, below) and server (storage-cleanup.ts) delete paths.
+ */
+export function getStoragePath(bucket: string, publicUrl: string): string | null {
+  const marker = `/storage/v1/object/public/${bucket}/`;
+  const index = publicUrl.indexOf(marker);
+  if (index === -1) return null;
+  return decodeURIComponent(publicUrl.slice(index + marker.length));
+}
+
+/**
  * Deletes a previously-uploaded object given its public URL. Best-effort —
  * callers should treat failures as non-fatal cleanup, not a reason to fail
  * whatever save already succeeded.
  */
 export async function deleteFromBucket(bucket: string, publicUrl: string) {
-  const marker = `/storage/v1/object/public/${bucket}/`;
-  const index = publicUrl.indexOf(marker);
-  if (index === -1) return;
-  const path = decodeURIComponent(publicUrl.slice(index + marker.length));
+  const path = getStoragePath(bucket, publicUrl);
+  if (!path) return;
 
   const supabase = createClient();
   const { error } = await supabase.storage.from(bucket).remove([path]);

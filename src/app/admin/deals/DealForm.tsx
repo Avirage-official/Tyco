@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { uploadToBucket } from "@/lib/supabase/upload";
+import { deleteFromBucket, uploadToBucket } from "@/lib/supabase/upload";
 import { Button } from "@/components/ui/Button";
 import { formatPrice } from "@/lib/format";
 import { createDeal, updateDeal, type DealInput } from "./actions";
@@ -132,6 +132,12 @@ export function DealForm({
         await updateDeal(deal.id, input);
       } else {
         await createDeal(input);
+      }
+
+      // Save succeeded — now safe to clean up whatever it orphaned.
+      // Best-effort: a cleanup failure shouldn't surface as a save failure.
+      if (finalCoverUrl !== coverUrl && coverUrl) {
+        await deleteFromBucket("deals", coverUrl).catch(() => {});
       }
 
       router.push("/admin/deals");

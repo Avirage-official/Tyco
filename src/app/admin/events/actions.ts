@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { deleteStorageUrls } from "@/lib/supabase/storage-cleanup";
 
 export type EventInput = {
   title: string;
@@ -66,7 +67,18 @@ export async function deleteEvent(id: string) {
     );
   }
 
+  const { data: eventRow } = await supabase
+    .from("events")
+    .select("cover_url, cover_video_url")
+    .eq("id", id)
+    .single();
+
   const { error } = await supabase.from("events").delete().eq("id", id);
   if (error) throw new Error(error.message);
+
+  if (eventRow) {
+    await deleteStorageUrls(supabase, "covers", [eventRow.cover_url, eventRow.cover_video_url]);
+  }
+
   revalidateEvents();
 }

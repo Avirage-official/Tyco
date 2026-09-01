@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { deleteStorageUrls } from "@/lib/supabase/storage-cleanup";
 
 export type ProductInput = {
   name: string;
@@ -107,7 +108,12 @@ export async function deleteProduct(id: string) {
     }
   }
 
+  const { data: product } = await supabase.from("products").select("images").eq("id", id).single();
+
   const { error } = await supabase.from("products").delete().eq("id", id);
   if (error) throw new Error(error.message);
+
+  if (product?.images) await deleteStorageUrls(supabase, "products", product.images);
+
   revalidateProducts();
 }
