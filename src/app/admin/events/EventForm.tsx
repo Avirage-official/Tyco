@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { uploadToBucket } from "@/lib/supabase/upload";
+import { deleteFromBucket, uploadToBucket } from "@/lib/supabase/upload";
 import { Button } from "@/components/ui/Button";
 import { createEvent, updateEvent, type EventInput } from "./actions";
 import styles from "../admin.module.css";
@@ -45,6 +45,11 @@ export function EventForm({ event }: { event?: Event }) {
   const [coverVideoFile, setCoverVideoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Captured once at mount so we know what to clean up afterward regardless
+  // of how the cover state gets mutated while editing.
+  const initialCoverUrl = useRef(coverUrl).current;
+  const initialCoverVideoUrl = useRef(coverVideoUrl).current;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -93,6 +98,17 @@ export function EventForm({ event }: { event?: Event }) {
       } else {
         await createEvent(input);
       }
+
+      // Save succeeded — now safe to clean up whatever it orphaned.
+      // Best-effort: a cleanup failure shouldn't surface as a save failure.
+      const toDelete: Promise<void>[] = [];
+      if (finalCoverUrl !== initialCoverUrl && initialCoverUrl) {
+        toDelete.push(deleteFromBucket("covers", initialCoverUrl));
+      }
+      if (finalCoverVideoUrl !== initialCoverVideoUrl && initialCoverVideoUrl) {
+        toDelete.push(deleteFromBucket("covers", initialCoverVideoUrl));
+      }
+      await Promise.allSettled(toDelete);
 
       router.push("/admin/events");
       router.refresh();

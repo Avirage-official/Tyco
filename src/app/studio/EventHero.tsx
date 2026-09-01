@@ -1,5 +1,6 @@
 import { formatEventDateParts, formatPrice } from "@/lib/format";
 import { TicketPurchase } from "./TicketPurchase";
+import { MobileBookingBar } from "./MobileBookingBar";
 import styles from "./EventHero.module.css";
 
 type HeroEvent = {
@@ -75,21 +76,23 @@ export function EventHero({ event, signedIn }: { event: HeroEvent; signedIn: boo
           {going !== null && <p className={styles.going}>{going} going</p>}
         </div>
 
-        <div className={styles.bookingPanel}>
-          <p className={styles.bookingPrice}>
-            {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free"}
-            {event.price_cents > 0 && <span className={styles.bookingPriceUnit}>/pax</span>}
-          </p>
-          <div className={styles.bookingAction}>
-            <TicketPurchase
-              eventId={event.id}
-              priceCents={event.price_cents}
-              currency={event.currency}
-              capacityRemaining={event.capacity != null ? event.capacity_remaining : null}
-              signedIn={signedIn}
-            />
+        <MobileBookingBar>
+          <div className={styles.bookingPanel}>
+            <p className={styles.bookingPrice}>
+              {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free"}
+              {event.price_cents > 0 && <span className={styles.bookingPriceUnit}>/pax</span>}
+            </p>
+            <div className={styles.bookingAction}>
+              <TicketPurchase
+                eventId={event.id}
+                priceCents={event.price_cents}
+                currency={event.currency}
+                capacityRemaining={event.capacity != null ? event.capacity_remaining : null}
+                signedIn={signedIn}
+              />
+            </div>
           </div>
-        </div>
+        </MobileBookingBar>
       </div>
     </section>
   );

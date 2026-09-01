@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { deleteStorageUrls } from "@/lib/supabase/storage-cleanup";
 
 export type DealInput = {
   vendor_id: string;
@@ -61,8 +62,13 @@ export async function deleteDeal(id: string) {
     );
   }
 
+  const { data: dealRow } = await supabase.from("deals").select("cover_url").eq("id", id).single();
+
   const { error } = await supabase.from("deals").delete().eq("id", id);
   if (error) throw new Error(error.message);
+
+  if (dealRow) await deleteStorageUrls(supabase, "deals", [dealRow.cover_url]);
+
   revalidateDeals();
 }
 

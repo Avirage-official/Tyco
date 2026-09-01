@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { uploadToBucket } from "@/lib/supabase/upload";
+import { deleteFromBucket, uploadToBucket } from "@/lib/supabase/upload";
 import { Button } from "@/components/ui/Button";
 import { createProduct, updateProduct, type ProductInput, type VariantInput } from "./actions";
 import styles from "../admin.module.css";
@@ -41,6 +41,10 @@ export function ProductForm({
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Captured once at mount so we know what to clean up afterward regardless
+  // of how `images` gets mutated while editing.
+  const initialImages = useRef(product?.images ?? []).current;
 
   const remainingSlots = MAX_IMAGES - images.length - imageFiles.length;
 
@@ -114,6 +118,12 @@ export function ProductForm({
       } else {
         await createProduct(input, cleanVariants);
       }
+
+      // Save succeeded — now safe to clean up whatever it orphaned.
+      // Best-effort: a cleanup failure shouldn't surface as a save failure.
+      const keptImages = new Set(finalImages);
+      const removedImages = initialImages.filter((url) => !keptImages.has(url));
+      await Promise.allSettled(removedImages.map((url) => deleteFromBucket("products", url)));
 
       router.push("/admin/products");
       router.refresh();
