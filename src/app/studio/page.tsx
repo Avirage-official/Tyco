@@ -3,10 +3,9 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SwipeDashboard } from "@/components/home/SwipeDashboard";
 import { getSwipeDashboardData } from "@/lib/home/swipe-data";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate, formatEventDateParts, formatPrice } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { EventHero } from "./EventHero";
-import { TicketPurchase } from "./TicketPurchase";
-import { Waveform } from "./Waveform";
+import { EventCard } from "./EventCard";
 import styles from "./studio.module.css";
 
 export const metadata: Metadata = { title: "Events" };
@@ -61,45 +60,9 @@ export default async function StudioEventsPage() {
         <section style={{ marginTop: "var(--space-2xl)" }}>
           <h2 className={styles.sectionTitle}>More dates</h2>
           <div className={styles.eventGrid}>
-            {restUpcoming.map((event) => {
-              const { month, day, weekday, time } = formatEventDateParts(event.event_date);
-              return (
-                <div key={event.id} className={styles.eventCard}>
-                  <span
-                    className={styles.eventCardMedia}
-                    style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
-                    aria-hidden
-                  />
-                  <span className={styles.eventCardScrim} aria-hidden />
-
-                  <div className={styles.eventCardTop}>
-                    <span className={styles.eventCardDate}>
-                      {month} {day}
-                    </span>
-                    <Waveform />
-                  </div>
-
-                  <div className={styles.eventCardBody}>
-                    <h3 className={styles.eventCardTitle}>{event.title}</h3>
-                    <p className={styles.eventCardMeta}>
-                      {[weekday + " · " + time, event.location].filter(Boolean).join(" — ")}
-                    </p>
-                    <p className={styles.eventCardPrice}>
-                      {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free entry"}
-                    </p>
-                    <div className={styles.eventCardAction}>
-                      <TicketPurchase
-                        eventId={event.id}
-                        priceCents={event.price_cents}
-                        currency={event.currency}
-                        capacityRemaining={event.capacity != null ? event.capacity_remaining : null}
-                        signedIn={signedIn}
-                      />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {restUpcoming.map((event) => (
+              <EventCard key={event.id} event={event} signedIn={signedIn} />
+            ))}
           </div>
         </section>
       )}

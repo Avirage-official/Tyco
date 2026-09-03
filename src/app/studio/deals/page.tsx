@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/server";
-import { formatPrice } from "@/lib/format";
-import { IconPin } from "@/components/icons";
-import { DealRedeem } from "./DealRedeem";
+import { DealCard } from "./DealCard";
 import { DealsCategoryFilter } from "./DealsCategoryFilter";
 import styles from "../studio.module.css";
 
@@ -42,7 +40,7 @@ export default async function StudioDealsPage({
     supabase
       .from("deals")
       .select(
-        "id, title, cover_url, subcategory_id, vendor_id, locations, vendor_rate_cents, margin_percent, original_price_cents, currency, redemptions_per_cycle"
+        "id, title, description, cover_url, subcategory_id, vendor_id, locations, vendor_rate_cents, margin_percent, original_price_cents, currency, redemptions_per_cycle"
       )
       .eq("is_published", true)
       .order("created_at", { ascending: false }),
@@ -110,44 +108,16 @@ export default async function StudioDealsPage({
                 (cycle?.redemptions_cap ?? deal.redemptions_per_cycle) - (cycle?.redemptions_used ?? 0);
 
               return (
-                <div key={deal.id} className={styles.posterCard}>
-                  <span
-                    className={styles.posterMedia}
-                    style={deal.cover_url ? { backgroundImage: `url(${deal.cover_url})` } : undefined}
-                    aria-hidden
-                  />
-                  <span className={styles.posterScrim} aria-hidden />
-                  <div className={styles.posterBody}>
-                    <p className={styles.dealSubcategory}>{sub?.name ?? cat.name}</p>
-                    <p className={styles.posterName}>{deal.title}</p>
-                    <p className={styles.posterTagline}>{vendorName.get(deal.vendor_id) ?? "Vendor"}</p>
-                    {deal.locations.length > 0 && (
-                      <p className={styles.dealLocations}>
-                        <IconPin className={styles.dealLocationIcon} />
-                        {deal.locations.join(" · ")}
-                      </p>
-                    )}
-                    <div className={styles.dealPriceRow}>
-                      <span className={styles.posterName} style={{ fontSize: "1rem" }}>
-                        {formatPrice(memberPriceCents, deal.currency)}
-                      </span>
-                      {deal.original_price_cents != null && (
-                        <span className={styles.dealOriginalPrice}>
-                          {formatPrice(deal.original_price_cents, deal.currency)}
-                        </span>
-                      )}
-                    </div>
-                    <div className={styles.dealAction}>
-                      <DealRedeem
-                        dealId={deal.id}
-                        memberPriceCents={memberPriceCents}
-                        currency={deal.currency}
-                        capRemaining={capRemaining}
-                        signedIn={signedIn}
-                      />
-                    </div>
-                  </div>
-                </div>
+                <DealCard
+                  key={deal.id}
+                  deal={deal}
+                  subcategoryName={sub?.name ?? cat.name}
+                  vendorName={vendorName.get(deal.vendor_id) ?? "Vendor"}
+                  memberPriceCents={memberPriceCents}
+                  originalPriceCents={deal.original_price_cents}
+                  capRemaining={capRemaining}
+                  signedIn={signedIn}
+                />
               );
             })}
           </div>
