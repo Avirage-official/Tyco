@@ -442,43 +442,155 @@
   max-height: 3rem;
 }
 
-/* -- detail modal (deals + events share this) --------------------------- */
+/* -- detail modal (deals + events share this) ---------------------------
+   Deliberately built to read as a compressed EventHero, not a generic
+   centered product-modal card: full-bleed grayscale-duotone image +
+   scrim, the same eyebrow/big-serif-title/dash-separated-meta language,
+   and a flat border-top booking panel instead of a floating rounded box.
+   The Modal shell itself is a full-screen takeover for the same reason —
+   it should feel like its own view, not a widget dropped on top of one. */
 
-.modalCover {
+.detailEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: var(--space-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.detailEyebrow::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.detailHeroImage {
+  position: relative;
+  isolation: isolate;
   aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+@media (max-width: 640px) {
+  .detailHeroImage {
+    aspect-ratio: 4 / 5;
+  }
+}
+
+.detailMedia {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
   background-size: cover;
   background-position: center;
   background-color: var(--surface);
+  filter: grayscale(1) contrast(1.08);
 }
 
-.modalBody {
-  padding: var(--space-lg);
+.detailScrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(16, 14, 13, 0.1) 0%, rgba(16, 14, 13, 0.6) 100%);
 }
 
-.modalTitle {
-  margin-top: 0.2rem;
-  font-size: 1.6rem;
+.detailScrim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(200deg, var(--red-deep) -10%, transparent 55%);
+  mix-blend-mode: multiply;
+  opacity: 0.4;
+}
+
+.detailBody {
+  padding: var(--space-lg) var(--space-md) var(--space-2xl);
+}
+
+@media (min-width: 640px) {
+  .detailBody {
+    max-width: 640px;
+    margin-inline: auto;
+    padding: var(--space-xl) var(--space-lg) var(--space-2xl);
+  }
+}
+
+.detailDateRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.detailDateBig {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
   font-weight: 700;
-  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
-.modalMeta {
-  margin-top: 0.3rem;
+.detailDateDetail {
   color: var(--fg-muted);
   font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
 }
 
-.modalDescription {
-  margin-top: var(--space-md);
+.detailTitle {
+  margin-top: var(--space-xs);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.detailMetaRow {
+  margin-top: var(--space-sm);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem var(--space-sm);
   color: var(--fg-muted);
   font-size: 0.92rem;
+}
+
+.detailMetaRow span:not(:last-child)::after {
+  content: "·";
+  margin-left: var(--space-sm);
+  color: var(--border);
+}
+
+.detailDescription {
+  margin-top: var(--space-md);
+  color: var(--fg-muted);
+  font-size: 1rem;
   line-height: 1.6;
 }
 
-.modalPrice {
+.detailBookingPanel {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 2px solid var(--accent);
+}
+
+.detailPrice {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.7rem;
   font-weight: 700;
+}
+
+.detailPriceOriginal {
+  margin-left: 0.5rem;
+  color: var(--fg-muted);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: line-through;
 }
 
 /* -- ticket purchase ----------------------------------------------------- */

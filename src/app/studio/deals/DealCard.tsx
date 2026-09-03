@@ -67,39 +67,41 @@ export function DealCard({
       </button>
 
       <Modal open={open} onClose={() => setOpen(false)} labelledBy={titleId}>
-        <div
-          className={styles.modalCover}
-          style={deal.cover_url ? { backgroundImage: `url(${deal.cover_url})` } : undefined}
-        />
-        <div className={styles.modalBody}>
-          <p className={styles.dealSubcategory}>{subcategoryName}</p>
-          <h2 id={titleId} className={styles.modalTitle}>
+        <div className={styles.detailHeroImage}>
+          <span
+            className={styles.detailMedia}
+            style={deal.cover_url ? { backgroundImage: `url(${deal.cover_url})` } : undefined}
+            aria-hidden
+          />
+          <span className={styles.detailScrim} aria-hidden />
+        </div>
+        <div className={styles.detailBody}>
+          <p className={styles.detailEyebrow}>{subcategoryName}</p>
+          <h2 id={titleId} className={styles.detailTitle}>
             {deal.title}
           </h2>
-          <p className={styles.modalMeta}>{vendorName}</p>
-          {deal.locations.length > 0 && (
-            <p className={styles.dealLocations} style={{ marginTop: "0.4rem" }}>
-              <IconPin className={styles.dealLocationIcon} />
-              {deal.locations.join(" · ")}
-            </p>
-          )}
-          {deal.description && <p className={styles.modalDescription}>{deal.description}</p>}
-
-          <div className={styles.dealPriceRow} style={{ marginTop: "var(--space-md)" }}>
-            <span className={styles.modalPrice}>{formatPrice(memberPriceCents, deal.currency)}</span>
-            {originalPriceCents != null && (
-              <span className={styles.dealOriginalPrice}>{formatPrice(originalPriceCents, deal.currency)}</span>
-            )}
+          <div className={styles.detailMetaRow}>
+            <span>{vendorName}</span>
+            {deal.locations.length > 0 && <span>{deal.locations.join(" · ")}</span>}
           </div>
+          {deal.description && <p className={styles.detailDescription}>{deal.description}</p>}
 
-          <div className={styles.dealAction}>
-            <DealRedeem
-              dealId={deal.id}
-              memberPriceCents={memberPriceCents}
-              currency={deal.currency}
-              capRemaining={capRemaining}
-              signedIn={signedIn}
-            />
+          <div className={styles.detailBookingPanel}>
+            <p className={styles.detailPrice}>
+              {formatPrice(memberPriceCents, deal.currency)}
+              {originalPriceCents != null && (
+                <span className={styles.detailPriceOriginal}>{formatPrice(originalPriceCents, deal.currency)}</span>
+              )}
+            </p>
+            <div className={styles.dealAction}>
+              <DealRedeem
+                dealId={deal.id}
+                memberPriceCents={memberPriceCents}
+                currency={deal.currency}
+                capRemaining={capRemaining}
+                signedIn={signedIn}
+              />
+            </div>
           </div>
         </div>
       </Modal>

@@ -75,10 +75,13 @@ export function Modal({
         if (e.target === ref.current) onClose();
       }}
     >
-      <button type="button" className={styles.close} onClick={onClose} aria-label="Close">
-        <IconClose />
-      </button>
-      <div className={styles.content}>{children}</div>
+      <div className={styles.content}>
+        <button type="button" className={styles.close} onClick={onClose}>
+          Close
+          <IconClose />
+        </button>
+        {children}
+      </div>
     </dialog>,
     document.body
   );
