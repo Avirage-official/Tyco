@@ -2,6 +2,24 @@
   padding-bottom: var(--space-2xl);
 }
 
+.shell {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .shell {
+    grid-template-columns: 200px 1fr;
+    gap: var(--space-2xl);
+  }
+}
+
+.shellContent {
+  min-width: 0;
+}
+
 .headerRow {
   display: flex;
   align-items: flex-end;

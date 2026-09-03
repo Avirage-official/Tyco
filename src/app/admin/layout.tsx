@@ -13,8 +13,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <>
       <PageHeader eyebrow="Behind the counter" title="Admin" />
       <div className={`container ${styles.page}`}>
-        <AdminNav />
-        {children}
+        <div className={styles.shell}>
+          <AdminNav />
+          <div className={styles.shellContent}>{children}</div>
+        </div>
       </div>
     </>
   );

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { formatPrice, formatDate } from "@/lib/format";
-import { lookupDealRedemption, approveDealRedemption, type DealRedemptionLookup } from "./actions";
+import { lookupDealRedemption, type DealRedemptionLookup } from "./actions";
+import { ApproveRedemptionButton } from "./ApproveRedemptionButton";
 import styles from "../admin.module.css";
 
 export function DealCheckInForm() {
@@ -25,20 +26,6 @@ export function DealCheckInForm() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleApprove() {
-    if (!redemption) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const updated = await approveDealRedemption(redemption.id);
-      setRedemption(updated);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not approve this redemption.");
     } finally {
       setLoading(false);
     }
@@ -78,17 +65,23 @@ export function DealCheckInForm() {
           {redemption.approved_at ? (
             <p style={{ marginTop: "var(--space-sm)", color: "var(--accent)", fontWeight: 600 }}>
               Already approved — {formatDate(redemption.approved_at)}
+              {redemption.redeemed_location && ` — ${redemption.redeemed_location}`}
             </p>
           ) : redemption.status === "paid" ? (
-            <button
-              type="button"
-              className={styles.linkBtn}
-              style={{ marginTop: "var(--space-sm)" }}
-              onClick={handleApprove}
-              disabled={loading}
-            >
-              Approve
-            </button>
+            <div style={{ marginTop: "var(--space-sm)" }}>
+              <ApproveRedemptionButton
+                redemptionId={redemption.id}
+                locations={redemption.dealLocations}
+                onApproved={(redeemedLocation) =>
+                  setRedemption({
+                    ...redemption,
+                    status: "paid",
+                    approved_at: new Date().toISOString(),
+                    redeemed_location: redeemedLocation,
+                  })
+                }
+              />
+            </div>
           ) : (
             <p style={{ marginTop: "var(--space-sm)", color: "var(--fg-muted)" }}>
               This deal hasn&rsquo;t been paid — do not approve.

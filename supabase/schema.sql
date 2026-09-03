@@ -1216,10 +1216,20 @@ create index if not exists deal_redemptions_vendor_id_idx on public.deal_redempt
 create index if not exists deal_redemptions_user_id_idx on public.deal_redemptions (user_id);
 create index if not exists deal_redemptions_reference_code_idx on public.deal_redemptions (reference_code);
 
+-- Which of the deal's locations (deals.locations) actually served this
+-- redemption — set at approval time, so vendor payouts can be broken down
+-- per outlet for a multi-location vendor. Null for single/no-location deals.
+alter table public.deal_redemptions add column if not exists redeemed_location text;
+
 -- The vendor-counter approval step. Admin-only for now (MVP: TYCO staff taps
 -- this on the vendor's behalf) — refuses to double-approve, same guard as
--- check_in_ticket.
-create or replace function public.approve_deal_redemption(p_redemption_id uuid)
+-- check_in_ticket. Signature changed to take p_location (added the
+-- redeemed_location column above) — drop the old 1-arg version first since
+-- `create or replace` can't change a function's parameter list, only leave
+-- a stale overload behind.
+drop function if exists public.approve_deal_redemption(uuid);
+
+create or replace function public.approve_deal_redemption(p_redemption_id uuid, p_location text default null)
 returns public.deal_redemptions
 language plpgsql
 security definer
@@ -1247,7 +1257,7 @@ begin
   end if;
 
   update public.deal_redemptions
-  set approved_at = now(), approved_by = auth.uid()
+  set approved_at = now(), approved_by = auth.uid(), redeemed_location = p_location
   where id = p_redemption_id
   returning * into v_redemption;
 
@@ -1255,7 +1265,7 @@ begin
 end;
 $$;
 
-grant execute on function public.approve_deal_redemption(uuid) to authenticated;
+grant execute on function public.approve_deal_redemption(uuid, text) to authenticated;
 
 -- ----------------------------------------------------------------------------
 -- webhook_errors — a scoped-down debug log. Not a catch-all error tracker;

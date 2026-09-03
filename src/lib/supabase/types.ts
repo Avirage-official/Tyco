@@ -120,6 +120,7 @@ export type DealRedemption = {
   reference_code: string;
   approved_at: string | null;
   approved_by: string | null;
+  redeemed_location: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -499,6 +500,7 @@ export interface Database {
           reference_code?: string;
           approved_at?: string | null;
           approved_by?: string | null;
+          redeemed_location?: string | null;
           created_at?: string;
           updated_at?: string;
         }
@@ -547,7 +549,7 @@ export interface Database {
         Returns: undefined;
       };
       approve_deal_redemption: {
-        Args: { p_redemption_id: string };
+        Args: { p_redemption_id: string; p_location: string | null };
         Returns: DealRedemption;
       };
     };
