@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
+import { IconPin } from "@/components/icons";
 import { DealRedeem } from "./DealRedeem";
 import { DealsCategoryFilter } from "./DealsCategoryFilter";
 import styles from "../studio.module.css";
@@ -120,6 +121,12 @@ export default async function StudioDealsPage({
                     <p className={styles.dealSubcategory}>{sub?.name ?? cat.name}</p>
                     <p className={styles.posterName}>{deal.title}</p>
                     <p className={styles.posterTagline}>{vendorName.get(deal.vendor_id) ?? "Vendor"}</p>
+                    {deal.locations.length > 0 && (
+                      <p className={styles.dealLocations}>
+                        <IconPin className={styles.dealLocationIcon} />
+                        {deal.locations.join(" · ")}
+                      </p>
+                    )}
                     <div className={styles.dealPriceRow}>
                       <span className={styles.posterName} style={{ fontSize: "1rem" }}>
                         {formatPrice(memberPriceCents, deal.currency)}

@@ -1267,6 +1267,43 @@ $$;
 
 grant execute on function public.approve_deal_redemption(uuid, text) to authenticated;
 
+-- Sweeps a redemption/ticket stuck at "pending" (an abandoned Revolut
+-- checkout that never completed) to "cancelled" once it's old enough that
+-- it's never coming back. Called lazily from the account and admin list
+-- pages rather than on a schedule — a stale pending row costs nothing
+-- (deal_cycles only increments on confirmed payment) so exact timing
+-- doesn't matter, only that a page that shows one eventually cleans it up.
+-- Not scoped to the caller: the age cutoff is the only thing that matters,
+-- so any signed-in (or anonymous) caller sweeping globally-stale rows is
+-- safe — nothing here reveals anything about who owns which row.
+create or replace function public.expire_stale_deal_redemptions()
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.deal_redemptions
+  set status = 'cancelled'
+  where status = 'pending'
+    and created_at < now() - interval '12 hours';
+$$;
+
+grant execute on function public.expire_stale_deal_redemptions() to authenticated, anon;
+
+create or replace function public.expire_stale_event_tickets()
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.event_tickets
+  set status = 'cancelled'
+  where status = 'pending'
+    and created_at < now() - interval '12 hours';
+$$;
+
+grant execute on function public.expire_stale_event_tickets() to authenticated, anon;
+
 -- ----------------------------------------------------------------------------
 -- webhook_errors — a scoped-down debug log. Not a catch-all error tracker;
 -- specifically for the two integrations that can fail silently from a

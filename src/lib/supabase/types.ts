@@ -552,6 +552,14 @@ export interface Database {
         Args: { p_redemption_id: string; p_location: string | null };
         Returns: DealRedemption;
       };
+      expire_stale_deal_redemptions: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+      expire_stale_event_tickets: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

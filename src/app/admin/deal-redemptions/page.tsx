@@ -18,6 +18,8 @@ export default async function AdminDealRedemptionsPage() {
   const { supabase } = await requireAdmin();
   const admin = createAdminClient();
 
+  await supabase.rpc("expire_stale_deal_redemptions");
+
   const [{ data: redemptions }, { data: deals }, { data: vendors }, { data: userList }] = await Promise.all([
     supabase
       .from("deal_redemptions")

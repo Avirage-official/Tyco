@@ -15,6 +15,8 @@ export default async function AdminTicketsPage() {
   const { supabase } = await requireAdmin();
   const admin = createAdminClient();
 
+  await supabase.rpc("expire_stale_event_tickets");
+
   const [{ data: tickets }, { data: events }, { data: userList }] = await Promise.all([
     supabase
       .from("event_tickets")
