@@ -59,37 +59,48 @@ export function EventCard({ event, signedIn }: { event: Event; signedIn: boolean
       </button>
 
       <Modal open={open} onClose={() => setOpen(false)} labelledBy={titleId}>
-        <div
-          className={styles.modalCover}
-          style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
-        />
-        <div className={styles.modalBody}>
-          <p className={styles.eventCardDate}>
-            {month} {day} · {weekday} · {time}
-          </p>
-          <h2 id={titleId} className={styles.modalTitle}>
+        <div className={styles.detailHeroImage}>
+          <span
+            className={styles.detailMedia}
+            style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
+            aria-hidden
+          />
+          <span className={styles.detailScrim} aria-hidden />
+        </div>
+        <div className={styles.detailBody}>
+          <div className={styles.detailDateRow}>
+            <span className={styles.detailDateBig}>
+              {month} {day}
+            </span>
+            <span className={styles.detailDateDetail}>
+              {weekday} · {time}
+            </span>
+          </div>
+          <h2 id={titleId} className={styles.detailTitle}>
             {event.title}
           </h2>
           {(event.location || event.organizer) && (
-            <p className={styles.modalMeta}>
-              {[event.location, event.organizer && `Hosted by ${event.organizer}`].filter(Boolean).join(" — ")}
-            </p>
+            <div className={styles.detailMetaRow}>
+              {event.location && <span>{event.location}</span>}
+              {event.organizer && <span>Hosted by {event.organizer}</span>}
+            </div>
           )}
-          {event.description && <p className={styles.modalDescription}>{event.description}</p>}
-          {going !== null && <p className={styles.modalMeta}>{going} going</p>}
+          {event.description && <p className={styles.detailDescription}>{event.description}</p>}
+          {going !== null && <p className={styles.detailDescription}>{going} going</p>}
 
-          <p className={styles.modalPrice} style={{ marginTop: "var(--space-md)" }}>
-            {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free"}
-          </p>
-
-          <div className={styles.eventCardAction}>
-            <TicketPurchase
-              eventId={event.id}
-              priceCents={event.price_cents}
-              currency={event.currency}
-              capacityRemaining={event.capacity != null ? event.capacity_remaining : null}
-              signedIn={signedIn}
-            />
+          <div className={styles.detailBookingPanel}>
+            <p className={styles.detailPrice}>
+              {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free"}
+            </p>
+            <div className={styles.eventCardAction}>
+              <TicketPurchase
+                eventId={event.id}
+                priceCents={event.price_cents}
+                currency={event.currency}
+                capacityRemaining={event.capacity != null ? event.capacity_remaining : null}
+                signedIn={signedIn}
+              />
+            </div>
           </div>
         </div>
       </Modal>

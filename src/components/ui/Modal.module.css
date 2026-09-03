@@ -1,41 +1,48 @@
 .dialog {
   position: fixed;
   inset: 0;
-  margin: auto;
+  margin: 0;
   padding: 0;
-  width: min(560px, calc(100vw - 2rem));
-  max-height: min(88vh, 720px);
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
   border: none;
-  border-radius: var(--radius-lg);
-  background: var(--bg-raised);
+  background: var(--bg);
   color: var(--fg);
 }
 
 .dialog::backdrop {
-  background: rgba(16, 14, 13, 0.72);
-  backdrop-filter: blur(3px);
+  background: var(--bg);
 }
 
 .content {
-  max-height: min(88vh, 720px);
+  position: relative;
+  height: 100%;
   overflow-y: auto;
-  border-radius: var(--radius-lg);
 }
 
 .close {
-  position: absolute;
-  top: var(--space-sm);
-  right: var(--space-sm);
-  z-index: 1;
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  background: rgba(16, 14, 13, 0.55);
-  backdrop-filter: blur(4px);
-  color: var(--paper);
+  justify-content: flex-end;
+  gap: 0.35rem;
+  width: 100%;
+  padding: var(--space-md);
+  background: linear-gradient(180deg, var(--bg) 45%, transparent 100%);
+  color: var(--fg-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color var(--dur) var(--ease);
+}
+
+.close:hover {
+  color: var(--fg);
 }
 
 .close svg {
