@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
 import { DealRedeem } from "./DealRedeem";
+import { DealsCategoryFilter } from "./DealsCategoryFilter";
 import styles from "../studio.module.css";
 
 export const metadata: Metadata = { title: "Deals" };
@@ -16,7 +17,12 @@ function currentCycleStart() {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString().slice(0, 10);
 }
 
-export default async function StudioDealsPage() {
+export default async function StudioDealsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category: selectedCategoryId } = await searchParams;
   const supabase = await createClient();
 
   const [
@@ -79,9 +85,17 @@ export default async function StudioDealsPage() {
     );
   }
 
+  const shownCategories = selectedCategoryId
+    ? categoriesWithDeals.filter((cat) => cat.id === selectedCategoryId)
+    : categoriesWithDeals;
+
   return (
     <div>
-      {categoriesWithDeals.map((cat) => (
+      <DealsCategoryFilter categories={categoriesWithDeals} activeId={selectedCategoryId ?? null} />
+      {shownCategories.length === 0 && (
+        <p className={styles.hint}>No deals in this category right now.</p>
+      )}
+      {shownCategories.map((cat) => (
         <div key={cat.id} className={styles.dealsCategory}>
           <h2 className={styles.dealsCategoryTitle}>{cat.name}</h2>
           <div className={styles.dealsGrid}>

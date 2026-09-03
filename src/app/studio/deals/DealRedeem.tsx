@@ -21,6 +21,7 @@ export function DealRedeem({
   signedIn: boolean;
 }) {
   const router = useRouter();
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +31,7 @@ export function DealRedeem({
     setLoading(true);
     setError(null);
     try {
-      const { checkoutUrl } = await startDealCheckout(dealId);
+      const { checkoutUrl } = await startDealCheckout(dealId, agreed);
       router.push(checkoutUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -51,8 +52,23 @@ export function DealRedeem({
   }
 
   return (
-    <div>
-      <button type="button" className={styles.ticketCta} onClick={handleRedeem} disabled={loading}>
+    <div className={styles.ticketPurchase}>
+      <label className={styles.ticketPolicy}>
+        <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
+        <span>
+          I agree to the{" "}
+          <Link
+            href="/terms#deals"
+            target="_blank"
+            className={styles.ticketPolicyLink}
+            onClick={(e) => e.stopPropagation()}
+          >
+            deal terms
+          </Link>{" "}
+          — this redemption is final and non-refundable.
+        </span>
+      </label>
+      <button type="button" className={styles.ticketCta} onClick={handleRedeem} disabled={loading || !agreed}>
         {loading ? "Redirecting…" : `Redeem — ${formatPrice(memberPriceCents, currency)}`}
       </button>
       {error && <p className={styles.ticketError}>{error}</p>}

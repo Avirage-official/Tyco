@@ -12,9 +12,10 @@ function slugify(text: string) {
 /**
  * Tiny markdown-ish parser for admin-authored legal content. Supports
  * "## Heading" (or "## Heading {#anchor}" to pin a stable id — used by
- * the shop checkout and ticket checkbox, which link to #shop / #tickets)
- * and blank-line-separated paragraphs. Nothing fancier than that on
- * purpose — this is edited in a plain textarea, not a rich editor.
+ * the shop checkout, ticket checkbox, and deal redeem checkbox, which
+ * link to #shop / #tickets / #deals) and blank-line-separated paragraphs.
+ * Nothing fancier than that on purpose — this is edited in a plain
+ * textarea, not a rich editor.
  */
 export function parseLegalContent(raw: string): LegalBlock[] {
   const blocks: LegalBlock[] = [];
@@ -48,11 +49,11 @@ export const DEFAULT_LEGAL_TERMS = `Last updated — [DATE].
 
 ## Acceptance of these terms
 
-These Terms & Conditions govern your use of the Tyco website and every purchase made through it — shop orders and event tickets alike. By creating an account, placing an order, or buying a ticket, you agree to these terms.
+These Terms & Conditions govern your use of the Tyco website and every purchase made through it — shop orders, event tickets, and deal redemptions alike. By creating an account, placing an order, buying a ticket, or redeeming a deal, you agree to these terms.
 
 ## Accounts
 
-You need an account to buy tickets, and you're welcome to create one to check out faster in the shop. You're responsible for keeping your login secure and for everything that happens under your account.
+You need an account to buy tickets or redeem deals, and you're welcome to create one to check out faster in the shop. Creating an account is all it takes to become a Tyco member — there are no membership tiers or fees. You're responsible for keeping your login secure and for everything that happens under your account.
 
 ## Shop purchases {#shop}
 
@@ -72,9 +73,17 @@ All ticket sales are final. Tickets are non-refundable and non-exchangeable once
 
 If we cancel or materially change an event (date, venue, or it not happening at all), ticket holders will be offered a full refund or credit toward a future event, at our discretion. Entry is subject to available capacity at the door and presentation of the reference code on your account; we reserve the right to refuse entry or remove anyone whose conduct puts other guests, staff, or the event at risk.
 
+## Deals {#deals}
+
+A deal is a discounted rate arranged with one of our vendor partners, redeemed through the Membership Deals Network and tied to the account that redeemed it. Each deal is limited to a set number of redemptions per calendar month, shared across all members — once that limit is reached the deal reopens on the 1st of the next month.
+
+To use a deal, show the reference code on your account to the vendor. It's approved once, by Tyco staff on the vendor's behalf, and cannot be reused after approval.
+
+All deal redemptions are final. Deals are non-refundable and non-exchangeable once purchased, with no exceptions — the discounted rate is committed to the vendor at the time of purchase. You confirm this at checkout before a redemption can complete.
+
 ## Payments
 
-Payments for both shop orders and tickets are processed by Revolut. We don't store your card details.
+Payments for shop orders, tickets, and deal redemptions are all processed by Revolut. We don't store your card details.
 
 ## Intellectual property
 
@@ -94,4 +103,4 @@ These terms are governed by the laws of the Republic of Singapore, and any dispu
 
 ## Contact
 
-Questions about these terms, an order, or a ticket? Reach us at [CONTACT EMAIL].`;
+Questions about these terms, an order, a ticket, or a deal? Reach us at [CONTACT EMAIL].`;

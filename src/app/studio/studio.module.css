@@ -3,6 +3,11 @@
   font-size: 1.2rem;
 }
 
+.hint {
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+}
+
 /* -- sidebar shell ------------------------------------------------------
    Deliberately not `.container` (1180px, the site's article-width cap) —
    this is an app-shell layout, not a page of text. The sidebar sits at
