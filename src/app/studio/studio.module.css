@@ -313,6 +313,24 @@
   color: var(--accent);
 }
 
+.dealLocations {
+  margin-top: 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--fg-muted);
+  font-size: 0.78rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dealLocationIcon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
 .dealPriceRow {
   margin-top: 0.2rem;
   display: flex;

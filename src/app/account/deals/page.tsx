@@ -31,6 +31,11 @@ export default async function AccountDealsPage({
     redirect("/login?next=/account/deals");
   }
 
+  // A redemption stuck at "pending" (an abandoned checkout) that's more
+  // than 12 hours old is never coming back — sweep it to "cancelled" so it
+  // doesn't sit forever with a stale "confirming your payment" message.
+  await supabase.rpc("expire_stale_deal_redemptions");
+
   const { data: redemptions } = await supabase
     .from("deal_redemptions")
     .select("id, total_cents, currency, status, reference_code, approved_at, created_at, deal_id, vendor_id")

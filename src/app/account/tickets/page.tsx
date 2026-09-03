@@ -31,6 +31,10 @@ export default async function TicketsPage({
     redirect("/login?next=/account/tickets");
   }
 
+  // Same stale-pending sweep as deal redemptions — an abandoned checkout
+  // more than 12 hours old is never coming back.
+  await supabase.rpc("expire_stale_event_tickets");
+
   const { data: tickets } = await supabase
     .from("event_tickets")
     .select(
