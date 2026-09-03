@@ -11,7 +11,11 @@ import { createRevolutOrder } from "@/lib/checkout/revolut";
  * (that's how the reference code maps back to a person at the vendor
  * counter).
  */
-export async function startDealCheckout(dealId: string) {
+export async function startDealCheckout(dealId: string, agreedToNoRefundPolicy: boolean) {
+  if (!agreedToNoRefundPolicy) {
+    throw new Error("You must agree that this redemption is final before continuing.");
+  }
+
   const sessionClient = await createClient();
   const {
     data: { user },

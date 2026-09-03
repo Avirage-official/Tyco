@@ -36,12 +36,13 @@ export function LegalForm({ initialValue }: { initialValue: string }) {
         <a href="/terms" target="_blank" rel="noreferrer">
           /terms
         </a>{" "}
-        page — shop and ticket policies, IP, liability, and so on. Start a line with{" "}
-        <code>## </code> for a section heading. The shop checkout and the ticket purchase
-        agreement link straight to the &ldquo;Shop purchases&rdquo; and &ldquo;Event tickets&rdquo;
-        sections, so keep those two headings as <code>## Shop purchases {"{#shop}"}</code> and{" "}
-        <code>## Event tickets {"{#tickets}"}</code> — the <code>{"{#id}"}</code> part pins the
-        link target even if you reword the heading.
+        page — shop, ticket, and deal policies, IP, liability, and so on. Start a line with{" "}
+        <code>## </code> for a section heading. The shop checkout, the ticket purchase
+        agreement, and the deal redeem agreement each link straight to a section — &ldquo;Shop
+        purchases&rdquo;, &ldquo;Event tickets&rdquo;, and &ldquo;Deals&rdquo; — so keep those
+        headings as <code>## Shop purchases {"{#shop}"}</code>,{" "}
+        <code>## Event tickets {"{#tickets}"}</code>, and <code>## Deals {"{#deals}"}</code> — the{" "}
+        <code>{"{#id}"}</code> part pins the link target even if you reword the heading.
       </p>
 
       <div className={styles.field}>
