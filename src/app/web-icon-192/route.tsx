@@ -10,7 +10,7 @@ export async function GET() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#100e0d",
+          background: "#211c18",
           position: "relative",
         }}
       >

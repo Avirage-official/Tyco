@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { motion } from "motion/react";
 import { LinkButton } from "@/components/ui/Button";
 import { NewBadge } from "@/components/ui/NewBadge";
 import { IconArrowRight } from "@/components/icons";
-import { useStaggerReveal } from "@/lib/motion/useScrollReveal";
+import { MotionLink } from "@/lib/motion/MotionLink";
+import { fadeUpContainer, fadeUpItem, revealViewport } from "@/lib/motion/variants";
 import { formatPrice, isNew } from "@/lib/format";
 import styles from "./FeaturedShop.module.css";
 
@@ -48,7 +49,7 @@ export function ShopCard({ item, position }: { item: ShopItem; position: number 
   const activeImage = useImageCycle(item.images.length, position * STAGGER_MS);
 
   return (
-    <Link href={`/shop/${item.id}`} className={styles.card}>
+    <MotionLink href={`/shop/${item.id}`} className={styles.card} variants={fadeUpItem}>
       <span className={styles.cover} aria-hidden>
         {item.images.length > 0 ? (
           item.images.map((url, i) => (
@@ -72,12 +73,11 @@ export function ShopCard({ item, position }: { item: ShopItem; position: number 
         {item.category && <span className={styles.category}>{item.category}</span>}
         <span className={styles.price}>{formatPrice(item.price_cents, item.currency)}</span>
       </span>
-    </Link>
+    </MotionLink>
   );
 }
 
 export function FeaturedShop({ items }: { items: ShopItem[] }) {
-  const revealRef = useStaggerReveal<HTMLDivElement>();
   const trackRef = useRef<HTMLDivElement | null>(null);
 
   if (items.length === 0) return null;
@@ -112,17 +112,18 @@ export function FeaturedShop({ items }: { items: ShopItem[] }) {
           <IconArrowRight />
         </button>
 
-        <div
-          ref={(el) => {
-            trackRef.current = el;
-            revealRef.current = el;
-          }}
+        <motion.div
+          ref={trackRef}
           className={styles.track}
+          variants={fadeUpContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={revealViewport}
         >
           {items.map((item, i) => (
             <ShopCard key={item.id} item={item} position={i} />
           ))}
-        </div>
+        </motion.div>
 
         <button
           type="button"

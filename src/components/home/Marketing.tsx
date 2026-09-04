@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "motion/react";
 import { LinkButton } from "@/components/ui/Button";
 import { Spotlight, type SpotlightProps } from "@/components/home/Spotlight";
 import { WhoWeAreHero } from "@/components/home/WhoWeAreHero";
 import { VideoHero } from "@/components/home/VideoHero";
+import { fadeUpItem } from "@/lib/motion/variants";
 import type { AboutSlide } from "@/lib/supabase/types";
 import styles from "./Marketing.module.css";
 
@@ -18,32 +22,33 @@ export function Marketing({
       <WhoWeAreHero slides={slides} />
 
       <VideoHero>
-        <h1 className={styles.title}>
-          TYCO. Where sound, style, and culture <em>collide</em>.
-        </h1>
-        <p className={styles.lede}>
-          The best work doesn&apos;t just exist. It moves. It changes something.
-          Everything we create is built on that belief.
-        </p>
-        <div className={styles.actions}>
+        <motion.h1 className={styles.title} variants={fadeUpItem}>
+          Save on the spots you already love. Discover the ones you&apos;ll
+          love next.
+        </motion.h1>
+        <motion.p className={styles.lede} variants={fadeUpItem}>
+          Deals that support the culture you love — while giving rising Asian
+          artists the spotlight and backing they deserve.
+        </motion.p>
+        <motion.div className={styles.actions} variants={fadeUpItem}>
           <LinkButton href="/signup">Sign up</LinkButton>
           <LinkButton href="/login" variant="ghost">
             Sign in
           </LinkButton>
-          <LinkButton href="/about" variant="ink">
-            About us
+          <LinkButton href="/studio/deals" variant="ink">
+            See Deals
           </LinkButton>
-        </div>
+        </motion.div>
         {spotlight && (
-          <div className={styles.spotlightSlot}>
+          <motion.div className={styles.spotlightSlot} variants={fadeUpItem}>
             <Spotlight {...spotlight} />
-          </div>
+          </motion.div>
         )}
-        <nav className={styles.quickLinks} aria-label="Quick links">
+        <motion.nav className={styles.quickLinks} aria-label="Quick links" variants={fadeUpItem}>
           <Link href="/studio">Happenings</Link>
           <span aria-hidden>&middot;</span>
           <Link href="/shop">Shop</Link>
-        </nav>
+        </motion.nav>
       </VideoHero>
     </>
   );

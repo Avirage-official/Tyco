@@ -12,12 +12,8 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
-  transition: transform var(--dur) var(--ease), background var(--dur) var(--ease),
-    color var(--dur) var(--ease), border-color var(--dur) var(--ease);
-}
-
-.btn:active {
-  transform: scale(0.97);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
 }
 
 .primary {
