@@ -52,7 +52,30 @@
   }
 }
 
-/* -- event grid (secondary upcoming dates, "marketplace" style) -------- */
+/* -- happenings theme scope (docs/happenings-mobile-redesign.md) --------
+   Soft light orange/red + brown palette, scoped to the /studio events
+   route only (see StudioThemeScope). Semantic tokens only — the raw
+   brand constants (--ink, --paper, --red*) are left alone since they're
+   building blocks used elsewhere, not the theme-dependent layer. */
+
+.happeningsTheme {
+  --bg: #faf1e6;
+  --bg-raised: #ffffff;
+  --surface: #ffffff;
+  --border: #eedfc9;
+  --fg: #3b2a1f;
+  --fg-muted: #8c7361;
+  --accent: #e3794c;
+  --accent-strong: #c85a34;
+  --accent-soft: rgba(227, 121, 76, 0.16);
+  --on-accent: #fff8f0;
+  --card-shadow: 0 2px 14px rgba(59, 42, 31, 0.08);
+
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* -- event grid ("More dates", image-top/body-below like EventHero) ---- */
 
 .eventGrid {
   display: grid;
@@ -61,27 +84,30 @@
 }
 
 .eventCard {
-  position: relative;
-  isolation: isolate;
   display: flex;
   flex-direction: column;
-  min-height: 320px;
   width: 100%;
-  padding: var(--space-md);
   border: none;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--surface);
+  background: var(--bg-raised);
+  box-shadow: var(--card-shadow, none);
   font: inherit;
   color: inherit;
   text-align: left;
   cursor: pointer;
 }
 
+.eventCardImage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--surface);
+}
+
 .eventCardMedia {
   position: absolute;
   inset: 0;
-  z-index: -2;
   background-size: cover;
   background-position: center;
   filter: grayscale(1) contrast(1.08);
@@ -92,128 +118,51 @@
   transform: scale(1.05);
 }
 
-.eventCardScrim {
+.eventCardDateBadge {
   position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(180deg, rgba(16, 14, 13, 0.15) 0%, rgba(16, 14, 13, 0.95) 78%);
-}
-
-.eventCardScrim::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(200deg, var(--red-deep) -10%, transparent 55%);
-  mix-blend-mode: multiply;
-  opacity: 0.4;
-}
-
-.eventCardTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.eventCardDate {
-  font-size: 0.72rem;
+  top: var(--space-2xs);
+  left: var(--space-2xs);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-pill);
+  background: var(--bg-raised);
+  color: var(--accent-strong);
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--accent);
 }
 
 .eventCardBody {
-  margin-top: auto;
+  padding: var(--space-sm);
 }
 
 .eventCardTitle {
-  font-size: 1.3rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: var(--paper);
+  color: var(--fg);
+  line-height: 1.2;
 }
 
 .eventCardMeta {
   margin-top: 0.3rem;
-  color: color-mix(in srgb, var(--paper) 72%, transparent);
-  font-size: 0.85rem;
+  color: var(--fg-muted);
+  font-size: 0.82rem;
 }
 
 .eventCardPrice {
   margin-top: 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--accent);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent-strong);
 }
 
 .eventCardAction {
   margin-top: var(--space-sm);
 }
 
-/* -- waveform (ambient hover cue, events only) -------------------------- */
-
-.waveform {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 20px;
-}
-
-.waveformBar {
-  width: 3px;
-  border-radius: var(--radius-pill);
-  background: var(--accent);
-  transform-origin: bottom;
-  transform: scaleY(0.45);
-  transition: transform 200ms var(--ease);
-}
-
-.waveformBar:nth-child(1) {
-  height: 6px;
-}
-.waveformBar:nth-child(2) {
-  height: 12px;
-  animation-delay: 90ms;
-}
-.waveformBar:nth-child(3) {
-  height: 18px;
-  animation-delay: 180ms;
-}
-.waveformBar:nth-child(4) {
-  height: 10px;
-  animation-delay: 60ms;
-}
-.waveformBar:nth-child(5) {
-  height: 16px;
-  animation-delay: 240ms;
-}
-.waveformBar:nth-child(6) {
-  height: 8px;
-  animation-delay: 130ms;
-}
-
-.eventCard:hover .waveformBar,
-.eventCard:focus-within .waveformBar {
-  animation: waveformPulse 850ms ease-in-out infinite;
-}
-
-@keyframes waveformPulse {
-  0%,
-  100% {
-    transform: scaleY(0.45);
-  }
-  50% {
-    transform: scaleY(1.15);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .eventCardMedia {
     transition: none;
-  }
-  .eventCard:hover .waveformBar,
-  .eventCard:focus-within .waveformBar {
-    animation: none;
-    transform: scaleY(0.8);
   }
 }
 
@@ -454,14 +403,16 @@
     gap: var(--space-sm);
   }
 
-  .eventCard {
-    min-height: 0;
-    aspect-ratio: 3 / 4;
-    padding: var(--space-sm);
+  .eventCardImage {
+    aspect-ratio: 1 / 1;
+  }
+
+  .eventCardBody {
+    padding: var(--space-xs);
   }
 
   .eventCardTitle {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     line-height: 1.15;
   }
 

@@ -4,7 +4,6 @@ import { useId, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { formatEventDateParts, formatPrice } from "@/lib/format";
 import { TicketPurchase } from "./TicketPurchase";
-import { Waveform } from "./Waveform";
 import styles from "./studio.module.css";
 
 type Event = {
@@ -33,18 +32,15 @@ export function EventCard({ event, signedIn }: { event: Event; signedIn: boolean
   return (
     <>
       <button type="button" className={styles.eventCard} onClick={() => setOpen(true)}>
-        <span
-          className={styles.eventCardMedia}
-          style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
-          aria-hidden
-        />
-        <span className={styles.eventCardScrim} aria-hidden />
-
-        <div className={styles.eventCardTop}>
-          <span className={styles.eventCardDate}>
+        <div className={styles.eventCardImage}>
+          <span
+            className={styles.eventCardMedia}
+            style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
+            aria-hidden
+          />
+          <span className={styles.eventCardDateBadge}>
             {month} {day}
           </span>
-          <Waveform />
         </div>
 
         <div className={styles.eventCardBody}>
