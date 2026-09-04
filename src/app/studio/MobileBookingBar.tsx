@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import styles from "./studio.module.css";
 
 const QUERY = "(max-width: 759px)";
 
@@ -32,10 +33,18 @@ function getServerSnapshot() {
  * returns false, matching the server-rendered markup exactly, then
  * useSyncExternalStore corrects to the real viewport reading right after
  * hydration without a mismatch.
+ *
+ * The portal also escapes the .happeningsTheme scope (see
+ * StudioThemeScope) that colors the rest of the page, since that scope is
+ * just a wrapping div in the normal render tree. This component only ever
+ * renders inside EventHero, which only ever renders on the Happenings
+ * route, so it's safe to reapply the theme class directly on the portaled
+ * wrapper rather than relying on inheriting it from an ancestor it no
+ * longer has.
  */
 export function MobileBookingBar({ children }: { children: React.ReactNode }) {
   const isMobile = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   if (!isMobile) return <>{children}</>;
-  return createPortal(children, document.body);
+  return createPortal(<div className={styles.happeningsTheme}>{children}</div>, document.body);
 }
