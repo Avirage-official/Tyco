@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StudioSidebar } from "./StudioSidebar";
 import { StudioTabs } from "./StudioTabs";
+import { StudioFeatureBanner } from "./StudioFeatureBanner";
 import styles from "./studio.module.css";
 
 export default function StudioLayout({ children }: { children: React.ReactNode }) {
@@ -17,6 +18,7 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
           <div className={styles.mobileTabs}>
             <StudioTabs />
           </div>
+          <StudioFeatureBanner />
           {children}
         </div>
       </div>

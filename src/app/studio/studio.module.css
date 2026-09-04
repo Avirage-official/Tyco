@@ -442,6 +442,54 @@
   max-height: 3rem;
 }
 
+/* -- mobile: a real 2-up grid instead of one big tile per row ----------
+   Both grids already fall back to a single column below their auto-fill
+   minmax breakpoint on narrow viewports — this forces two, and trims each
+   card down to what actually fits at that width (full detail — tagline,
+   locations, meta — stays one tap away in the takeover). */
+@media (max-width: 640px) {
+  .eventGrid,
+  .dealsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+  }
+
+  .eventCard {
+    min-height: 0;
+    aspect-ratio: 3 / 4;
+    padding: var(--space-sm);
+  }
+
+  .eventCardTitle {
+    font-size: 0.95rem;
+    line-height: 1.15;
+  }
+
+  .eventCardMeta {
+    display: none;
+  }
+
+  .eventCardPrice {
+    font-size: 0.78rem;
+  }
+
+  .posterName {
+    font-size: 0.95rem;
+  }
+
+  .dealLocations {
+    display: none;
+  }
+
+  .dealPriceRow {
+    flex-wrap: wrap;
+  }
+
+  .dealOriginalPrice {
+    font-size: 0.72rem;
+  }
+}
+
 /* -- detail modal (deals + events share this) ---------------------------
    Deliberately built to read as a compressed EventHero, not a generic
    centered product-modal card: full-bleed grayscale-duotone image +
