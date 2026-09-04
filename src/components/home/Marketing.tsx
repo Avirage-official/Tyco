@@ -23,19 +23,20 @@ export function Marketing({
 
       <VideoHero>
         <motion.h1 className={styles.title} variants={fadeUpItem}>
-          TYCO. Where sound, style, and culture <em>collide</em>.
+          Save on the spots you already love. Discover the ones you&apos;ll
+          love next.
         </motion.h1>
         <motion.p className={styles.lede} variants={fadeUpItem}>
-          The best work doesn&apos;t just exist. It moves. It changes something.
-          Everything we create is built on that belief.
+          Deals that support the culture you love — while giving rising Asian
+          artists the spotlight and backing they deserve.
         </motion.p>
         <motion.div className={styles.actions} variants={fadeUpItem}>
           <LinkButton href="/signup">Sign up</LinkButton>
           <LinkButton href="/login" variant="ghost">
             Sign in
           </LinkButton>
-          <LinkButton href="/about" variant="ink">
-            About us
+          <LinkButton href="/studio/deals" variant="ink">
+            See Deals
           </LinkButton>
         </motion.div>
         {spotlight && (

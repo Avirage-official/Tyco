@@ -65,11 +65,9 @@ export function WhoWeAreHero({ slides }: { slides: AboutSlide[] }) {
         viewport={revealViewport}
       >
         <motion.p className={styles.blurb} variants={fadeUpItem}>
-          TYCO is a Southeast Asia-rooted creative collective — part
-          community, part commerce. We put out apparel that carries the
-          culture, back the creators building it, and we&apos;re opening up
-          real access to the studios, bars, and lessons creatives already
-          spend on.
+          TYCO gets you real savings at spots creatives already spend on —
+          while spotlighting the Asian music and fashion shaping the scene.
+          Every deal you use helps fund that culture forward.
         </motion.p>
 
         <motion.div className={styles.bottom} variants={fadeUpItem}>
@@ -98,7 +96,7 @@ export function WhoWeAreHero({ slides }: { slides: AboutSlide[] }) {
             <div className={styles.copy}>
               <p className="eyebrow">Who we are</p>
               <h2 className={styles.title}>
-                An artistic collective, not a <em>label</em> with a merch table.
+                Not just deals. <em>A movement.</em>
               </h2>
             </div>
           </div>
