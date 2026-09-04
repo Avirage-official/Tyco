@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "motion/react";
 import { LinkButton } from "@/components/ui/Button";
 import { Spotlight, type SpotlightProps } from "@/components/home/Spotlight";
 import { WhoWeAreHero } from "@/components/home/WhoWeAreHero";
 import { VideoHero } from "@/components/home/VideoHero";
+import { fadeUpItem } from "@/lib/motion/variants";
 import type { AboutSlide } from "@/lib/supabase/types";
 import styles from "./Marketing.module.css";
 
@@ -18,14 +22,14 @@ export function Marketing({
       <WhoWeAreHero slides={slides} />
 
       <VideoHero>
-        <h1 className={styles.title}>
+        <motion.h1 className={styles.title} variants={fadeUpItem}>
           TYCO. Where sound, style, and culture <em>collide</em>.
-        </h1>
-        <p className={styles.lede}>
+        </motion.h1>
+        <motion.p className={styles.lede} variants={fadeUpItem}>
           The best work doesn&apos;t just exist. It moves. It changes something.
           Everything we create is built on that belief.
-        </p>
-        <div className={styles.actions}>
+        </motion.p>
+        <motion.div className={styles.actions} variants={fadeUpItem}>
           <LinkButton href="/signup">Sign up</LinkButton>
           <LinkButton href="/login" variant="ghost">
             Sign in
@@ -33,17 +37,17 @@ export function Marketing({
           <LinkButton href="/about" variant="ink">
             About us
           </LinkButton>
-        </div>
+        </motion.div>
         {spotlight && (
-          <div className={styles.spotlightSlot}>
+          <motion.div className={styles.spotlightSlot} variants={fadeUpItem}>
             <Spotlight {...spotlight} />
-          </div>
+          </motion.div>
         )}
-        <nav className={styles.quickLinks} aria-label="Quick links">
+        <motion.nav className={styles.quickLinks} aria-label="Quick links" variants={fadeUpItem}>
           <Link href="/studio">Happenings</Link>
           <span aria-hidden>&middot;</span>
           <Link href="/shop">Shop</Link>
-        </nav>
+        </motion.nav>
       </VideoHero>
     </>
   );

@@ -1,3 +1,7 @@
+"use client";
+
+import { motion } from "motion/react";
+import { fadeUpContainer, revealViewport } from "@/lib/motion/variants";
 import styles from "./VideoHero.module.css";
 
 export function VideoHero({
@@ -13,7 +17,15 @@ export function VideoHero({
         <source src="/video/home-hero.mp4" type="video/mp4" />
       </video>
       <div className={styles.heroOverlay} aria-hidden="true" />
-      <div className={`container ${styles.heroInner}`}>{children}</div>
+      <motion.div
+        className={`container ${styles.heroInner}`}
+        variants={fadeUpContainer}
+        initial="hidden"
+        whileInView="visible"
+        viewport={revealViewport}
+      >
+        {children}
+      </motion.div>
     </section>
   );
 }

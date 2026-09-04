@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "motion/react";
 import { IconArrowRight } from "@/components/icons";
+import { fadeUpContainer, fadeUpItem, revealViewport } from "@/lib/motion/variants";
 import type { AboutSlide } from "@/lib/supabase/types";
 import styles from "./WhoWeAreHero.module.css";
 
@@ -55,16 +57,22 @@ export function WhoWeAreHero({ slides }: { slides: AboutSlide[] }) {
         <span className={styles.scrim} aria-hidden />
       </div>
 
-      <div className={`container ${styles.frame}`}>
-        <p className={styles.blurb}>
+      <motion.div
+        className={`container ${styles.frame}`}
+        variants={fadeUpContainer}
+        initial="hidden"
+        whileInView="visible"
+        viewport={revealViewport}
+      >
+        <motion.p className={styles.blurb} variants={fadeUpItem}>
           TYCO is a Southeast Asia-rooted creative collective — part
           community, part commerce. We put out apparel that carries the
           culture, back the creators building it, and we&apos;re opening up
           real access to the studios, bars, and lessons creatives already
           spend on.
-        </p>
+        </motion.p>
 
-        <div className={styles.bottom}>
+        <motion.div className={styles.bottom} variants={fadeUpItem}>
           <div className={styles.left}>
             {slides.length > 1 && (
               <div className={styles.tabs} role="tablist" aria-label="Gallery">
@@ -99,8 +107,8 @@ export function WhoWeAreHero({ slides }: { slides: AboutSlide[] }) {
             <span className={styles.ctaLabel}>Read our full story</span>
             <IconArrowRight className={styles.ctaIcon} />
           </Link>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

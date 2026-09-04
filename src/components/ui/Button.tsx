@@ -1,5 +1,7 @@
-import Link from "next/link";
-import type { ButtonHTMLAttributes } from "react";
+"use client";
+
+import { motion, type HTMLMotionProps } from "motion/react";
+import { MotionLink } from "@/lib/motion/MotionLink";
 import styles from "./Button.module.css";
 
 type Variant = "primary" | "ghost" | "ink";
@@ -8,6 +10,12 @@ type CommonProps = {
   variant?: Variant;
   full?: boolean;
   children: React.ReactNode;
+};
+
+const press = {
+  whileHover: { scale: 1.03 },
+  whileTap: { scale: 0.96 },
+  transition: { type: "spring", stiffness: 420, damping: 28 } as const,
 };
 
 function classesFor({ variant = "primary", full }: { variant?: Variant; full?: boolean }) {
@@ -19,8 +27,14 @@ export function Button({
   full,
   className,
   ...rest
-}: CommonProps & ButtonHTMLAttributes<HTMLButtonElement> & { className?: string }) {
-  return <button className={`${classesFor({ variant, full })} ${className ?? ""}`} {...rest} />;
+}: CommonProps & HTMLMotionProps<"button"> & { className?: string }) {
+  return (
+    <motion.button
+      className={`${classesFor({ variant, full })} ${className ?? ""}`}
+      {...press}
+      {...rest}
+    />
+  );
 }
 
 export function LinkButton({
@@ -31,8 +45,12 @@ export function LinkButton({
   className,
 }: CommonProps & { href: string; className?: string }) {
   return (
-    <Link href={href} className={`${classesFor({ variant, full })} ${className ?? ""}`}>
+    <MotionLink
+      href={href}
+      className={`${classesFor({ variant, full })} ${className ?? ""}`}
+      {...press}
+    >
       {children}
-    </Link>
+    </MotionLink>
   );
 }

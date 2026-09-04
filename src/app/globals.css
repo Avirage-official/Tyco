@@ -5,25 +5,25 @@
 
 :root {
   /* -- palette -------------------------------------------------------- */
-  --ink: #100e0d;              /* near-black, warm not blue-black */
-  --ink-soft: #2b2622;
+  --ink: #211c18;               /* lifted, brighter warm charcoal (was near-black #100e0d) */
+  --ink-soft: #3a3229;
   --paper: #f4ecdc;            /* cream white */
   --paper-dim: #e9dfc8;        /* recessed cream surface */
   --paper-line: #d9cbac;       /* hairline on cream */
-  --red: #b3241b;              /* primary accent */
-  --red-deep: #7c170f;         /* pressed / shadow state */
-  --red-bright: #d8402f;       /* hover / highlight */
+  --red: #c22e1f;              /* primary accent, brightened for the lighter ground */
+  --red-deep: #8c1c11;         /* pressed / shadow state */
+  --red-bright: #e04a37;       /* hover / highlight */
 
   /* -- semantic --------------------------------------------------------- */
   --bg: var(--ink);
   --bg-raised: var(--ink-soft);
   --surface: var(--ink-soft);
-  --border: #423b34;
+  --border: #56493c;
   --fg: var(--paper);
-  --fg-muted: #b8ac96;
+  --fg-muted: #cabfa8;
   --accent: var(--red-bright);
   --accent-strong: var(--red);
-  --accent-soft: rgba(216, 64, 47, 0.18);
+  --accent-soft: rgba(224, 74, 55, 0.2);
   --on-accent: var(--paper);
   --on-ink: var(--paper);
 
