@@ -38,8 +38,15 @@
   display: none;
 }
 
+/* Sizing lives on .track's own children, not on .card itself — the same
+   card (see ShopCard, exported for reuse) also renders inside a plain
+   CSS grid on the Shop listing page, where it should just fill its
+   grid cell instead of carrying a fixed carousel width. */
 .card {
   display: block;
+}
+
+.track > .card {
   flex: 0 0 auto;
   width: clamp(200px, 23vw, 280px);
   scroll-snap-align: start;
@@ -153,6 +160,14 @@
 @media (max-width: 560px) {
   .arrow {
     display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Edge-to-edge on desktop; a floating rounded card on mobile — same
+     treatment the Happenings/Deals grids use at this breakpoint. */
+  .cover {
+    border-radius: var(--radius-lg);
   }
 }
 

@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
 import { EventHero } from "./EventHero";
 import { EventCard } from "./EventCard";
-import { Marquee } from "./Marquee";
+import { Marquee } from "@/components/motion/Marquee";
 import styles from "./studio.module.css";
 
 export const metadata: Metadata = { title: "Events" };
