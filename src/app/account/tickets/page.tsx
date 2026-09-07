@@ -36,12 +36,18 @@ export default async function TicketsPage({
     .order("created_at", { ascending: false });
 
   const eventIds = Array.from(new Set((tickets ?? []).map((t) => t.event_id)));
-  type EventRow = { id: string; title: string; location: string | null; event_date: string };
+  type EventRow = {
+    id: string;
+    title: string;
+    location: string | null;
+    event_date: string;
+    cover_url: string | null;
+  };
   let events: EventRow[] = [];
   if (eventIds.length > 0) {
     const { data } = await supabase
       .from("events")
-      .select("id, title, location, event_date")
+      .select("id, title, location, event_date, cover_url")
       .in("id", eventIds);
     events = data ?? [];
   }
