@@ -4,17 +4,9 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate, formatEventDateTime, formatPrice } from "@/lib/format";
-import styles from "./tickets.module.css";
+import { TicketList } from "./TicketList";
 
 export const metadata: Metadata = { title: "Your tickets" };
-
-const STATUS_LABEL: Record<string, string> = {
-  pending: "Payment pending",
-  paid: "Paid",
-  cancelled: "Cancelled",
-  refunded: "Refunded",
-};
 
 export default async function TicketsPage({
   searchParams,
@@ -66,61 +58,7 @@ export default async function TicketsPage({
             action={<LinkButton href="/studio">See what&rsquo;s on</LinkButton>}
           />
         ) : (
-          <ul className={styles.list}>
-            {tickets.map((ticket) => {
-              const event = eventById.get(ticket.event_id);
-              const justPurchased = ticket.id === justPurchasedId;
-              return (
-                <li
-                  key={ticket.id}
-                  className={justPurchased ? `${styles.card} ${styles.cardHighlight}` : styles.card}
-                >
-                  <div className={styles.cardHeader}>
-                    <div>
-                      <p className={styles.eventTitle}>{event?.title ?? "Event"}</p>
-                      {event && (
-                        <p className={styles.eventMeta}>
-                          {[formatEventDateTime(event.event_date), event.location].filter(Boolean).join(" — ")}
-                        </p>
-                      )}
-                    </div>
-                    <span className={`${styles.status} ${styles[`status_${ticket.status}`] ?? ""}`}>
-                      {STATUS_LABEL[ticket.status] ?? ticket.status}
-                    </span>
-                  </div>
-
-                  {ticket.status === "paid" && (
-                    <div className={styles.proof}>
-                      <div>
-                        <p className={styles.proofLabel}>Show this at the door</p>
-                        <p className={styles.referenceCode}>{ticket.reference_code}</p>
-                      </div>
-                      <div className={styles.pax}>
-                        <span className={styles.paxCount}>{ticket.quantity}</span>
-                        <span className={styles.paxLabel}>{ticket.quantity === 1 ? "pax" : "pax"}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {justPurchased && ticket.status === "pending" && (
-                    <p className={styles.confirming}>
-                      We&rsquo;re confirming your payment — refresh this page in a moment if it doesn&rsquo;t
-                      update.
-                    </p>
-                  )}
-
-                  {ticket.checked_in_at && (
-                    <p className={styles.checkedIn}>Checked in {formatDate(ticket.checked_in_at)}</p>
-                  )}
-
-                  <div className={styles.cardFooter}>
-                    <span>Total</span>
-                    <span className={styles.total}>{formatPrice(ticket.total_cents, ticket.currency)}</span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          <TicketList tickets={tickets} eventById={eventById} justPurchasedId={justPurchasedId} />
         )}
       </div>
     </>
