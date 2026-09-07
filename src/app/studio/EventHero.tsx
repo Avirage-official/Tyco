@@ -1,4 +1,6 @@
+import { IconClock, IconPin } from "@/components/icons";
 import { formatEventDateParts, formatPrice } from "@/lib/format";
+import { StudioTabs } from "./StudioTabs";
 import { TicketPurchase } from "./TicketPurchase";
 import { MobileBookingBar } from "./MobileBookingBar";
 import styles from "./EventHero.module.css";
@@ -25,72 +27,69 @@ export function EventHero({ event, signedIn }: { event: HeroEvent; signedIn: boo
       ? event.capacity - event.capacity_remaining
       : null;
 
-  const metaParts = [
-    event.location,
-    event.organizer && `Hosted by ${event.organizer}`,
-    event.capacity != null && `${event.capacity_remaining} seats left`,
-  ].filter(Boolean) as string[];
-
   return (
     <section className={styles.hero}>
-      <p className={styles.eyebrow}>Next up</p>
-
-      <div className={styles.heroImage}>
+      <div className={styles.media} aria-hidden>
         {event.cover_video_url ? (
-          <video className={styles.media} autoPlay muted loop playsInline aria-hidden>
+          <video className={styles.mediaLayer} autoPlay muted loop playsInline>
             <source src={event.cover_video_url} type="video/mp4" />
           </video>
         ) : (
           <span
-            className={styles.media}
+            className={styles.mediaLayer}
             style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
-            aria-hidden
           />
         )}
-        <span className={styles.scrim} aria-hidden />
+        <span className={styles.scrim} />
       </div>
 
-      <div className={styles.body}>
-        <div className={styles.main}>
-          <div className={styles.dateRow}>
-            <span className={styles.dateBig}>
-              {month} {day}
-            </span>
-            <span className={styles.dateDetail}>
-              {weekday} · {time}
-            </span>
-          </div>
+      <div className={`container ${styles.top}`}>
+        <p className={styles.eyebrow}>Next up</p>
+        <div className={styles.tabsSlot}>
+          <StudioTabs />
+        </div>
+      </div>
 
+      <div className={`container ${styles.frame}`}>
+        <div className={styles.dateStack}>
+          <span className={styles.dateBig}>{day}</span>
+          <span className={styles.dateMonth}>{month}</span>
+        </div>
+
+        <div className={styles.body}>
           <h1 className={styles.title}>{event.title}</h1>
 
-          {metaParts.length > 0 && (
-            <div className={styles.metaRow}>
-              {metaParts.map((part) => (
-                <span key={part}>{part}</span>
-              ))}
-            </div>
-          )}
+          <div className={styles.metaRow}>
+            <span>
+              <IconClock className={styles.metaIcon} />
+              {weekday} · {time}
+            </span>
+            {event.location && (
+              <span>
+                <IconPin className={styles.metaIcon} />
+                {event.location}
+              </span>
+            )}
+            {event.organizer && <span>Hosted by {event.organizer}</span>}
+            {going !== null && <span className={styles.going}>{going} going</span>}
+          </div>
 
           {event.description && <p className={styles.description}>{event.description}</p>}
-
-          {going !== null && <p className={styles.going}>{going} going</p>}
         </div>
 
         <MobileBookingBar>
-          <div className={styles.bookingPanel}>
+          <div className={styles.bookingRow}>
             <p className={styles.bookingPrice}>
               {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free"}
               {event.price_cents > 0 && <span className={styles.bookingPriceUnit}>/pax</span>}
             </p>
-            <div className={styles.bookingAction}>
-              <TicketPurchase
-                eventId={event.id}
-                priceCents={event.price_cents}
-                currency={event.currency}
-                capacityRemaining={event.capacity != null ? event.capacity_remaining : null}
-                signedIn={signedIn}
-              />
-            </div>
+            <TicketPurchase
+              eventId={event.id}
+              priceCents={event.price_cents}
+              currency={event.currency}
+              capacityRemaining={event.capacity != null ? event.capacity_remaining : null}
+              signedIn={signedIn}
+            />
           </div>
         </MobileBookingBar>
       </div>

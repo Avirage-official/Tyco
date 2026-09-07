@@ -6,9 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
 import { EventHero } from "./EventHero";
 import { EventCard } from "./EventCard";
+import { Marquee } from "./Marquee";
 import styles from "./studio.module.css";
 
 export const metadata: Metadata = { title: "Events" };
+
+const MARQUEE_ITEMS = ["Happenings", "Studio Nights", "Live Sets", "Tyco"];
 
 export default async function StudioEventsPage() {
   const supabase = await createClient();
@@ -54,41 +57,45 @@ export default async function StudioEventsPage() {
     <div>
       {featured && <EventHero event={featured} signedIn={signedIn} />}
 
-      <SwipeDashboard {...swipeData} initialSlide={1} />
+      <Marquee items={MARQUEE_ITEMS} />
 
-      {restUpcoming.length > 0 && (
-        <section style={{ marginTop: "var(--space-2xl)" }}>
-          <h2 className={styles.sectionTitle}>More dates</h2>
-          <div className={styles.eventGrid}>
-            {restUpcoming.map((event) => (
-              <EventCard key={event.id} event={event} signedIn={signedIn} />
-            ))}
-          </div>
-        </section>
-      )}
+      <div className={styles.happeningsBody}>
+        <SwipeDashboard {...swipeData} initialSlide={1} />
 
-      {hasPast && (
-        <section style={{ marginTop: "var(--space-2xl)" }}>
-          <h2 className={styles.sectionTitle}>Past events</h2>
-          <div className={styles.filmstrip}>
-            {past.map((event, i) => (
-              <div key={event.id} className={styles.filmCard}>
-                <div
-                  className={styles.filmMedia}
-                  style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
-                >
-                  <span className={styles.filmIndex}>{String(i + 1).padStart(2, "0")}</span>
-                  <div className={styles.filmBody}>
-                    <p className={styles.filmDate}>{formatDate(event.event_date)}</p>
-                    <h3 className={styles.filmTitle}>{event.title}</h3>
-                    {event.location && <p className={styles.filmLocation}>{event.location}</p>}
+        {restUpcoming.length > 0 && (
+          <section style={{ marginTop: "var(--space-2xl)" }}>
+            <h2 className={styles.sectionTitle}>More dates</h2>
+            <div className={styles.eventGrid}>
+              {restUpcoming.map((event) => (
+                <EventCard key={event.id} event={event} signedIn={signedIn} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {hasPast && (
+          <section style={{ marginTop: "var(--space-2xl)" }}>
+            <h2 className={styles.sectionTitle}>Past events</h2>
+            <div className={styles.filmstrip}>
+              {past.map((event, i) => (
+                <div key={event.id} className={styles.filmCard}>
+                  <div
+                    className={styles.filmMedia}
+                    style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
+                  >
+                    <span className={styles.filmIndex}>{String(i + 1).padStart(2, "0")}</span>
+                    <div className={styles.filmBody}>
+                      <p className={styles.filmDate}>{formatDate(event.event_date)}</p>
+                      <h3 className={styles.filmTitle}>{event.title}</h3>
+                      {event.location && <p className={styles.filmLocation}>{event.location}</p>}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 }

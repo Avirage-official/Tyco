@@ -1,20 +1,81 @@
 .hero {
   position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 86vh;
+  min-height: 86dvh;
+  overflow: hidden;
 }
 
 @media (max-width: 759px) {
-  /* Room at the bottom of the whole hero so the fixed booking bar (below)
-     never covers the tail end of the description/going line. */
+  /* Room at the bottom for the fixed booking bar (below) so it never
+     covers the tail end of the description/meta row. */
   .hero {
-    margin-bottom: 12rem;
+    margin-bottom: 11rem;
   }
+}
+
+.media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.mediaLayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: var(--surface);
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(1) contrast(1.08);
+}
+
+/* Fades fully to the shared --bg at the bottom instead of meeting whatever
+   follows (the marquee) at a hard edge — same technique as the homepage
+   hero, so the two pages read as one visual system. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(33, 28, 24, 0.35) 0%,
+    rgba(33, 28, 24, 0.55) 55%,
+    var(--bg) 100%
+  );
+}
+
+.scrim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(200deg, var(--red-deep) -10%, transparent 55%);
+  mix-blend-mode: multiply;
+  opacity: 0.4;
+}
+
+.top {
+  position: absolute;
+  top: calc(var(--nav-h) + var(--space-md));
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.tabsSlot {
+  max-width: 220px;
 }
 
 .eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: var(--space-sm);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -30,92 +91,51 @@
   background: var(--accent);
 }
 
-.heroImage {
-  position: relative;
-  isolation: isolate;
-  aspect-ratio: 21 / 9;
-  overflow: hidden;
-  background: var(--surface);
-}
-
-@media (max-width: 640px) {
-  .heroImage {
-    aspect-ratio: 4 / 5;
-  }
-}
-
-.media {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  background-color: var(--surface);
-  background-size: cover;
-  background-position: center;
-  filter: grayscale(1) contrast(1.08);
-}
-
-.scrim {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(180deg, rgba(16, 14, 13, 0.1) 0%, rgba(16, 14, 13, 0.6) 100%);
-}
-
-.scrim::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(200deg, var(--red-deep) -10%, transparent 55%);
-  mix-blend-mode: multiply;
-  opacity: 0.4;
-}
-
-.body {
+.frame {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-lg);
-  margin-top: var(--space-lg);
-}
-
-@media (min-width: 760px) {
-  .body {
-    grid-template-columns: 1fr 280px;
-    gap: var(--space-2xl);
-  }
-}
-
-.main {
-  min-width: 0;
-}
-
-.dateRow {
   display: flex;
-  align-items: baseline;
-  gap: var(--space-sm);
+  align-items: flex-end;
+  gap: var(--space-lg);
+  padding-block: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+/* The big graphic date — a corner detail in its own right, not a line of
+   text inside the title block (echoes the coordinate/est.-date treatment
+   from the moodboard references rather than a generic "event card" date
+   badge). */
+.dateStack {
+  display: flex;
+  flex-direction: column;
+  line-height: 0.85;
+  flex-shrink: 0;
 }
 
 .dateBig {
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-size: clamp(3.5rem, 9vw, 6rem);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  color: var(--accent);
 }
 
-.dateDetail {
+.dateMonth {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--fg-muted);
-  font-size: 0.95rem;
-  font-variant-numeric: tabular-nums;
+}
+
+.body {
+  min-width: 0;
+  flex: 1 1 320px;
 }
 
 .title {
-  margin-top: var(--space-xs);
-  font-size: clamp(2.4rem, 5.5vw, 4rem);
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
   font-weight: 700;
   line-height: 1.02;
   letter-spacing: -0.01em;
@@ -126,15 +146,43 @@
   margin-top: var(--space-md);
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.4rem var(--space-sm);
   color: var(--fg-muted);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+}
+
+.metaRow span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .metaRow span:not(:last-child)::after {
   content: "·";
   margin-left: var(--space-sm);
   color: var(--border);
+}
+
+.metaIcon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* A blended chip, not a bordered block at the foot of the page — the "N
+   going" count sits inline with the rest of the meta instead of behind
+   its own hairline. */
+.going {
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.going::after {
+  content: none !important;
 }
 
 .description {
@@ -145,50 +193,17 @@
   line-height: 1.6;
 }
 
-.going {
-  margin-top: var(--space-md);
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--border);
-  color: var(--fg-muted);
-  font-size: 0.9rem;
-}
-
-.bookingPanel {
-  padding: var(--space-lg);
-  background: var(--bg-raised);
-  border-top: 2px solid var(--accent);
-}
-
-@media (min-width: 760px) {
-  .bookingPanel {
-    align-self: start;
-  }
-}
-
-/* Docked to the bottom of the screen on mobile, above the site's own
-   bottom nav — the primary "buy" action stays reachable while scrolling
-   instead of sitting once, inline, wherever the hero happens to end. */
-@media (max-width: 759px) {
-  .bookingPanel {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
-    z-index: 30;
-    padding: var(--space-sm) var(--space-md);
-  }
+.bookingRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  flex-shrink: 0;
 }
 
 .bookingPrice {
   font-family: var(--font-display);
   font-size: 1.9rem;
   font-weight: 700;
-}
-
-@media (max-width: 759px) {
-  .bookingPrice {
-    font-size: 1.4rem;
-  }
 }
 
 .bookingPriceUnit {
@@ -199,6 +214,26 @@
   color: var(--fg-muted);
 }
 
-.bookingAction {
-  margin-top: var(--space-md);
+/* Docked to the bottom of the screen on mobile, above the site's own
+   bottom nav — the primary "buy" action stays reachable while scrolling.
+   Blended in with a blur + soft rise instead of a flat bordered panel. */
+@media (max-width: 759px) {
+  .bookingRow {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
+    z-index: 30;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md) var(--space-md);
+    background: linear-gradient(180deg, transparent, var(--bg) 45%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mediaLayer {
+    filter: none;
+  }
 }

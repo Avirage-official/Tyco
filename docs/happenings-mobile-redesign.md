@@ -1,112 +1,82 @@
-# Happenings page — light theme + card redesign
+# Happenings page — full-bleed editorial redesign
 
-Living spec for the `/studio` (Happenings) page redesign. Primary reference:
-the second screenshot shared in chat — the light-mode "Discover Your Best
-Clothes" fashion app (cream background, black category pills, rounded promo
-banner, image-top/white-body product cards, floating pill bottom nav).
+Living spec for the `/studio` (Happenings) page. Scope is deliberately
+narrow: **`/studio` only** (the events/Happenings listing — hero, "More
+dates" grid, "Past events" strip, plus the shared sidebar/tabs/banner
+chrome, which Happenings now opts out of). `/studio/deals` keeps its
+existing dark theme, sidebar/tabs/banner shell, and overlay-style cards —
+the user said "the happenings page," not deals.
 
-Scope is deliberately narrow: **`/studio` only** (the events/Happenings
-listing — hero, "More dates" grid, "Past events" strip, plus the shared
-sidebar/tabs/banner chrome). `/studio/deals` keeps its current dark theme
-and overlay-style cards — the user said "the happening page," not deals.
-Deals gets its own pass later if this direction is confirmed.
+This supersedes the previous light-cream-theme direction below (kept as
+history, not as the current design).
 
-## Why the previous attempt (PR #54) still read as "vibe coded"
+## Why the last two attempts still read as "vibe coded"
 
-- It kept the site's all-dark theme instead of adopting the reference's
-  actual light palette.
-- The grid cards kept the sitewide "full-bleed photo + scrim + text
-  overlaid on the image" anatomy. The reference's cards are a completely
-  different, more common component shape: **image contained in a rounded
-  frame, on top; a separate plain-background body underneath carries the
-  title/meta/price in ordinary text.** Overlaying text on every single
-  small grid thumbnail (rather than reserving that treatment for a hero
-  banner) is what read as generic/AI rather than "a real component
-  library."
-- Fix: give grid cards the image-top/body-below anatomy. Notably,
-  `EventHero` (the big featured-event block) *already* works this way —
-  its image block has no text in it; date/title/meta live in a body
-  section below. So this isn't a new idiom for the site, it's making the
-  small grid cards consistent with the site's own hero, instead of
-  reusing the deals-style overlay poster card.
+- **Attempt 1** (dark, PR #54): kept the sitewide full-bleed
+  photo-with-text-overlay anatomy but the sections met at flat 1px/2px
+  ruled lines (`border-top: 2px solid var(--accent)` on the booking
+  panel, a bordered "Coming soon" placeholder box, a hairline under the
+  "going" count) — the generic tell of a component-kit page, not
+  full-bleed editorial design.
+- **Attempt 2** (light cream theme, this doc's original version): fixed
+  nothing about the dividers, and additionally flipped the page to an
+  isolated light palette disconnected from the rest of the dark site,
+  reused a generic "image-top, plain-white-body-below" product-card
+  anatomy for the grid, and kept a permanent 240px dashboard sidebar for
+  a two-item nav. All three are exactly the componentized, assembled-
+  from-a-template shapes that read as generic rather than art-directed.
 
-## Color tokens (scoped to `/studio` events route only)
+## What changed
 
-Soft light orange/red primary, brown secondary — applied as a scoped
-CSS-variable override (`.happeningsTheme` in `studio.module.css`), not a
-change to `globals.css`. The rest of the site (including `/studio/deals`)
-is untouched; dark stays "the brand background" everywhere else per the
-existing comment in `globals.css`.
-
-| token | value | role |
-|---|---|---|
-| `--bg` | `#FAF1E6` | page background, warm cream |
-| `--bg-raised` / `--surface` | `#FFFFFF` | card bodies |
-| `--border` | `#EEDFC9` | hairlines, dividers |
-| `--fg` | `#3B2A1F` | primary text — brown, not black |
-| `--fg-muted` | `#8C7361` | secondary text (meta rows, muted labels) |
-| `--accent` | `#E3794C` | soft light orange/red — CTAs, price, active pill |
-| `--accent-strong` | `#C85A34` | hover/active state of accent |
-| `--accent-soft` | `rgba(227,121,76,0.16)` | tinted backgrounds (chips) |
-| `--on-accent` | `#FFF8F0` | text/icons on accent-filled elements |
-| `--card-shadow` (new, local to this scope) | `0 2px 14px rgba(59,42,31,0.08)` | soft elevation cards get in light mode; dark mode has no shadow system so this is a scoped-only token with a `none` fallback |
-
-No separate "brown secondary" token was needed in the end — `--fg` and
-`--fg-muted` are themselves brown (`#3B2A1F` / `#8C7361`), so the brown
-shows up everywhere text does, which is what "brown secondary color"
-meant in practice once applied.
-
-Raw brand constants (`--ink`, `--paper`, `--red*`) are **not** overridden —
-those are building blocks used elsewhere on the site; only the semantic
-tokens that are meant to vary by theme are swapped.
-
-## What stays dark (deliberate, not an oversight)
-
-- **The detail takeover modal** (tap a card → full-screen purchase view)
-  stays in the site's dark brand treatment, unchanged from PR #53. It's
-  portaled to `document.body`, so it renders outside the page-scoped
-  theme wrapper by construction — and keeping it dark also keeps it
-  visually consistent with the Deals modal, which isn't re-themed either.
-  The light theme applies to the *browsing* layer, not the purchase flow.
-- **The mobile sticky "buy" bar** (`MobileBookingBar`, inside `EventHero`)
-  portals to `document.body` on mobile for unrelated layout reasons (see
-  its own doc comment), which also escapes the `.happeningsTheme` div. It
-  reapplies the theme class directly on its portaled wrapper — safe to
-  hardcode since this component only ever renders on the Happenings route.
-- **The `SwipeDashboard` full-viewport slide deck** (the immersive
-  cinematic browsing mode between the hero and the grid) is left as-is.
-  It's a distinct, separately-scoped feature shared with the homepage,
-  not part of the reference's product-grid aesthetic — re-theming it
-  wasn't asked for and would fight its full-bleed editorial design.
-
-## Component mapping
-
-| Reference | TYCO equivalent | Change |
-|---|---|---|
-| Header title ("Discover Your Best Clothes") | `PageHeader` ("Happenings") | recolor only, via scope |
-| Category pills (Men/Women/Kids…) | `StudioTabs` (Happenings/Deals) | recolor: active = `--accent` fill, inactive = `--secondary` outline/text |
-| Promo/feature banner | `StudioFeatureBanner` | recolors automatically via the scope (it already only used tokens) — left structurally untouched since it's shared chrome rendered on both `/studio` and `/studio/deals`; still an honest "Coming soon" placeholder — no fabricated promo copy |
-| Product grid, 2-up mobile | "More dates" grid (`EventCard`) | **restructure**: image-top (rounded, grayscale-duotone kept for brand consistency) with a small date badge on the image corner, plain white body below with title / weekday·time·location / price |
-| Heart icon (wishlist) | — | **excluded** — no wishlist feature exists; would be fake affordance |
-| Star rating pill | — | **excluded** — no rating data exists; would be fabricated |
-| Floating pill bottom nav | site's existing bottom tab bar | unchanged, out of scope (site-wide component) |
-
-The grid card's `Waveform` hover flourish (animated bars) was dropped —
-it was a nice-to-have on the old overlay card but has no place on a
-plain image-top/body card, and the reference doesn't have an equivalent.
-
-`EventHero` (the single big featured event above the grid) keeps its
-existing image-top/body-below structure and overlay scrim on the image —
-that's the one place an overlay is appropriate (it's a hero/banner
-moment, same idiom as the reference's own promo banner), it just
-inherits the new light colors for its body text automatically through
-the scope.
+- **Theme**: reverted to the site's own dark palette — no more scoped
+  light-mode override. `SwipeDashboard` (shared with the homepage) now
+  renders in the same dark tokens everywhere instead of inheriting a
+  page-local theme flip.
+- **Chrome**: Happenings no longer renders the shared `PageHeader` +
+  `StudioSidebar` + `StudioFeatureBanner` dashboard shell (`StudioChrome`
+  now branches on route — Deals still gets the full shell, unchanged).
+  The page owns its own full-bleed layout instead.
+- **Hero** (`EventHero`): full-bleed, edge to edge, ~86dvh tall. The
+  event date is a large graphic detail (day number + month) sitting
+  beside the title, not a small text badge on a boxed photo. The
+  "Happenings / Deals" switcher (`StudioTabs`) is folded into the hero's
+  own top bar instead of a separate sidebar or mobile-only tab strip.
+  The booking row (price + `TicketPurchase`) sits inline in the hero's
+  scrim with no bordered panel; on mobile it's a blurred, gradient-faded
+  dock at the bottom of the screen instead of a flat-bordered bar.
+- **Divider technique**: every hard 1px/2px rule is gone from this page.
+  Section boundaries either fade into the shared `--bg` token (hero →
+  marquee → grid, same gradient-to-`--bg` technique used on the
+  homepage hero) or are replaced by the marquee itself.
+- **Marquee** (new, `Marquee.tsx`): a slow, seamlessly looping strip of
+  brand phrases (`Happenings · Studio Nights · Live Sets · Tyco`) used
+  as the transition device between the hero and the grid — the
+  "divider" is moving content, not a ruled line. Hand-built (a
+  duplicated-track CSS `@keyframes` loop, masked at its own edges),
+  `aria-hidden` since it's decorative, and disabled under
+  `prefers-reduced-motion`.
+- **"More dates" grid**: replaced the boxed image-top/white-body card
+  with the same full-bleed poster anatomy already used by the Deals grid
+  (`.eventPoster*` mirrors `.posterCard*`) — one card idiom for "browse a
+  bunch of these" grids across the site, not two competing ones on the
+  same page.
+- **Ticket controls**: `.ticketCta` and `.qtyStepper` moved off the
+  sitewide 2px "sharp" radius token onto a full pill radius, local to
+  this page's controls.
+- **Detail modal** (shared by Deals): the flat `border-top: 2px solid
+  var(--accent)` booking-panel divider is gone (spacing only now) and a
+  stale near-black scrim color was brought in line with the current
+  `--ink`. This is the one shared-component change — it's a hairline fix
+  identical in spirit to the rest of this pass, and it also touches
+  Deals' modal, but not Deals' browsing-layer cards or theme.
 
 ## Explicitly excluded / deferred (unchanged from earlier decisions)
 
 - Event category chips on cards — event category taxonomy doesn't exist
-  yet, deferred to later (per earlier conversation).
+  yet, deferred to later.
 - "+" quick-add buttons — bypasses the details-before-purchase flow that
   was deliberately built; still excluded.
 - Wishlist hearts, star ratings — no backing data; excluded per the
   no-fabricated-data rule.
+- Marquee copy is limited to the brand's own section names (no invented
+  stats or claims), for the same reason.
