@@ -1,6 +1,6 @@
 .sectionTitle {
-  margin-bottom: var(--space-md);
-  font-size: 1.2rem;
+  margin-bottom: var(--space-lg);
+  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
 }
 
 .hint {
@@ -52,116 +52,116 @@
   }
 }
 
-/* -- happenings theme scope (docs/happenings-mobile-redesign.md) --------
-   Soft light orange/red + brown palette, scoped to the /studio events
-   route only (see StudioThemeScope). Semantic tokens only — the raw
-   brand constants (--ink, --paper, --red*) are left alone since they're
-   building blocks used elsewhere, not the theme-dependent layer. */
-
-.happeningsTheme {
-  --bg: #faf1e6;
-  --bg-raised: #ffffff;
-  --surface: #ffffff;
-  --border: #eedfc9;
-  --fg: #3b2a1f;
-  --fg-muted: #8c7361;
-  --accent: #e3794c;
-  --accent-strong: #c85a34;
-  --accent-soft: rgba(227, 121, 76, 0.16);
-  --on-accent: #fff8f0;
-  --card-shadow: 0 2px 14px rgba(59, 42, 31, 0.08);
-
-  background: var(--bg);
-  color: var(--fg);
+/* -- happenings body -----------------------------------------------------
+   The full-bleed hero and marquee run edge to edge; everything below gets
+   the same wide cap the old sidebar shell used, so the poster grid still
+   reads as a wall of tiles on large screens instead of one narrow column. */
+.happeningsBody {
+  max-width: 1920px;
+  margin-inline: auto;
+  padding: var(--space-2xl) var(--space-md);
 }
 
-/* -- event grid ("More dates", image-top/body-below like EventHero) ---- */
+@media (min-width: 900px) {
+  .happeningsBody {
+    padding-inline: var(--space-lg);
+  }
+}
+
+@media (min-width: 1400px) {
+  .happeningsBody {
+    padding-inline: var(--space-2xl);
+  }
+}
+
+/* -- event grid ("More dates") — full-bleed poster tiles, the same
+   image-with-overlaid-text idiom as the deals poster grid below, instead
+   of a separate boxed image-top/white-body card. One shared visual
+   language for "browse a bunch of these" grids across the site, rather
+   than two competing card anatomies on one page. */
 
 .eventGrid {
   display: grid;
-  gap: var(--space-md);
+  gap: var(--space-2xs);
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-.eventCard {
-  display: flex;
-  flex-direction: column;
+.eventPoster {
+  position: relative;
+  isolation: isolate;
+  display: block;
   width: 100%;
+  aspect-ratio: 4 / 5;
   border: none;
-  border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--bg-raised);
-  box-shadow: var(--card-shadow, none);
+  background: var(--surface);
   font: inherit;
   color: inherit;
   text-align: left;
   cursor: pointer;
 }
 
-.eventCardImage {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: var(--surface);
-}
-
-.eventCardMedia {
+.eventPosterMedia {
   position: absolute;
   inset: 0;
+  z-index: -2;
   background-size: cover;
   background-position: center;
   filter: grayscale(1) contrast(1.08);
   transition: transform 600ms var(--ease);
 }
 
-.eventCard:hover .eventCardMedia {
+.eventPoster:hover .eventPosterMedia {
   transform: scale(1.05);
 }
 
-.eventCardDateBadge {
+.eventPosterScrim {
   position: absolute;
-  top: var(--space-2xs);
-  left: var(--space-2xs);
-  padding: 0.2rem 0.55rem;
-  border-radius: var(--radius-pill);
-  background: var(--bg-raised);
-  color: var(--accent-strong);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, transparent 35%, var(--bg) 100%);
 }
 
-.eventCardBody {
+.eventPosterBody {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   padding: var(--space-sm);
 }
 
-.eventCardTitle {
-  font-size: 1.05rem;
+.eventPosterDate {
+  font-size: 0.68rem;
   font-weight: 700;
-  color: var(--fg);
-  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
-.eventCardMeta {
+.eventPosterTitle {
+  margin-top: 0.2rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.eventPosterMeta {
   margin-top: 0.3rem;
   color: var(--fg-muted);
   font-size: 0.82rem;
+  opacity: 0;
+  max-height: 0;
+  transition: opacity var(--dur) var(--ease), max-height var(--dur) var(--ease);
 }
 
-.eventCardPrice {
-  margin-top: 0.5rem;
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--accent-strong);
-}
-
-.eventCardAction {
-  margin-top: var(--space-sm);
+.eventPoster:hover .eventPosterMeta,
+.eventPoster:focus-visible .eventPosterMeta {
+  opacity: 1;
+  max-height: 3rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .eventCardMedia {
+  .eventPosterMedia {
     transition: none;
   }
 }
@@ -206,7 +206,7 @@
   left: var(--space-2xs);
   padding: 0.15rem 0.5rem;
   border-radius: var(--radius-pill);
-  background: rgba(16, 14, 13, 0.72);
+  background: rgba(33, 28, 24, 0.72);
   backdrop-filter: blur(4px);
   color: var(--fg);
   font-size: 0.7rem;
@@ -220,7 +220,7 @@
   right: 0;
   bottom: 0;
   padding: var(--space-md) var(--space-sm);
-  background: linear-gradient(180deg, transparent, rgba(16, 14, 13, 0.92) 65%);
+  background: linear-gradient(180deg, transparent, rgba(33, 28, 24, 0.92) 65%);
 }
 
 .filmDate {
@@ -348,7 +348,7 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(180deg, transparent 40%, rgba(16, 14, 13, 0.92) 100%);
+  background: linear-gradient(180deg, transparent 40%, rgba(33, 28, 24, 0.92) 100%);
 }
 
 .posterBody {
@@ -400,28 +400,20 @@
   .eventGrid,
   .dealsGrid {
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-sm);
+    gap: var(--space-2xs);
   }
 
-  .eventCardImage {
+  .eventPoster {
     aspect-ratio: 1 / 1;
   }
 
-  .eventCardBody {
-    padding: var(--space-xs);
-  }
-
-  .eventCardTitle {
+  .eventPosterTitle {
     font-size: 0.92rem;
     line-height: 1.15;
   }
 
-  .eventCardMeta {
+  .eventPosterMeta {
     display: none;
-  }
-
-  .eventCardPrice {
-    font-size: 0.78rem;
   }
 
   .posterName {
@@ -445,9 +437,10 @@
    Deliberately built to read as a compressed EventHero, not a generic
    centered product-modal card: full-bleed grayscale-duotone image +
    scrim, the same eyebrow/big-serif-title/dash-separated-meta language,
-   and a flat border-top booking panel instead of a floating rounded box.
-   The Modal shell itself is a full-screen takeover for the same reason —
-   it should feel like its own view, not a widget dropped on top of one. */
+   and a booking panel set off by spacing and type scale alone — no ruled
+   line — instead of a floating rounded box. The Modal shell itself is a
+   full-screen takeover for the same reason — it should feel like its own
+   view, not a widget dropped on top of one. */
 
 .detailEyebrow {
   display: inline-flex;
@@ -497,7 +490,7 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(180deg, rgba(16, 14, 13, 0.1) 0%, rgba(16, 14, 13, 0.6) 100%);
+  background: linear-gradient(180deg, rgba(33, 28, 24, 0.1) 0%, var(--bg) 100%);
 }
 
 .detailScrim::after {
@@ -572,9 +565,7 @@
 }
 
 .detailBookingPanel {
-  margin-top: var(--space-lg);
-  padding-top: var(--space-lg);
-  border-top: 2px solid var(--accent);
+  margin-top: var(--space-xl);
 }
 
 .detailPrice {
@@ -634,7 +625,7 @@
   align-items: center;
   justify-content: center;
   padding: 0.65rem 1.1rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   background: var(--accent);
   color: var(--on-accent);
   font-size: 0.8rem;
@@ -673,7 +664,7 @@
   align-items: center;
   gap: 0.75rem;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   padding: 0.35rem 0.9rem;
   font-variant-numeric: tabular-nums;
   background: var(--bg);

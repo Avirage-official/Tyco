@@ -31,24 +31,21 @@ export function EventCard({ event, signedIn }: { event: Event; signedIn: boolean
 
   return (
     <>
-      <button type="button" className={styles.eventCard} onClick={() => setOpen(true)}>
-        <div className={styles.eventCardImage}>
-          <span
-            className={styles.eventCardMedia}
-            style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
-            aria-hidden
-          />
-          <span className={styles.eventCardDateBadge}>
+      <button type="button" className={styles.eventPoster} onClick={() => setOpen(true)}>
+        <span
+          className={styles.eventPosterMedia}
+          style={event.cover_url ? { backgroundImage: `url(${event.cover_url})` } : undefined}
+          aria-hidden
+        />
+        <span className={styles.eventPosterScrim} aria-hidden />
+        <div className={styles.eventPosterBody}>
+          <p className={styles.eventPosterDate}>
             {month} {day}
-          </span>
-        </div>
-
-        <div className={styles.eventCardBody}>
-          <h3 className={styles.eventCardTitle}>{event.title}</h3>
-          <p className={styles.eventCardMeta}>
-            {[weekday + " · " + time, event.location].filter(Boolean).join(" — ")}
           </p>
-          <p className={styles.eventCardPrice}>
+          <h3 className={styles.eventPosterTitle}>{event.title}</h3>
+          <p className={styles.eventPosterMeta}>
+            {[weekday + " · " + time, event.location].filter(Boolean).join(" — ")}
+            {" — "}
             {event.price_cents > 0 ? formatPrice(event.price_cents, event.currency) : "Free entry"}
           </p>
         </div>
