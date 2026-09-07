@@ -7,13 +7,6 @@
   overflow: hidden;
 }
 
-@media (max-width: 759px) {
-  /* Room at the bottom for the fixed booking bar (below) so it never
-     covers the tail end of the description/meta row. */
-  .hero {
-    margin-bottom: 11rem;
-  }
-}
 
 .media {
   position: absolute;
@@ -99,6 +92,21 @@
   gap: var(--space-lg);
   padding-block: var(--space-xl);
   flex-wrap: wrap;
+}
+
+@media (max-width: 759px) {
+  /* .frame is bottom-anchored in .hero (see .hero's align-items), so a
+     tall .frame rides its top edge straight up into .top (the absolutely
+     positioned eyebrow/tabs row) with zero clearance — extra padding-top
+     here reserves room for .top before .frame's own content starts.
+     padding-bottom reserves room for the booking row, which portals to a
+     fixed bar at the bottom of the screen on mobile (see
+     MobileBookingBar), sized to the bar's own footprint plus the bottom
+     nav, so it never covers the tail end of the description/meta row. */
+  .frame {
+    padding-top: calc(var(--nav-h) + var(--space-xl) + var(--space-lg));
+    padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom) + 11rem);
+  }
 }
 
 /* The big graphic date — a corner detail in its own right, not a line of
