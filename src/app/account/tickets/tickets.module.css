@@ -1,26 +1,42 @@
+/* A grid, not a single narrow column — a lone 640px-wide strip left the
+   rest of the page empty on desktop. Cards fill the width and wrap down
+   to one column on their own once the viewport can't fit a second. */
 .list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--space-lg);
   padding-block: var(--space-lg) var(--space-2xl);
-  max-width: 640px;
 }
 
 /* A real ticket stub: a raised card with a torn edge — two half-circle
    notches bitten out of the sides at a dashed tear line — instead of a
-   plain bordered box with hairline dividers. */
+   plain bordered box with hairline dividers. The event photo bleeds to
+   the card's own edges (padding lives on .body instead) so the stub
+   reads as a photo ticket, not a bare text box. */
 .card {
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-raised);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: var(--space-md);
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
 }
 
 .cardHighlight {
   border-color: var(--accent);
+}
+
+.cover {
+  aspect-ratio: 16 / 9;
+  background-color: var(--surface);
+  background-size: cover;
+  background-position: center;
+}
+
+.body {
+  padding: var(--space-md);
 }
 
 .confirming {

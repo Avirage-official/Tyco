@@ -12,7 +12,13 @@ const STATUS_LABEL: Record<string, string> = {
   refunded: "Refunded",
 };
 
-type EventRow = { id: string; title: string; location: string | null; event_date: string };
+type EventRow = {
+  id: string;
+  title: string;
+  location: string | null;
+  event_date: string;
+  cover_url: string | null;
+};
 type Ticket = {
   id: string;
   quantity: number;
@@ -51,50 +57,59 @@ export function TicketList({
             className={justPurchased ? `${styles.card} ${styles.cardHighlight}` : styles.card}
             variants={fadeUpItem}
           >
-            <div className={styles.cardHeader}>
-              <div>
-                <p className={styles.eventTitle}>{event?.title ?? "Event"}</p>
-                {event && (
-                  <p className={styles.eventMeta}>
-                    {[formatEventDateTime(event.event_date), event.location].filter(Boolean).join(" — ")}
-                  </p>
-                )}
-              </div>
-              <span className={`${styles.status} ${styles[`status_${ticket.status}`] ?? ""}`}>
-                {STATUS_LABEL[ticket.status] ?? ticket.status}
-              </span>
-            </div>
-
-            {ticket.status === "paid" && (
-              <>
-                <div className={styles.tear} aria-hidden />
-                <div className={styles.proof}>
-                  <div>
-                    <p className={styles.proofLabel}>Show this at the door</p>
-                    <p className={styles.referenceCode}>{ticket.reference_code}</p>
-                  </div>
-                  <div className={styles.pax}>
-                    <span className={styles.paxCount}>{ticket.quantity}</span>
-                    <span className={styles.paxLabel}>pax</span>
-                  </div>
+            {event?.cover_url && (
+              <div
+                className={styles.cover}
+                style={{ backgroundImage: `url(${event.cover_url})` }}
+                aria-hidden
+              />
+            )}
+            <div className={styles.body}>
+              <div className={styles.cardHeader}>
+                <div>
+                  <p className={styles.eventTitle}>{event?.title ?? "Event"}</p>
+                  {event && (
+                    <p className={styles.eventMeta}>
+                      {[formatEventDateTime(event.event_date), event.location].filter(Boolean).join(" — ")}
+                    </p>
+                  )}
                 </div>
-              </>
-            )}
+                <span className={`${styles.status} ${styles[`status_${ticket.status}`] ?? ""}`}>
+                  {STATUS_LABEL[ticket.status] ?? ticket.status}
+                </span>
+              </div>
 
-            {justPurchased && ticket.status === "pending" && (
-              <p className={styles.confirming}>
-                We&rsquo;re confirming your payment — refresh this page in a moment if it doesn&rsquo;t
-                update.
-              </p>
-            )}
+              {ticket.status === "paid" && (
+                <>
+                  <div className={styles.tear} aria-hidden />
+                  <div className={styles.proof}>
+                    <div>
+                      <p className={styles.proofLabel}>Show this at the door</p>
+                      <p className={styles.referenceCode}>{ticket.reference_code}</p>
+                    </div>
+                    <div className={styles.pax}>
+                      <span className={styles.paxCount}>{ticket.quantity}</span>
+                      <span className={styles.paxLabel}>pax</span>
+                    </div>
+                  </div>
+                </>
+              )}
 
-            {ticket.checked_in_at && (
-              <p className={styles.checkedIn}>Checked in {formatDate(ticket.checked_in_at)}</p>
-            )}
+              {justPurchased && ticket.status === "pending" && (
+                <p className={styles.confirming}>
+                  We&rsquo;re confirming your payment — refresh this page in a moment if it doesn&rsquo;t
+                  update.
+                </p>
+              )}
 
-            <div className={styles.cardFooter}>
-              <span>Total</span>
-              <span className={styles.total}>{formatPrice(ticket.total_cents, ticket.currency)}</span>
+              {ticket.checked_in_at && (
+                <p className={styles.checkedIn}>Checked in {formatDate(ticket.checked_in_at)}</p>
+              )}
+
+              <div className={styles.cardFooter}>
+                <span>Total</span>
+                <span className={styles.total}>{formatPrice(ticket.total_cents, ticket.currency)}</span>
+              </div>
             </div>
           </motion.li>
         );
