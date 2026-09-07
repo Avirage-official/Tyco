@@ -1,11 +1,9 @@
 # Happenings page — full-bleed editorial redesign
 
-Living spec for the `/studio` (Happenings) page. Scope is deliberately
-narrow: **`/studio` only** (the events/Happenings listing — hero, "More
-dates" grid, "Past events" strip, plus the shared sidebar/tabs/banner
-chrome, which Happenings now opts out of). `/studio/deals` keeps its
-existing dark theme, sidebar/tabs/banner shell, and overlay-style cards —
-the user said "the happenings page," not deals.
+Living spec for `/studio` (Happenings) and `/studio/deals`. Both routes
+are now full-bleed pages with no shared dashboard shell — see "Deals
+follow-up" below for what changed there after the Happenings rework
+landed.
 
 This supersedes the previous light-cream-theme direction below (kept as
 history, not as the current design).
@@ -69,6 +67,27 @@ history, not as the current design).
   `--ink`. This is the one shared-component change — it's a hairline fix
   identical in spirit to the rest of this pass, and it also touches
   Deals' modal, but not Deals' browsing-layer cards or theme.
+
+## Deals follow-up
+
+Once Happenings dropped the shared `PageHeader` + `StudioSidebar` +
+`StudioFeatureBanner` dashboard shell, that shell had no remaining
+callers — Deals was the only other route using it, and it was carrying
+Happenings' own copy ("Behind the sound" / "Happenings") on the Deals
+page by mistake. Rather than leave a one-caller shell behind:
+
+- Deleted `StudioChrome`, `StudioSidebar`(+css), `StudioFeatureBanner`
+  (+css), and the now-trivial `studio/layout.tsx` entirely. Both routes
+  render themselves fully now; there's nothing left to opt in or out of.
+- Deals gets its own accurate header: eyebrow "Member perks", title
+  "Deals", and a real description — instead of inherited Happenings copy.
+- The Happenings/Deals switcher (`StudioTabs`) moved out of the permanent
+  240px sidebar and into the page header itself, top-right — the same
+  placement EventHero already uses on Happenings. `.studioBody` (renamed
+  from `.happeningsBody`, now shared by both routes) gives the deals grid
+  the full width the sidebar used to eat, so more tiles fit per row.
+- Deals' own cards (`.posterCard`) and dark theme were already right —
+  untouched here.
 
 ## Explicitly excluded / deferred (unchanged from earlier decisions)
 

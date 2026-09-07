@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/server";
+import { StudioTabs } from "../StudioTabs";
 import { DealCard } from "./DealCard";
 import { DealsCategoryFilter } from "./DealsCategoryFilter";
 import styles from "../studio.module.css";
@@ -75,54 +76,67 @@ export default async function StudioDealsPage({
     (cat) => (dealsByCategory.get(cat.id) ?? []).length > 0
   );
 
-  if (categoriesWithDeals.length === 0) {
-    return (
-      <EmptyState
-        title="No deals yet"
-        description="Vendor deals published from Supabase will appear here, grouped by category."
-      />
-    );
-  }
-
   const shownCategories = selectedCategoryId
     ? categoriesWithDeals.filter((cat) => cat.id === selectedCategoryId)
     : categoriesWithDeals;
 
   return (
-    <div>
-      <DealsCategoryFilter categories={categoriesWithDeals} activeId={selectedCategoryId ?? null} />
-      {shownCategories.length === 0 && (
-        <p className={styles.hint}>No deals in this category right now.</p>
-      )}
-      {shownCategories.map((cat) => (
-        <div key={cat.id} className={styles.dealsCategory}>
-          <h2 className={styles.dealsCategoryTitle}>{cat.name}</h2>
-          <div className={styles.dealsGrid}>
-            {(dealsByCategory.get(cat.id) ?? []).map((deal) => {
-              const memberPriceCents = Math.round(
-                deal.vendor_rate_cents * (1 + deal.margin_percent / 100)
-              );
-              const sub = subcategoryById.get(deal.subcategory_id);
-              const cycle = cycleByDealId.get(deal.id);
-              const capRemaining =
-                (cycle?.redemptions_cap ?? deal.redemptions_per_cycle) - (cycle?.redemptions_used ?? 0);
-
-              return (
-                <DealCard
-                  key={deal.id}
-                  deal={deal}
-                  subcategoryName={sub?.name ?? cat.name}
-                  vendorName={vendorName.get(deal.vendor_id) ?? "Vendor"}
-                  memberPriceCents={memberPriceCents}
-                  originalPriceCents={deal.original_price_cents}
-                  capRemaining={capRemaining}
-                  signedIn={signedIn}
-                />
-              );
-            })}
-          </div>
+    <div className={styles.studioBody}>
+      <div className={styles.pageHead}>
+        <div>
+          <p className="eyebrow">Member perks</p>
+          <h1 className={styles.pageHeadTitle}>Deals</h1>
+          <p className={styles.pageHeadDesc}>
+            Real savings at the studios, shops, and services creatives already spend on.
+          </p>
         </div>
-      ))}
+        <div className={styles.pageHeadTabs}>
+          <StudioTabs />
+        </div>
+      </div>
+
+      {categoriesWithDeals.length === 0 ? (
+        <EmptyState
+          title="No deals yet"
+          description="Vendor deals published from Supabase will appear here, grouped by category."
+        />
+      ) : (
+        <>
+          <DealsCategoryFilter categories={categoriesWithDeals} activeId={selectedCategoryId ?? null} />
+          {shownCategories.length === 0 && (
+            <p className={styles.hint}>No deals in this category right now.</p>
+          )}
+          {shownCategories.map((cat) => (
+            <div key={cat.id} className={styles.dealsCategory}>
+              <h2 className={styles.dealsCategoryTitle}>{cat.name}</h2>
+              <div className={styles.dealsGrid}>
+                {(dealsByCategory.get(cat.id) ?? []).map((deal) => {
+                  const memberPriceCents = Math.round(
+                    deal.vendor_rate_cents * (1 + deal.margin_percent / 100)
+                  );
+                  const sub = subcategoryById.get(deal.subcategory_id);
+                  const cycle = cycleByDealId.get(deal.id);
+                  const capRemaining =
+                    (cycle?.redemptions_cap ?? deal.redemptions_per_cycle) - (cycle?.redemptions_used ?? 0);
+
+                  return (
+                    <DealCard
+                      key={deal.id}
+                      deal={deal}
+                      subcategoryName={sub?.name ?? cat.name}
+                      vendorName={vendorName.get(deal.vendor_id) ?? "Vendor"}
+                      memberPriceCents={memberPriceCents}
+                      originalPriceCents={deal.original_price_cents}
+                      capRemaining={capRemaining}
+                      signedIn={signedIn}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }

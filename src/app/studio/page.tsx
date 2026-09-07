@@ -59,7 +59,7 @@ export default async function StudioEventsPage() {
 
       <Marquee items={MARQUEE_ITEMS} />
 
-      <div className={styles.happeningsBody}>
+      <div className={styles.studioBody}>
         <SwipeDashboard {...swipeData} initialSlide={1} />
 
         {restUpcoming.length > 0 && (
