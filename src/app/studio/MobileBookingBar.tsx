@@ -25,8 +25,7 @@ function getServerSnapshot() {
  * route content in an element with a CSS transform, which creates a new
  * containing block for any `position: fixed` descendant — silently turning
  * "fixed to the viewport" into "fixed to that wrapper" instead. Escaping via
- * portal sidesteps that entirely, the same way the site's own BottomNav
- * (rendered outside the transitioning tree) already does.
+ * portal sidesteps that entirely.
  *
  * Renders inline (no portal) on desktop and during SSR — getServerSnapshot
  * returns false, matching the server-rendered markup exactly, then
