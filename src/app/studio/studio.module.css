@@ -8,69 +8,64 @@
   font-size: 0.9rem;
 }
 
-/* -- sidebar shell ------------------------------------------------------
-   Deliberately not `.container` (1180px, the site's article-width cap) —
-   this is an app-shell layout, not a page of text. The sidebar sits at
-   the true edge of the viewport and content gets the room the reference
-   layout actually used, up to a wide cap for very large screens. */
-
-.shell {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-lg);
-  align-items: start;
-  max-width: 1920px;
-  margin-inline: auto;
-  padding: var(--space-lg) var(--space-md);
-}
-
-@media (min-width: 900px) {
-  .shell {
-    grid-template-columns: 240px 1fr;
-    gap: var(--space-2xl);
-    padding-inline: var(--space-lg);
-  }
-}
-
-@media (min-width: 1400px) {
-  .shell {
-    padding-inline: var(--space-2xl);
-  }
-}
-
-.shellContent {
-  min-width: 0;
-}
-
-.mobileTabs {
-  margin-bottom: var(--space-lg);
-}
-
-@media (min-width: 900px) {
-  .mobileTabs {
-    display: none;
-  }
-}
-
-/* -- happenings body -----------------------------------------------------
-   The full-bleed hero and marquee run edge to edge; everything below gets
-   the same wide cap the old sidebar shell used, so the poster grid still
-   reads as a wall of tiles on large screens instead of one narrow column. */
-.happeningsBody {
+/* -- studio body ----------------------------------------------------------
+   Shared by both /studio and /studio/deals. Deliberately not `.container`
+   (1180px, the site's article-width cap) — this is a wide poster wall, not
+   a page of text — so it gets the room a permanent sidebar used to eat,
+   up to a wide cap for very large screens. */
+.studioBody {
   max-width: 1920px;
   margin-inline: auto;
   padding: var(--space-2xl) var(--space-md);
 }
 
 @media (min-width: 900px) {
-  .happeningsBody {
+  .studioBody {
     padding-inline: var(--space-lg);
   }
 }
 
 @media (min-width: 1400px) {
-  .happeningsBody {
+  .studioBody {
     padding-inline: var(--space-2xl);
+  }
+}
+
+/* -- studio page header ---------------------------------------------------
+   Shared header anatomy for both Happenings and Deals: eyebrow + bold
+   display title on the left, the Happenings/Deals switcher on the right —
+   the switcher lives in page content now, not a permanent sidebar. */
+.pageHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  padding-top: var(--space-xl);
+  margin-bottom: var(--space-xl);
+}
+
+.pageHeadTitle {
+  margin-top: var(--space-2xs);
+  font-size: clamp(2.4rem, 6vw, 4rem);
+}
+
+.pageHeadDesc {
+  margin-top: var(--space-sm);
+  max-width: 44ch;
+  color: var(--fg-muted);
+  font-size: 1rem;
+}
+
+.pageHeadTabs {
+  flex-shrink: 0;
+  max-width: 220px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .pageHeadTabs {
+    width: 220px;
   }
 }
 
