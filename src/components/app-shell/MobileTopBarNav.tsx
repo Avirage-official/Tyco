@@ -4,21 +4,20 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { Wordmark } from "@/components/app-shell/Wordmark";
+import { Wordmark } from "./Wordmark";
 import { CartLink } from "@/components/cart/CartLink";
-import { navItems, isActive } from "@/components/app-shell/nav-items";
+import { navItems, isActive } from "./nav-items";
 import { IconMenu, IconClose } from "@/components/icons";
-import styles from "./StudioMobileBar.module.css";
+import styles from "./MobileTopBar.module.css";
 
 /**
- * A compact, app-style top bar for Happenings/Deals on mobile — the site's
- * usual TopNav hides below 860px in favor of BottomNav, but a persistent
- * bottom tab bar plus this page's own fixed booking bar leaves no good
- * place for primary nav on these two pages. Menu button opens a dropdown
- * sheet instead of a second row of links, per the app-like brief: nav on
- * top, not a horizontal list.
+ * The site's mobile nav: a compact app-style top bar whose menu button
+ * opens a dropdown sheet, rather than a horizontal link row or a separate
+ * bottom tab bar (the two used to coexist, which read as two navs for one
+ * site). TopNav (the desktop link rail) takes over above the breakpoint
+ * this hides at.
  */
-export function StudioMobileBar({ signedIn }: { signedIn: boolean }) {
+export function MobileTopBarNav({ signedIn }: { signedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 

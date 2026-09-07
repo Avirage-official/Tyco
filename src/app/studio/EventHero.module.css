@@ -101,11 +101,11 @@
      here reserves room for .top before .frame's own content starts.
      padding-bottom reserves room for the booking row, which portals to a
      fixed bar at the bottom of the screen on mobile (see
-     MobileBookingBar), sized to the bar's own footprint plus the bottom
-     nav, so it never covers the tail end of the description/meta row. */
+     MobileBookingBar), sized to the bar's own footprint, so it never
+     covers the tail end of the description/meta row. */
   .frame {
     padding-top: calc(var(--nav-h) + var(--space-xl) + var(--space-lg));
-    padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom) + 11rem);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 11rem);
   }
 }
 
@@ -222,15 +222,15 @@
   color: var(--fg-muted);
 }
 
-/* Docked to the bottom of the screen on mobile, above the site's own
-   bottom nav — the primary "buy" action stays reachable while scrolling.
-   Blended in with a blur + soft rise instead of a flat bordered panel. */
+/* Docked to the bottom of the screen on mobile — the primary "buy" action
+   stays reachable while scrolling. Blended in with a blur + soft rise
+   instead of a flat bordered panel. */
 @media (max-width: 759px) {
   .bookingRow {
     position: fixed;
     left: 0;
     right: 0;
-    bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
+    bottom: env(safe-area-inset-bottom);
     z-index: 30;
     justify-content: space-between;
     padding: var(--space-sm) var(--space-md) var(--space-md);
