@@ -1,0 +1,109 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "motion/react";
+import { Wordmark } from "@/components/app-shell/Wordmark";
+import { CartLink } from "@/components/cart/CartLink";
+import { navItems, isActive } from "@/components/app-shell/nav-items";
+import { IconMenu, IconClose } from "@/components/icons";
+import styles from "./StudioMobileBar.module.css";
+
+/**
+ * A compact, app-style top bar for Happenings/Deals on mobile — the site's
+ * usual TopNav hides below 860px in favor of BottomNav, but a persistent
+ * bottom tab bar plus this page's own fixed booking bar leaves no good
+ * place for primary nav on these two pages. Menu button opens a dropdown
+ * sheet instead of a second row of links, per the app-like brief: nav on
+ * top, not a horizontal list.
+ */
+export function StudioMobileBar({ signedIn }: { signedIn: boolean }) {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Close the sheet on navigation. Adjusting state during render (rather
+  // than in an effect) avoids an extra cascading render pass — see
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setOpen(false);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [open]);
+
+  return (
+    <div className={styles.root}>
+      <div className={styles.bar}>
+        <button
+          type="button"
+          className={styles.iconBtn}
+          aria-expanded={open}
+          aria-label={open ? "Close menu" : "Open menu"}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {open ? <IconClose className={styles.icon} /> : <IconMenu className={styles.icon} />}
+        </button>
+        <Wordmark />
+        <CartLink className={styles.cart} />
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className={styles.backdrop}
+            onClick={() => setOpen(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.nav
+              aria-label="Primary"
+              className={styles.sheet}
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: -16, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -16, scale: 0.98 }}
+              transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
+            >
+              {navItems.map((item) => {
+                const active = isActive(pathname, item.href, item.match);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={active ? `${styles.sheetLink} ${styles.sheetLinkActive}` : styles.sheetLink}
+                  >
+                    <Icon className={styles.sheetIcon} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+              {!signedIn && (
+                <>
+                  <span className={styles.sheetDivider} aria-hidden />
+                  <Link href="/login" className={styles.sheetLink}>
+                    Login
+                  </Link>
+                  <Link href="/signup" className={`${styles.sheetLink} ${styles.sheetLinkAccent}`}>
+                    Sign up
+                  </Link>
+                </>
+              )}
+            </motion.nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

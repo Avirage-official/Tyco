@@ -390,16 +390,21 @@
    Both grids already fall back to a single column below their auto-fill
    minmax breakpoint on narrow viewports — this forces two, and trims each
    card down to what actually fits at that width (full detail — tagline,
-   locations, meta — stays one tap away in the takeover). */
+   locations, meta — stays one tap away in the takeover). Cards also pick
+   up real corner rounding here (posterCard already has it; eventPoster is
+   deliberately edge-to-edge on desktop) — separated, gapped tiles read as
+   an app's product grid, not a wall of posters, which is the point on a
+   phone screen. */
 @media (max-width: 640px) {
   .eventGrid,
   .dealsGrid {
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-2xs);
+    gap: var(--space-sm);
   }
 
   .eventPoster {
     aspect-ratio: 1 / 1;
+    border-radius: var(--radius-lg);
   }
 
   .eventPosterTitle {
