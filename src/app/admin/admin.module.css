@@ -53,6 +53,26 @@
   font-size: 0.82rem;
 }
 
+/* -- bulk actions --------------------------------------------------- */
+.bulkBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+}
+
+.bulkCount {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
 /* -- table -------------------------------------------------------- */
 .tableWrap {
   overflow-x: auto;
