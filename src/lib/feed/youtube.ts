@@ -17,15 +17,23 @@ const SEA_REGION_CODES = ["TH", "VN", "ID", "MY", "PH", "SG", "KH", "LA", "MM", 
 // YouTube's search `q` param supports "|" (OR) and "-" (NOT) as documented
 // boolean operators — one call per region covers every keyword instead of
 // one call per keyword-per-region, which would blow through the daily
-// quota fast. English terms plus native-language equivalents for the
-// markets where "official MV" isn't how local uploaders actually title
-// things — small/independent artists especially.
+// quota fast. Deliberately broad on the English side — "official mv" alone
+// missed most real uploads, which use "Official Video," "Official Audio,"
+// "M/V," or no distinctive phrase at all — plus native-language terms for
+// markets where uploaders (small/independent artists especially) don't
+// title things in English. Casting a wider net here is the correct
+// tradeoff: Claude's classification step is the actual quality gate
+// (conservative by design — see classify.ts), not this query.
 const DISCOVERY_QUERY = [
   "official mv",
   "official music video",
+  "official video",
+  "official audio",
+  "m/v",
   "เพลงใหม่", // Thai: "new song"
   "MV chính thức", // Vietnamese: "official MV"
   "musik resmi", // Indonesian: "official [music]"
+  "lagu baru", // Indonesian: "new song"
 ].join(" | ");
 
 export type YouTubeCandidate = {
