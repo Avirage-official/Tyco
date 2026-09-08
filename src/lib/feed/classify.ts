@@ -15,6 +15,7 @@ const ClassificationResult = z.object({
   reason: z.string(),
   type: z.enum(["release", "news"]),
   blurb: z.string().nullable(),
+  is_english: z.boolean(),
 });
 
 const ClassificationSchema = z.object({
@@ -27,6 +28,7 @@ export type ClassifiedCandidate = {
   reason: string;
   type: "release" | "news";
   blurb: string | null;
+  isEnglish: boolean;
 };
 
 // The only thing standing between a noisy YouTube search and what lands as
@@ -34,11 +36,13 @@ export type ClassifiedCandidate = {
 // doesn't support is the load-bearing line here, same discipline as every
 // other AI-touched surface on this site (no invented specs, no fabricated
 // data).
-const SYSTEM_PROMPT = `You are screening YouTube search results for Tyco, a Southeast Asia-rooted creative collective's website. Your job: decide which candidates are genuinely a real, current music release or creative-scene news item from a Southeast Asian artist, label, or creative — and draft a short (1-2 sentence) blurb for each one that passes, using ONLY the title, channel name, and description text given to you.
+const SYSTEM_PROMPT = `You are screening YouTube search results for Tyco, a Southeast Asia-rooted creative collective's website. Your job: decide which candidates are genuinely a real, current music release or creative-scene news item from an Asian artist, label, or creative (any country — East, South, and Southeast Asia are all in scope) — and draft a short (1-2 sentence) blurb for each one that passes, using ONLY the title, channel name, and description text given to you.
 
-Reject anything that is: a cover, reaction, remix, or fan compilation rather than an original release; a re-upload, lyric-video repost, or clearly unofficial upload; not actually tied to a Southeast Asian artist/scene despite matching a search keyword; spam, unrelated content, or too vague to confirm.
+Reject anything that is: a cover, reaction, remix, or fan compilation rather than an original release; a re-upload, lyric-video repost, or clearly unofficial upload; not actually tied to an Asian artist/scene despite matching a search keyword; spam, unrelated content, or too vague to confirm.
 
-Never state a fact in the blurb that isn't directly supported by the title/channel/description you were given — no invented release dates, no guessed genre or backstory, no claims about chart performance or popularity unless the text says so. If you aren't sure a candidate is genuine or Southeast Asian, mark it not relevant rather than guessing.
+Never state a fact in the blurb that isn't directly supported by the title/channel/description you were given — no invented release dates, no guessed genre or backstory, no claims about chart performance or popularity unless the text says so. If you aren't sure a candidate is genuine or Asian, mark it not relevant rather than guessing.
+
+For every relevant candidate, also set is_english: true if the song/content itself is in English, false otherwise (including instrumental, or any other language). This is a tag, not a filter — non-English candidates are just as valid a pass as English ones; don't let language affect the relevant decision.
 
 Classify every candidate in the input, in the same order given, exactly one result per video_id.`;
 
@@ -88,6 +92,7 @@ export async function classifyCandidates(candidates: YouTubeCandidate[]): Promis
       reason: result.reason,
       type: result.type,
       blurb: result.blurb,
+      isEnglish: result.is_english,
     });
   }
   return out;

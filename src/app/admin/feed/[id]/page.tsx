@@ -7,7 +7,7 @@ export default async function EditFeedItemPage({ params }: { params: Promise<{ i
   const { supabase } = await requireAdmin();
   const { data: item } = await supabase
     .from("feed_items")
-    .select("id, type, title, body, cover_url, source_url, release_date, discovery")
+    .select("id, type, title, body, cover_url, source_url, release_date, discovery, is_english")
     .eq("id", id)
     .single();
 

@@ -18,6 +18,7 @@ export type JournalEntry = {
   date: string;
   href: string | null;
   meta: string | null;
+  isEnglish?: boolean;
 };
 
 const KIND_LABEL: Record<JournalEntry["kind"], string> = {
@@ -73,7 +74,9 @@ function MediaEntry({ entry }: { entry: JournalEntry }) {
       </div>
       <div className={styles.body}>
         <p className={styles.title}>{entry.title}</p>
-        <p className={styles.meta}>{[entry.meta, formatDate(entry.date)].filter(Boolean).join(" — ")}</p>
+        <p className={styles.meta}>
+          {[entry.meta, entry.isEnglish ? "English" : null, formatDate(entry.date)].filter(Boolean).join(" — ")}
+        </p>
         {entry.description && <p className={styles.desc}>{entry.description}</p>}
       </div>
     </div>

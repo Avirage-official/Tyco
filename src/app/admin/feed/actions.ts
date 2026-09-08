@@ -10,6 +10,7 @@ export type FeedItemInput = {
   cover_url: string | null;
   source_url: string | null;
   release_date: string | null;
+  is_english: boolean;
 };
 
 function revalidateFeed() {

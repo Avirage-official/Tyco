@@ -15,7 +15,7 @@ export default async function AdminFeedPage() {
   const { supabase } = await requireAdmin();
   const { data: items } = await supabase
     .from("feed_items")
-    .select("id, type, title, cover_url, discovery, is_published, release_date")
+    .select("id, type, title, cover_url, discovery, is_published, release_date, is_english")
     .order("created_at", { ascending: false });
 
   return (
@@ -41,6 +41,7 @@ export default async function AdminFeedPage() {
                 <th>Title</th>
                 <th>Type</th>
                 <th>Source</th>
+                <th>Lang</th>
                 <th>Release date</th>
                 <th>Status</th>
                 <th></th>
@@ -58,6 +59,7 @@ export default async function AdminFeedPage() {
                   <td className={styles.rowTitle}>{item.title}</td>
                   <td className={styles.rowMeta}>{item.type}</td>
                   <td className={styles.rowMeta}>{DISCOVERY_LABEL[item.discovery] ?? item.discovery}</td>
+                  <td className={styles.rowMeta}>{item.is_english ? "EN" : "—"}</td>
                   <td className={styles.rowMeta}>{item.release_date ? formatDate(item.release_date) : "—"}</td>
                   <td>
                     <PublishBadge isPublished={item.is_published} />

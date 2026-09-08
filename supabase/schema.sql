@@ -215,7 +215,12 @@ create index if not exists portfolio_items_published_idx
 -- and the generated query doesn't repeat the WHERE clause). discovery
 -- records which side of the pipeline found it, since open-search hits are
 -- noisier than the curated channel list and get flagged for extra
--- scrutiny in the admin review screen.
+-- scrutiny in the admin review screen. is_english is a tag, not a filter —
+-- Claude sets it from the candidate's actual language, but nothing at
+-- discovery or classification time rejects non-English items; the point is
+-- to keep every language's coverage (most of Asia's independent/small-
+-- artist scene doesn't release in English) while still letting the site
+-- (or an admin) distinguish English-language items later.
 -- ----------------------------------------------------------------------------
 create table if not exists public.feed_items (
   id uuid primary key default gen_random_uuid(),
@@ -233,6 +238,8 @@ create table if not exists public.feed_items (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.feed_items add column if not exists is_english boolean not null default false;
 
 alter table public.feed_items drop constraint if exists feed_items_type_check;
 alter table public.feed_items add constraint feed_items_type_check

@@ -308,17 +308,23 @@ missed run, harmless since candidates are always deduped against
    than one word, so each term is its own unambiguous plain search instead)
    and merged, with no `regionCode` restriction (that param filters by
    "viewable in this country," not "uploaded from this country," so it
-   wasn't actually scoping anything). This is the primary path
+   wasn't actually scoping anything). Scope is all of Asia, not just
+   Southeast Asia — the term list covers East, South, and Southeast Asian
+   markets, English and native-language both. This is the primary path
    (independent/small artists won't be on anyone's curated channel list);
    an optional curated-channel list (`YOUTUBE_CURATED_CHANNEL_IDS`,
    comma-separated video channel IDs, empty by default) supplements it.
 2. **Claude classification** (`src/lib/feed/classify.ts`) — YouTube's own
    filters are mechanical (publish date, keyword match), so every candidate
    is sent to Claude Haiku 4.5 in one batched call, which decides which
-   ones are genuinely relevant Southeast Asian releases/news — judged from
-   the video's real title/channel/description, not a YouTube region
-   setting — and drafts a short blurb strictly from that same input — the
-   prompt explicitly forbids stating anything the input doesn't support.
+   ones are genuinely relevant Asian releases/news — judged from the
+   video's real title/channel/description, not a YouTube region setting —
+   and drafts a short blurb strictly from that same input — the prompt
+   explicitly forbids stating anything the input doesn't support. It also
+   tags each passing candidate `is_english` (does it sing/speak in
+   English) — a tag, not a filter: non-English candidates pass just as
+   readily, since most of the region's independent scene doesn't release
+   in English at all.
 3. Passing candidates land in `feed_items` as **drafts**
    (`is_published = false`) — nothing in this pipeline ever publishes
    anything. An admin reviews them in `/admin/feed` (rows found via the
@@ -392,11 +398,14 @@ empty state).
   `/journal` once published; reviewed/approved in `/admin/feed`.
   `source_id` (the YouTube video ID) is unique-indexed so the monthly
   sync can't insert the same video twice; `discovery` records whether a row
-  came from a curated channel, the open Southeast-Asia keyword search, or
+  came from a curated channel, the open Asia-wide keyword search, or
   was written by hand, since the two automated paths carry different trust
-  levels. Every row — automated or manual — lands with `is_published =
-  false`; nothing posts itself. `/api/cron/feed-sync` (see below) is the
-  only thing that writes `discovery = 'curated'/'search'` rows.
+  levels. `is_english` is a tag Claude sets from the actual content
+  language, not a filter — every language stays eligible, this just marks
+  which rows are in English for later display/sorting. Every row —
+  automated or manual — lands with `is_published = false`; nothing posts
+  itself. `/api/cron/feed-sync` (see below) is the only thing that writes
+  `discovery = 'curated'/'search'` rows.
 - **`event_tickets`** — one row per *purchase*, not per attendee (a single
   ticket row covers however many pax were bought together). Requires a
   signed-in buyer — unlike shop orders, a ticket only means something tied
