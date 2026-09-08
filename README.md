@@ -288,6 +288,40 @@ not a confirmed spec — place one real order and check Vercel's function logs
 for both routes; a rejected order or an unmatched webhook event is almost
 certainly a field name needing a small correction, not the surrounding logic.
 
+## Journal feed sync
+
+`/journal` shows music releases and creative-scene news (`feed_items`),
+merged at render time with recently-published events and shop drops. New
+`feed_items` rows can be written by hand in `/admin/feed`, or found
+automatically by `/api/cron/feed-sync`, on a daily Vercel Cron schedule
+(`vercel.json`):
+
+1. **YouTube discovery** (`src/lib/feed/youtube.ts`) — an open keyword +
+   region search across the 10 ASEAN country codes is the primary path
+   (independent/small artists won't be on anyone's curated channel list);
+   an optional curated-channel list (`YOUTUBE_CURATED_CHANNEL_IDS`,
+   comma-separated video channel IDs, empty by default) supplements it.
+2. **Claude classification** (`src/lib/feed/classify.ts`) — YouTube's own
+   filters are mechanical (region code, publish date, keyword match), so
+   every candidate is sent to Claude Haiku 4.5 in one batched call, which
+   decides which ones are genuinely relevant Southeast Asian releases/news
+   and drafts a short blurb strictly from that video's own title/channel/
+   description — the prompt explicitly forbids stating anything the input
+   doesn't support.
+3. Passing candidates land in `feed_items` as **drafts**
+   (`is_published = false`) — nothing in this pipeline ever publishes
+   anything. An admin reviews them in `/admin/feed` (rows found via the
+   noisier open-search path are flagged for extra scrutiny there) and hits
+   Publish.
+
+**Env vars** (see `.env.example`): `YOUTUBE_API_KEY` (Google Cloud Console →
+enable "YouTube Data API v3" → Credentials → API key), `ANTHROPIC_API_KEY`
+(console.anthropic.com → API Keys), `CRON_SECRET` (any random string —
+authenticates Vercel's own cron invocations via the `Authorization: Bearer`
+header it sends automatically once the env var is set). The site works fine
+with none of these set — the sync route just isn't reachable, and `/journal`
+shows whatever's been published by hand (or nothing, via its empty state).
+
 ## Local setup
 
 1. Install dependencies:
@@ -342,6 +376,14 @@ certainly a field name needing a small correction, not the surrounding logic.
   events; "past" vs "upcoming" is derived from `event_date` at query time.
   `events.price_cents`/`capacity` are admin-set; `capacity_remaining` is a
   live decrementing counter, same relationship as `products.stock`.
+- **`feed_items`** — the `/journal` page: music releases and creative-scene
+  news. `source_id` (the YouTube video ID) is unique-indexed so the daily
+  sync can't insert the same video twice; `discovery` records whether a row
+  came from a curated channel, the open Southeast-Asia keyword search, or
+  was written by hand, since the two automated paths carry different trust
+  levels. Every row — automated or manual — lands with `is_published =
+  false`; nothing posts itself. `/api/cron/feed-sync` (see below) is the
+  only thing that writes `discovery = 'curated'/'search'` rows.
 - **`event_tickets`** — one row per *purchase*, not per attendee (a single
   ticket row covers however many pax were bought together). Requires a
   signed-in buyer — unlike shop orders, a ticket only means something tied

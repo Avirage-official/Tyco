@@ -39,6 +39,7 @@ const groups = [
     items: [
       { href: "/admin/settings", label: "Homepage" },
       { href: "/admin/portfolio", label: "Portfolio" },
+      { href: "/admin/feed", label: "Journal" },
       { href: "/admin/legal", label: "Legal" },
       { href: "/admin/webhooks", label: "Webhooks" },
     ],

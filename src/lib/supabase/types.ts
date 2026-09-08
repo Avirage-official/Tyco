@@ -206,6 +206,40 @@ export interface Database {
           updated_at?: string;
         }
       >;
+      feed_items: Table<
+        {
+          id: string;
+          type: "release" | "news";
+          title: string;
+          body: string | null;
+          cover_url: string | null;
+          source_url: string | null;
+          source_id: string | null;
+          source_channel: string | null;
+          discovery: "manual" | "curated" | "search";
+          release_date: string | null;
+          is_published: boolean;
+          published_at: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          type: "release" | "news";
+          title: string;
+          body?: string | null;
+          cover_url?: string | null;
+          source_url?: string | null;
+          source_id?: string | null;
+          source_channel?: string | null;
+          discovery?: "manual" | "curated" | "search";
+          release_date?: string | null;
+          is_published?: boolean;
+          published_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        }
+      >;
       events: Table<
         {
           id: string;

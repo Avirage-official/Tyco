@@ -4,6 +4,7 @@ import styles from "./Footer.module.css";
 
 const exploreLinks = [
   { href: "/studio", label: "Happenings" },
+  { href: "/journal", label: "Journal" },
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About" },
 ];
