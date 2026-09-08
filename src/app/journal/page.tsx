@@ -16,7 +16,7 @@ export default async function JournalPage() {
   const [{ data: feedItems }, { data: events }, { data: products }] = await Promise.all([
     supabase
       .from("feed_items")
-      .select("id, type, title, body, cover_url, source_url, source_channel, release_date, published_at")
+      .select("id, type, title, body, cover_url, source_url, source_channel, release_date, published_at, is_english")
       .eq("is_published", true)
       .order("published_at", { ascending: false })
       .limit(60),
@@ -44,6 +44,7 @@ export default async function JournalPage() {
       date: item.release_date ?? item.published_at ?? new Date(0).toISOString(),
       href: item.source_url,
       meta: item.source_channel,
+      isEnglish: item.is_english,
     })),
     ...(events ?? []).map((event): JournalEntry => ({
       id: `event-${event.id}`,

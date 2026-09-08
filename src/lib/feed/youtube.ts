@@ -8,10 +8,11 @@ function requireEnv(name: string) {
 
 const YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3";
 
-// Up to 2 pages of 50 results (100 total) per term — with 9 terms now run
-// separately (see DISCOVERY_TERMS below) this is already ~18 calls/run
-// (1800 quota units), so kept a notch more conservative per-term than the
-// single-query version was.
+// Up to 2 pages of 50 results (100 total) per term — with 14 terms now run
+// separately (see DISCOVERY_TERMS below) this is already ~28 calls/run
+// (2800 quota units), so kept a notch more conservative per-term than the
+// single-query version was. Still comfortably under the 10,000/day free
+// quota for a monthly cron.
 const MAX_SEARCH_PAGES = 2;
 
 // Each term runs as its own plain search rather than one query combining
@@ -38,9 +39,16 @@ const MAX_SEARCH_PAGES = 2;
 // country" (almost never excludes anything) rather than "uploaded from
 // this country," so rotating through region codes was mostly running the
 // same search repeatedly rather than actually covering more ground.
-// Claude judges "genuinely Southeast Asian" from the video's real
-// title/channel/description instead — the thing regionCode was never
-// actually doing.
+// Claude judges "genuinely Asian" from the video's real title/channel/
+// description instead — the thing regionCode was never actually doing.
+//
+// Scope is all of Asia, not just Southeast Asia — East and South Asia
+// (Korea, Japan, Greater China, India) are in too, each with at least one
+// native-language term below for the same independent/small-artist reason
+// as the Southeast Asian terms. English is never filtered on: Claude tags
+// each relevant candidate as English or not (see classify.ts) rather than
+// rejecting non-English candidates, since most of the region's
+// independent scene doesn't release in English at all.
 const DISCOVERY_TERMS = [
   "official mv",
   "official music video",
@@ -51,6 +59,11 @@ const DISCOVERY_TERMS = [
   "MV chính thức", // Vietnamese: "official MV"
   "musik resmi", // Indonesian: "official [music]"
   "lagu baru", // Indonesian: "new song"
+  "신곡", // Korean: "new song"
+  "新曲", // Japanese: "new song"
+  "官方MV", // Mandarin: "official MV"
+  "新歌", // Mandarin: "new song"
+  "नया गाना", // Hindi: "new song"
 ];
 
 export type YouTubeCandidate = {

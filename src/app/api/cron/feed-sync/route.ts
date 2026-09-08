@@ -19,8 +19,8 @@ function lookbackStart(): Date {
 }
 
 /**
- * Pulls new YouTube candidates (curated channels + open Southeast Asia
- * search), has Claude classify/draft the relevant ones, and inserts them
+ * Pulls new YouTube candidates (curated channels + open Asia-wide search),
+ * has Claude classify/draft the relevant ones, and inserts them
  * into feed_items as unpublished drafts for /admin/feed to review. Nothing
  * this route does ever sets is_published — that's a human decision, made
  * in the admin screen.
@@ -77,6 +77,7 @@ export async function GET(request: Request) {
         discovery: c.candidate.discovery,
         release_date: c.candidate.publishedAt,
         is_published: false,
+        is_english: c.isEnglish,
       }));
 
     if (toInsert.length > 0) {

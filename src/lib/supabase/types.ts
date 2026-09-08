@@ -219,6 +219,7 @@ export interface Database {
           discovery: "manual" | "curated" | "search";
           release_date: string | null;
           is_published: boolean;
+          is_english: boolean;
           published_at: string | null;
           created_at: string;
           updated_at: string;
@@ -235,6 +236,7 @@ export interface Database {
           discovery?: "manual" | "curated" | "search";
           release_date?: string | null;
           is_published?: boolean;
+          is_english?: boolean;
           published_at?: string | null;
           created_at?: string;
           updated_at?: string;

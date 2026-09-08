@@ -15,6 +15,7 @@ type FeedItem = {
   source_url: string | null;
   release_date: string | null;
   discovery: "manual" | "curated" | "search";
+  is_english: boolean;
 };
 
 function toDateInputValue(iso: string | null) {
@@ -30,6 +31,7 @@ export function FeedForm({ item }: { item?: FeedItem }) {
   const [coverUrl, setCoverUrl] = useState(item?.cover_url ?? "");
   const [sourceUrl, setSourceUrl] = useState(item?.source_url ?? "");
   const [releaseDate, setReleaseDate] = useState(toDateInputValue(item?.release_date ?? null));
+  const [isEnglish, setIsEnglish] = useState(item?.is_english ?? false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,6 +48,7 @@ export function FeedForm({ item }: { item?: FeedItem }) {
         cover_url: coverUrl || null,
         source_url: sourceUrl || null,
         release_date: releaseDate ? new Date(releaseDate).toISOString() : null,
+        is_english: isEnglish,
       };
 
       if (item) {
@@ -145,6 +148,16 @@ export function FeedForm({ item }: { item?: FeedItem }) {
           value={releaseDate}
           onChange={(e) => setReleaseDate(e.target.value)}
         />
+      </div>
+
+      <div className={styles.checkboxRow}>
+        <input
+          id="is_english"
+          type="checkbox"
+          checked={isEnglish}
+          onChange={(e) => setIsEnglish(e.target.checked)}
+        />
+        <label htmlFor="is_english">English-language</label>
       </div>
 
       {error && <p className={styles.error}>{error}</p>}
