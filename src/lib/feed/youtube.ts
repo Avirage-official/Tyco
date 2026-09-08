@@ -8,22 +8,28 @@ function requireEnv(name: string) {
 
 const YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3";
 
-// The 10 ASEAN member states — the "Southeast Asia" scope for both the
-// region rotation below and Claude's classification prompt. Some of these
-// (BN, LA) return few or no hits given how thin YouTube's penetration is
-// there, but they're included for completeness rather than assumed away.
-const SEA_REGION_CODES = ["TH", "VN", "ID", "MY", "PH", "SG", "KH", "LA", "MM", "BN"];
+// Up to 3 pages of 50 results (150 total) for the open search — cheap
+// relative to the daily quota (300 units for this vs. a 10,000 budget),
+// and worth the extra reach given how few real matches a single 50-result
+// page was turning up.
+const MAX_SEARCH_PAGES = 3;
 
 // YouTube's search `q` param supports "|" (OR) and "-" (NOT) as documented
-// boolean operators — one call per region covers every keyword instead of
-// one call per keyword-per-region, which would blow through the daily
-// quota fast. Deliberately broad on the English side — "official mv" alone
-// missed most real uploads, which use "Official Video," "Official Audio,"
-// "M/V," or no distinctive phrase at all — plus native-language terms for
+// boolean operators — one query covers every keyword in a single call.
+// Deliberately broad on the English side — "official mv" alone missed
+// most real uploads, which use "Official Video," "Official Audio," "M/V,"
+// or no distinctive phrase at all — plus native-language terms for
 // markets where uploaders (small/independent artists especially) don't
 // title things in English. Casting a wider net here is the correct
 // tradeoff: Claude's classification step is the actual quality gate
-// (conservative by design — see classify.ts), not this query.
+// (conservative by design — see classify.ts), not this query. No
+// regionCode restriction — it turned out to filter by "viewable in this
+// country" (almost never excludes anything) rather than "uploaded from
+// this country," so rotating through region codes was mostly running the
+// same search repeatedly rather than actually covering more ground.
+// Claude judges "genuinely Southeast Asian" from the video's real
+// title/channel/description instead — the thing regionCode was never
+// actually doing.
 const DISCOVERY_QUERY = [
   "official mv",
   "official music video",
@@ -76,7 +82,9 @@ function toCandidate(item: SearchListItem, discovery: YouTubeCandidate["discover
   };
 }
 
-async function searchList(params: Record<string, string>): Promise<SearchListItem[]> {
+type SearchListPage = { items: SearchListItem[]; nextPageToken?: string };
+
+async function searchList(params: Record<string, string>): Promise<SearchListPage> {
   const apiKey = requireEnv("YOUTUBE_API_KEY");
   const url = new URL(`${YOUTUBE_API_BASE}/search`);
   url.search = new URLSearchParams({ part: "snippet", type: "video", key: apiKey, ...params }).toString();
@@ -86,8 +94,26 @@ async function searchList(params: Record<string, string>): Promise<SearchListIte
     const body = await res.text().catch(() => "");
     throw new Error(`YouTube search.list failed (${res.status}): ${body.slice(0, 300)}`);
   }
-  const data = (await res.json()) as { items?: SearchListItem[] };
-  return data.items ?? [];
+  const data = (await res.json()) as { items?: SearchListItem[]; nextPageToken?: string };
+  return { items: data.items ?? [], nextPageToken: data.nextPageToken };
+}
+
+/** Walks up to `maxPages` pages of search.list via nextPageToken, stopping early once a page comes back short of a full maxResults (no more results left). */
+async function searchListAllPages(
+  params: Record<string, string>,
+  maxPages: number
+): Promise<SearchListItem[]> {
+  const items: SearchListItem[] = [];
+  let pageToken: string | undefined;
+  for (let page = 0; page < maxPages; page++) {
+    const { items: pageItems, nextPageToken } = await searchList(
+      pageToken ? { ...params, pageToken } : params
+    );
+    items.push(...pageItems);
+    if (!nextPageToken || pageItems.length < Number(params.maxResults ?? 50)) break;
+    pageToken = nextPageToken;
+  }
+  return items;
 }
 
 type DiscoveryResult = { candidates: YouTubeCandidate[]; errors: string[] };
@@ -95,7 +121,7 @@ type DiscoveryResult = { candidates: YouTubeCandidate[]; errors: string[] };
 /**
  * Polls a fixed list of channel IDs (set via YOUTUBE_CURATED_CHANNEL_IDS,
  * comma-separated — empty by default) for uploads since `publishedAfter`.
- * The reliable core of discovery, but optional: unlike the region/keyword
+ * The reliable core of discovery, but optional: unlike the open keyword
  * search below, it only ever finds channels someone has explicitly added,
  * so small/independent artists won't show up here until curated in.
  */
@@ -114,10 +140,12 @@ export async function searchCuratedChannels(publishedAfter: Date): Promise<Disco
         order: "date",
         maxResults: "10",
         publishedAfter: publishedAfter.toISOString(),
-      }).catch((err) => {
-        errors.push(`channel ${channelId}: ${err instanceof Error ? err.message : String(err)}`);
-        return [] as SearchListItem[];
       })
+        .then((page) => page.items)
+        .catch((err) => {
+          errors.push(`channel ${channelId}: ${err instanceof Error ? err.message : String(err)}`);
+          return [] as SearchListItem[];
+        })
     )
   );
 
@@ -130,50 +158,45 @@ export async function searchCuratedChannels(publishedAfter: Date): Promise<Disco
 
 /**
  * The primary discovery path per the project's direction: cast a wide net
- * across Southeast Asian region codes with a combined keyword query rather
- * than requiring a hand-picked channel list, since independent artists
- * won't be on anyone's curated playlist. Noisier than the curated path —
- * candidates from here get the "search" discovery tag so Claude's
- * classification (and the admin review screen) can weigh them more
- * carefully. maxResults is 50 (YouTube's per-call maximum) rather than
- * paginating with nextPageToken — the monthly job's ~2-month window needs
- * more headroom per call than the old daily job did, but a second page
- * per region would double the quota cost for a call this runs on a cron.
+ * with a combined keyword query rather than requiring a hand-picked
+ * channel list, since independent artists won't be on anyone's curated
+ * playlist. One plain global search (no region restriction — see the
+ * DISCOVERY_QUERY comment above for why), walking up to MAX_SEARCH_PAGES
+ * pages so the ~2-month window gets more than one page's worth of
+ * results. Noisier than the curated path — candidates from here get the
+ * "search" discovery tag so Claude's classification (and the admin
+ * review screen) can weigh them more carefully.
  *
- * Per-region failures (quota exhaustion, a malformed query, a transient
- * 5xx) are caught individually so one bad region doesn't sink the whole
- * run, but the error is collected rather than silently dropped — a run
- * that comes back with almost nothing found needs to be distinguishable
- * from a run where most/all region calls actually failed.
+ * A failure partway through paging is caught and recorded rather than
+ * silently dropped — a run that comes back with almost nothing found
+ * needs to be distinguishable from a run where the search actually
+ * failed.
  */
 export async function searchOpenDiscovery(publishedAfter: Date): Promise<DiscoveryResult> {
   const errors: string[] = [];
-  const results = await Promise.all(
-    SEA_REGION_CODES.map((regionCode) =>
-      searchList({
+  let items: SearchListItem[] = [];
+  try {
+    items = await searchListAllPages(
+      {
         q: DISCOVERY_QUERY,
-        regionCode,
         order: "date",
         maxResults: "50",
         publishedAfter: publishedAfter.toISOString(),
-      }).catch((err) => {
-        errors.push(`region ${regionCode}: ${err instanceof Error ? err.message : String(err)}`);
-        return [] as SearchListItem[];
-      })
-    )
-  );
+      },
+      MAX_SEARCH_PAGES
+    );
+  } catch (err) {
+    errors.push(`open search: ${err instanceof Error ? err.message : String(err)}`);
+  }
 
-  const candidates = results
-    .flat()
-    .map((item) => toCandidate(item, "search"))
-    .filter((c): c is YouTubeCandidate => c !== null);
+  const candidates = items.map((item) => toCandidate(item, "search")).filter((c): c is YouTubeCandidate => c !== null);
   return { candidates, errors };
 }
 
 /**
- * Runs both discovery paths and dedupes by video ID — a video can
- * legitimately surface from more than one region query, and a curated
- * channel's upload could also match the open search.
+ * Runs both discovery paths and dedupes by video ID — a video could
+ * legitimately surface from a curated channel's upload also matching the
+ * open search.
  */
 export async function discoverCandidates(publishedAfter: Date): Promise<DiscoveryResult> {
   const [curated, search] = await Promise.all([

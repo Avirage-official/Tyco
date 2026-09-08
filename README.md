@@ -302,18 +302,20 @@ run covers August 1st onward) — that overlap is the buffer against a
 missed run, harmless since candidates are always deduped against
 `feed_items.source_id` before anything is inserted:
 
-1. **YouTube discovery** (`src/lib/feed/youtube.ts`) — an open keyword +
-   region search across the 10 ASEAN country codes is the primary path
-   (independent/small artists won't be on anyone's curated channel list);
-   an optional curated-channel list (`YOUTUBE_CURATED_CHANNEL_IDS`,
+1. **YouTube discovery** (`src/lib/feed/youtube.ts`) — a global open keyword
+   search (no `regionCode` restriction — that param filters by "viewable in
+   this country," not "uploaded from this country," so it wasn't actually
+   scoping anything) is the primary path, walking a few pages of results
+   per run (independent/small artists won't be on anyone's curated channel
+   list); an optional curated-channel list (`YOUTUBE_CURATED_CHANNEL_IDS`,
    comma-separated video channel IDs, empty by default) supplements it.
 2. **Claude classification** (`src/lib/feed/classify.ts`) — YouTube's own
-   filters are mechanical (region code, publish date, keyword match), so
-   every candidate is sent to Claude Haiku 4.5 in one batched call, which
-   decides which ones are genuinely relevant Southeast Asian releases/news
-   and drafts a short blurb strictly from that video's own title/channel/
-   description — the prompt explicitly forbids stating anything the input
-   doesn't support.
+   filters are mechanical (publish date, keyword match), so every candidate
+   is sent to Claude Haiku 4.5 in one batched call, which decides which
+   ones are genuinely relevant Southeast Asian releases/news — judged from
+   the video's real title/channel/description, not a YouTube region
+   setting — and drafts a short blurb strictly from that same input — the
+   prompt explicitly forbids stating anything the input doesn't support.
 3. Passing candidates land in `feed_items` as **drafts**
    (`is_published = false`) — nothing in this pipeline ever publishes
    anything. An admin reviews them in `/admin/feed` (rows found via the
