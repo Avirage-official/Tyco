@@ -201,15 +201,20 @@ create index if not exists portfolio_items_published_idx
   on public.portfolio_items (is_published, published_at desc);
 
 -- ----------------------------------------------------------------------------
--- feed_items — the Journal: music releases + creative news. 'release' rows
--- can be created automatically (see src/app/api/cron/feed-sync) from a
--- YouTube search, filtered/drafted by Claude, but every row lands with
--- is_published = false — same admin-review gate as portfolio_items, nothing
--- posts itself. source_id is the YouTube video ID, used to dedupe repeat
--- cron runs against videos already seen (null for hand-written 'news' rows,
--- hence the partial unique index rather than a plain column constraint).
--- discovery records which side of the pipeline found it, since open-search
--- hits are noisier than the curated channel list and get flagged for extra
+-- feed_items — music releases + creative news, reviewed in /admin/feed.
+-- 'release' rows can be created automatically (see src/app/api/cron/
+-- feed-sync) from a YouTube search, filtered/drafted by Claude, but every
+-- row lands with is_published = false — same admin-review gate as
+-- portfolio_items, nothing posts itself. source_id is the YouTube video
+-- ID, used to dedupe repeat cron runs against videos already seen (null
+-- for hand-written 'news' rows — a plain unique index still allows any
+-- number of nulls, since Postgres never treats two nulls as equal; a
+-- *partial* index (`where source_id is not null`) looks like the more
+-- precise tool here but breaks the sync route's upsert — Supabase's
+-- ON CONFLICT target has to exactly match the index, predicate included,
+-- and the generated query doesn't repeat the WHERE clause). discovery
+-- records which side of the pipeline found it, since open-search hits are
+-- noisier than the curated channel list and get flagged for extra
 -- scrutiny in the admin review screen.
 -- ----------------------------------------------------------------------------
 create table if not exists public.feed_items (
@@ -237,8 +242,9 @@ alter table public.feed_items drop constraint if exists feed_items_discovery_che
 alter table public.feed_items add constraint feed_items_discovery_check
   check (discovery in ('manual', 'curated', 'search'));
 
+drop index if exists public.feed_items_source_id_key;
 create unique index if not exists feed_items_source_id_key
-  on public.feed_items (source_id) where source_id is not null;
+  on public.feed_items (source_id);
 
 alter table public.feed_items enable row level security;
 
