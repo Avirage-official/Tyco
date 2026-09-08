@@ -3,11 +3,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { discoverCandidates } from "@/lib/feed/youtube";
 import { classifyCandidates } from "@/lib/feed/classify";
 
-// Daily is the cadence (see vercel.json); a 2-day lookback gives a buffer
-// against a missed or delayed run without risking duplicates — new
-// candidates are always filtered against feed_items.source_id below before
-// anything gets classified or inserted.
-const LOOKBACK_DAYS = 2;
+// Daily is the cadence (see vercel.json), but the window is wider than a
+// day — a real "official MV" upload in this exact region+keyword slice
+// isn't guaranteed every single day, and a wider window has no downside:
+// new candidates are always filtered against feed_items.source_id below
+// before anything gets classified or inserted, so scanning further back
+// just means seeing (and skipping) more already-known videos, not
+// re-inserting them.
+const LOOKBACK_DAYS = 7;
 
 /**
  * Pulls new YouTube candidates (curated channels + open Southeast Asia
