@@ -90,6 +90,8 @@ async function searchList(params: Record<string, string>): Promise<SearchListIte
   return data.items ?? [];
 }
 
+type DiscoveryResult = { candidates: YouTubeCandidate[]; errors: string[] };
+
 /**
  * Polls a fixed list of channel IDs (set via YOUTUBE_CURATED_CHANNEL_IDS,
  * comma-separated — empty by default) for uploads since `publishedAfter`.
@@ -97,13 +99,14 @@ async function searchList(params: Record<string, string>): Promise<SearchListIte
  * search below, it only ever finds channels someone has explicitly added,
  * so small/independent artists won't show up here until curated in.
  */
-export async function searchCuratedChannels(publishedAfter: Date): Promise<YouTubeCandidate[]> {
+export async function searchCuratedChannels(publishedAfter: Date): Promise<DiscoveryResult> {
   const channelIds = (process.env.YOUTUBE_CURATED_CHANNEL_IDS ?? "")
     .split(",")
     .map((id) => id.trim())
     .filter(Boolean);
-  if (channelIds.length === 0) return [];
+  if (channelIds.length === 0) return { candidates: [], errors: [] };
 
+  const errors: string[] = [];
   const results = await Promise.all(
     channelIds.map((channelId) =>
       searchList({
@@ -111,11 +114,18 @@ export async function searchCuratedChannels(publishedAfter: Date): Promise<YouTu
         order: "date",
         maxResults: "10",
         publishedAfter: publishedAfter.toISOString(),
-      }).catch(() => [] as SearchListItem[])
+      }).catch((err) => {
+        errors.push(`channel ${channelId}: ${err instanceof Error ? err.message : String(err)}`);
+        return [] as SearchListItem[];
+      })
     )
   );
 
-  return results.flat().map((item) => toCandidate(item, "curated")).filter((c): c is YouTubeCandidate => c !== null);
+  const candidates = results
+    .flat()
+    .map((item) => toCandidate(item, "curated"))
+    .filter((c): c is YouTubeCandidate => c !== null);
+  return { candidates, errors };
 }
 
 /**
@@ -129,8 +139,15 @@ export async function searchCuratedChannels(publishedAfter: Date): Promise<YouTu
  * paginating with nextPageToken — the monthly job's ~2-month window needs
  * more headroom per call than the old daily job did, but a second page
  * per region would double the quota cost for a call this runs on a cron.
+ *
+ * Per-region failures (quota exhaustion, a malformed query, a transient
+ * 5xx) are caught individually so one bad region doesn't sink the whole
+ * run, but the error is collected rather than silently dropped — a run
+ * that comes back with almost nothing found needs to be distinguishable
+ * from a run where most/all region calls actually failed.
  */
-export async function searchOpenDiscovery(publishedAfter: Date): Promise<YouTubeCandidate[]> {
+export async function searchOpenDiscovery(publishedAfter: Date): Promise<DiscoveryResult> {
+  const errors: string[] = [];
   const results = await Promise.all(
     SEA_REGION_CODES.map((regionCode) =>
       searchList({
@@ -139,11 +156,18 @@ export async function searchOpenDiscovery(publishedAfter: Date): Promise<YouTube
         order: "date",
         maxResults: "50",
         publishedAfter: publishedAfter.toISOString(),
-      }).catch(() => [] as SearchListItem[])
+      }).catch((err) => {
+        errors.push(`region ${regionCode}: ${err instanceof Error ? err.message : String(err)}`);
+        return [] as SearchListItem[];
+      })
     )
   );
 
-  return results.flat().map((item) => toCandidate(item, "search")).filter((c): c is YouTubeCandidate => c !== null);
+  const candidates = results
+    .flat()
+    .map((item) => toCandidate(item, "search"))
+    .filter((c): c is YouTubeCandidate => c !== null);
+  return { candidates, errors };
 }
 
 /**
@@ -151,19 +175,19 @@ export async function searchOpenDiscovery(publishedAfter: Date): Promise<YouTube
  * legitimately surface from more than one region query, and a curated
  * channel's upload could also match the open search.
  */
-export async function discoverCandidates(publishedAfter: Date): Promise<YouTubeCandidate[]> {
+export async function discoverCandidates(publishedAfter: Date): Promise<DiscoveryResult> {
   const [curated, search] = await Promise.all([
     searchCuratedChannels(publishedAfter),
     searchOpenDiscovery(publishedAfter),
   ]);
 
   const seen = new Map<string, YouTubeCandidate>();
-  for (const candidate of [...curated, ...search]) {
+  for (const candidate of [...curated.candidates, ...search.candidates]) {
     // Curated wins the dedupe if both find the same video — it's the more
     // trusted source, so a duplicate should carry the less-scrutinized tag.
     if (!seen.has(candidate.videoId) || candidate.discovery === "curated") {
       seen.set(candidate.videoId, candidate);
     }
   }
-  return Array.from(seen.values());
+  return { candidates: Array.from(seen.values()), errors: [...curated.errors, ...search.errors] };
 }

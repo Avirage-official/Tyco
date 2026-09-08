@@ -37,10 +37,10 @@ export async function GET(request: Request) {
   }
 
   try {
-    const candidates = await discoverCandidates(lookbackStart());
+    const { candidates, errors: discoveryErrors } = await discoverCandidates(lookbackStart());
 
     if (candidates.length === 0) {
-      return NextResponse.json({ candidatesFound: 0, newCandidates: 0, inserted: 0 });
+      return NextResponse.json({ candidatesFound: 0, newCandidates: 0, inserted: 0, discoveryErrors });
     }
 
     const supabase = createAdminClient();
@@ -55,7 +55,12 @@ export async function GET(request: Request) {
     const newCandidates = candidates.filter((c) => !seenIds.has(c.videoId));
 
     if (newCandidates.length === 0) {
-      return NextResponse.json({ candidatesFound: candidates.length, newCandidates: 0, inserted: 0 });
+      return NextResponse.json({
+        candidatesFound: candidates.length,
+        newCandidates: 0,
+        inserted: 0,
+        discoveryErrors,
+      });
     }
 
     const classified = await classifyCandidates(newCandidates);
@@ -86,6 +91,7 @@ export async function GET(request: Request) {
       newCandidates: newCandidates.length,
       classified: classified.length,
       inserted: toInsert.length,
+      discoveryErrors,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
