@@ -302,12 +302,15 @@ run covers August 1st onward) — that overlap is the buffer against a
 missed run, harmless since candidates are always deduped against
 `feed_items.source_id` before anything is inserted:
 
-1. **YouTube discovery** (`src/lib/feed/youtube.ts`) — a global open keyword
-   search (no `regionCode` restriction — that param filters by "viewable in
-   this country," not "uploaded from this country," so it wasn't actually
-   scoping anything) is the primary path, walking a few pages of results
-   per run (independent/small artists won't be on anyone's curated channel
-   list); an optional curated-channel list (`YOUTUBE_CURATED_CHANNEL_IDS`,
+1. **YouTube discovery** (`src/lib/feed/youtube.ts`) — a handful of plain
+   keyword searches, each run separately (not combined with YouTube's `|`
+   OR operator — that didn't behave as documented once phrases had more
+   than one word, so each term is its own unambiguous plain search instead)
+   and merged, with no `regionCode` restriction (that param filters by
+   "viewable in this country," not "uploaded from this country," so it
+   wasn't actually scoping anything). This is the primary path
+   (independent/small artists won't be on anyone's curated channel list);
+   an optional curated-channel list (`YOUTUBE_CURATED_CHANNEL_IDS`,
    comma-separated video channel IDs, empty by default) supplements it.
 2. **Claude classification** (`src/lib/feed/classify.ts`) — YouTube's own
    filters are mechanical (publish date, keyword match), so every candidate
