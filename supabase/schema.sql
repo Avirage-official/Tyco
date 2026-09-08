@@ -201,6 +201,72 @@ create index if not exists portfolio_items_published_idx
   on public.portfolio_items (is_published, published_at desc);
 
 -- ----------------------------------------------------------------------------
+-- feed_items — the Journal: music releases + creative news. 'release' rows
+-- can be created automatically (see src/app/api/cron/feed-sync) from a
+-- YouTube search, filtered/drafted by Claude, but every row lands with
+-- is_published = false — same admin-review gate as portfolio_items, nothing
+-- posts itself. source_id is the YouTube video ID, used to dedupe repeat
+-- cron runs against videos already seen (null for hand-written 'news' rows,
+-- hence the partial unique index rather than a plain column constraint).
+-- discovery records which side of the pipeline found it, since open-search
+-- hits are noisier than the curated channel list and get flagged for extra
+-- scrutiny in the admin review screen.
+-- ----------------------------------------------------------------------------
+create table if not exists public.feed_items (
+  id uuid primary key default gen_random_uuid(),
+  type text not null,
+  title text not null,
+  body text,
+  cover_url text,
+  source_url text,
+  source_id text,
+  source_channel text,
+  discovery text not null default 'manual',
+  release_date timestamptz,
+  is_published boolean not null default false,
+  published_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.feed_items drop constraint if exists feed_items_type_check;
+alter table public.feed_items add constraint feed_items_type_check
+  check (type in ('release', 'news'));
+
+alter table public.feed_items drop constraint if exists feed_items_discovery_check;
+alter table public.feed_items add constraint feed_items_discovery_check
+  check (discovery in ('manual', 'curated', 'search'));
+
+create unique index if not exists feed_items_source_id_key
+  on public.feed_items (source_id) where source_id is not null;
+
+alter table public.feed_items enable row level security;
+
+drop policy if exists "published feed items are public" on public.feed_items;
+create policy "published feed items are public"
+  on public.feed_items for select
+  using (is_published = true);
+
+drop policy if exists "admins manage feed items" on public.feed_items;
+create policy "admins manage feed items"
+  on public.feed_items for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop trigger if exists set_feed_items_updated_at on public.feed_items;
+create trigger set_feed_items_updated_at
+  before update on public.feed_items
+  for each row execute function public.set_updated_at();
+
+drop trigger if exists set_feed_items_published_at on public.feed_items;
+create trigger set_feed_items_published_at
+  before insert or update on public.feed_items
+  for each row execute function public.set_published_at();
+
+create index if not exists feed_items_published_idx
+  on public.feed_items (is_published, coalesce(release_date, published_at) desc);
+
+-- ----------------------------------------------------------------------------
 -- events — past & upcoming. "Past" vs "upcoming" is derived from event_date
 -- at query time rather than stored, so it can never drift out of sync.
 -- ----------------------------------------------------------------------------
