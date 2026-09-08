@@ -8,14 +8,25 @@ function requireEnv(name: string) {
 
 const YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3";
 
-// Up to 3 pages of 50 results (150 total) for the open search — cheap
-// relative to the daily quota (300 units for this vs. a 10,000 budget),
-// and worth the extra reach given how few real matches a single 50-result
-// page was turning up.
-const MAX_SEARCH_PAGES = 3;
+// Up to 2 pages of 50 results (100 total) per term — with 9 terms now run
+// separately (see DISCOVERY_TERMS below) this is already ~18 calls/run
+// (1800 quota units), so kept a notch more conservative per-term than the
+// single-query version was.
+const MAX_SEARCH_PAGES = 2;
 
-// YouTube's search `q` param supports "|" (OR) and "-" (NOT) as documented
-// boolean operators — one query covers every keyword in a single call.
+// Each term runs as its own plain search rather than one query combining
+// them with YouTube's documented "|" (OR) operator — a run using the
+// combined-OR query returned almost nothing (1 candidate) even after
+// dropping the regionCode restriction that should have only ever
+// broadened results, never narrowed them. That's a strong sign the "|"
+// operator doesn't behave the way the docs describe once phrases have
+// more than one word each, and there's no way to verify the exact
+// parsing behavior from outside a live query. A plain single-phrase
+// search is YouTube's best-understood, most standard behavior — no
+// operator syntax left to get wrong — so each term below gets searched
+// independently and the results are merged (same dedup-by-video-ID logic
+// already used to merge the curated and open-search paths).
+//
 // Deliberately broad on the English side — "official mv" alone missed
 // most real uploads, which use "Official Video," "Official Audio," "M/V,"
 // or no distinctive phrase at all — plus native-language terms for
@@ -30,7 +41,7 @@ const MAX_SEARCH_PAGES = 3;
 // Claude judges "genuinely Southeast Asian" from the video's real
 // title/channel/description instead — the thing regionCode was never
 // actually doing.
-const DISCOVERY_QUERY = [
+const DISCOVERY_TERMS = [
   "official mv",
   "official music video",
   "official video",
@@ -40,7 +51,7 @@ const DISCOVERY_QUERY = [
   "MV chính thức", // Vietnamese: "official MV"
   "musik resmi", // Indonesian: "official [music]"
   "lagu baru", // Indonesian: "new song"
-].join(" | ");
+];
 
 export type YouTubeCandidate = {
   videoId: string;
@@ -158,38 +169,46 @@ export async function searchCuratedChannels(publishedAfter: Date): Promise<Disco
 
 /**
  * The primary discovery path per the project's direction: cast a wide net
- * with a combined keyword query rather than requiring a hand-picked
- * channel list, since independent artists won't be on anyone's curated
- * playlist. One plain global search (no region restriction — see the
- * DISCOVERY_QUERY comment above for why), walking up to MAX_SEARCH_PAGES
- * pages so the ~2-month window gets more than one page's worth of
- * results. Noisier than the curated path — candidates from here get the
- * "search" discovery tag so Claude's classification (and the admin
- * review screen) can weigh them more carefully.
+ * with plain keyword searches rather than requiring a hand-picked channel
+ * list, since independent artists won't be on anyone's curated playlist.
+ * Each term in DISCOVERY_TERMS runs as its own separate, plain search (no
+ * region restriction — see the DISCOVERY_TERMS comment above for why, and
+ * for why this is separate single-term searches rather than one combined
+ * "|"-joined query), walking up to MAX_SEARCH_PAGES pages each so the
+ * ~2-month window gets more than one page's worth of results per term.
+ * Results are merged and deduped by video ID. Noisier than the curated
+ * path — candidates from here get the "search" discovery tag so Claude's
+ * classification (and the admin review screen) can weigh them more
+ * carefully.
  *
- * A failure partway through paging is caught and recorded rather than
- * silently dropped — a run that comes back with almost nothing found
- * needs to be distinguishable from a run where the search actually
- * failed.
+ * A failure on any one term's search is caught and recorded rather than
+ * silently dropped, and doesn't stop the other terms from running — a run
+ * that comes back with almost nothing found needs to be distinguishable
+ * from a run where searches actually failed.
  */
 export async function searchOpenDiscovery(publishedAfter: Date): Promise<DiscoveryResult> {
   const errors: string[] = [];
-  let items: SearchListItem[] = [];
-  try {
-    items = await searchListAllPages(
-      {
-        q: DISCOVERY_QUERY,
-        order: "date",
-        maxResults: "50",
-        publishedAfter: publishedAfter.toISOString(),
-      },
-      MAX_SEARCH_PAGES
-    );
-  } catch (err) {
-    errors.push(`open search: ${err instanceof Error ? err.message : String(err)}`);
-  }
+  const results = await Promise.all(
+    DISCOVERY_TERMS.map((term) =>
+      searchListAllPages(
+        {
+          q: term,
+          order: "date",
+          maxResults: "50",
+          publishedAfter: publishedAfter.toISOString(),
+        },
+        MAX_SEARCH_PAGES
+      ).catch((err) => {
+        errors.push(`term "${term}": ${err instanceof Error ? err.message : String(err)}`);
+        return [] as SearchListItem[];
+      })
+    )
+  );
 
-  const candidates = items.map((item) => toCandidate(item, "search")).filter((c): c is YouTubeCandidate => c !== null);
+  const candidates = results
+    .flat()
+    .map((item) => toCandidate(item, "search"))
+    .filter((c): c is YouTubeCandidate => c !== null);
   return { candidates, errors };
 }
 
