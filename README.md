@@ -293,7 +293,11 @@ certainly a field name needing a small correction, not the surrounding logic.
 `/admin/feed` is an internal-only review table for music releases and
 creative-scene news (`feed_items`) — there's no public page for this yet.
 New `feed_items` rows can be written by hand there, or found automatically
-by `/api/cron/feed-sync`, on a daily Vercel Cron schedule (`vercel.json`):
+by `/api/cron/feed-sync`, on a monthly Vercel Cron schedule (`vercel.json`,
+the 1st of each month). Each run sweeps the current and previous calendar
+month (e.g. a September run covers August 1st onward) — that overlap is
+the buffer against a missed run, harmless since candidates are always
+deduped against `feed_items.source_id` before anything is inserted:
 
 1. **YouTube discovery** (`src/lib/feed/youtube.ts`) — an open keyword +
    region search across the 10 ASEAN country codes is the primary path

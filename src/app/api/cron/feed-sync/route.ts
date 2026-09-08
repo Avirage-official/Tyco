@@ -3,14 +3,20 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { discoverCandidates } from "@/lib/feed/youtube";
 import { classifyCandidates } from "@/lib/feed/classify";
 
-// Daily is the cadence (see vercel.json), but the window is wider than a
-// day — a real "official MV" upload in this exact region+keyword slice
-// isn't guaranteed every single day, and a wider window has no downside:
-// new candidates are always filtered against feed_items.source_id below
-// before anything gets classified or inserted, so scanning further back
-// just means seeing (and skipping) more already-known videos, not
-// re-inserting them.
-const LOOKBACK_DAYS = 7;
+// Monthly is the cadence (see vercel.json), sweeping the current and
+// previous calendar month every run — e.g. a run in September covers
+// August 1st onward. That one-month overlap between consecutive runs is
+// the buffer against a missed run, same idea as the old daily job's
+// few-day buffer, just scaled up. It has no downside: new candidates are
+// always filtered against feed_items.source_id below before anything
+// gets classified or inserted, so re-scanning the overlap just means
+// seeing (and skipping) already-known videos, not re-inserting them.
+const LOOKBACK_MONTHS = 2;
+
+function lookbackStart(): Date {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (LOOKBACK_MONTHS - 1), 1));
+}
 
 /**
  * Pulls new YouTube candidates (curated channels + open Southeast Asia
@@ -31,8 +37,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const publishedAfter = new Date(Date.now() - LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
-    const candidates = await discoverCandidates(publishedAfter);
+    const candidates = await discoverCandidates(lookbackStart());
 
     if (candidates.length === 0) {
       return NextResponse.json({ candidatesFound: 0, newCandidates: 0, inserted: 0 });

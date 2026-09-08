@@ -117,7 +117,10 @@ export async function searchCuratedChannels(publishedAfter: Date): Promise<YouTu
  * won't be on anyone's curated playlist. Noisier than the curated path —
  * candidates from here get the "search" discovery tag so Claude's
  * classification (and the admin review screen) can weigh them more
- * carefully.
+ * carefully. maxResults is 50 (YouTube's per-call maximum) rather than
+ * paginating with nextPageToken — the monthly job's ~2-month window needs
+ * more headroom per call than the old daily job did, but a second page
+ * per region would double the quota cost for a call this runs on a cron.
  */
 export async function searchOpenDiscovery(publishedAfter: Date): Promise<YouTubeCandidate[]> {
   const results = await Promise.all(
@@ -126,7 +129,7 @@ export async function searchOpenDiscovery(publishedAfter: Date): Promise<YouTube
         q: DISCOVERY_QUERY,
         regionCode,
         order: "date",
-        maxResults: "15",
+        maxResults: "50",
         publishedAfter: publishedAfter.toISOString(),
       }).catch(() => [] as SearchListItem[])
     )
