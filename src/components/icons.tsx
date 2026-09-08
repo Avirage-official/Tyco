@@ -182,6 +182,18 @@ export function IconTag(props: IconProps) {
   );
 }
 
+export function IconWave(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6 14.5v-3" />
+      <path d="M10 17.5V6.5" />
+      <path d="M14 15.5v-7" />
+      <path d="M18 16.5v-5" />
+      <circle cx="10" cy="6" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function IconBoat(props: IconProps) {
   return (
     <svg {...base} {...props}>
