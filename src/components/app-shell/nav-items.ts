@@ -3,13 +3,11 @@ import {
   IconHome,
   IconMark,
   IconUser,
-  IconWave,
 } from "@/components/icons";
 
 export const navItems = [
   { href: "/", label: "Home", icon: IconHome, match: "exact" as const },
   { href: "/studio", label: "Happenings", icon: IconMark, match: "prefix" as const },
-  { href: "/journal", label: "Journal", icon: IconWave, match: "prefix" as const },
   { href: "/shop", label: "Shop", icon: IconBag, match: "prefix" as const },
   { href: "/account", label: "Account", icon: IconUser, match: "prefix" as const },
 ];

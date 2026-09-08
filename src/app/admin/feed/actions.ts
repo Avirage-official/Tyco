@@ -14,7 +14,6 @@ export type FeedItemInput = {
 
 function revalidateFeed() {
   revalidatePath("/admin/feed");
-  revalidatePath("/journal");
 }
 
 export async function createFeedItem(input: FeedItemInput) {

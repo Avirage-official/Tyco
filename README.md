@@ -290,11 +290,10 @@ certainly a field name needing a small correction, not the surrounding logic.
 
 ## Journal feed sync
 
-`/journal` shows music releases and creative-scene news (`feed_items`),
-merged at render time with recently-published events and shop drops. New
-`feed_items` rows can be written by hand in `/admin/feed`, or found
-automatically by `/api/cron/feed-sync`, on a daily Vercel Cron schedule
-(`vercel.json`):
+`/admin/feed` is an internal-only review table for music releases and
+creative-scene news (`feed_items`) — there's no public page for this yet.
+New `feed_items` rows can be written by hand there, or found automatically
+by `/api/cron/feed-sync`, on a daily Vercel Cron schedule (`vercel.json`):
 
 1. **YouTube discovery** (`src/lib/feed/youtube.ts`) — an open keyword +
    region search across the 10 ASEAN country codes is the primary path
@@ -319,8 +318,8 @@ enable "YouTube Data API v3" → Credentials → API key), `ANTHROPIC_API_KEY`
 (console.anthropic.com → API Keys), `CRON_SECRET` (any random string —
 authenticates Vercel's own cron invocations via the `Authorization: Bearer`
 header it sends automatically once the env var is set). The site works fine
-with none of these set — the sync route just isn't reachable, and `/journal`
-shows whatever's been published by hand (or nothing, via its empty state).
+with none of these set — the sync route just isn't reachable, and
+`/admin/feed` shows whatever's been added by hand (or nothing).
 
 ## Local setup
 
@@ -376,8 +375,9 @@ shows whatever's been published by hand (or nothing, via its empty state).
   events; "past" vs "upcoming" is derived from `event_date` at query time.
   `events.price_cents`/`capacity` are admin-set; `capacity_remaining` is a
   live decrementing counter, same relationship as `products.stock`.
-- **`feed_items`** — the `/journal` page: music releases and creative-scene
-  news. `source_id` (the YouTube video ID) is unique-indexed so the daily
+- **`feed_items`** — the `/admin/feed` review table: music releases and
+  creative-scene news, internal-only for now (no public page).
+  `source_id` (the YouTube video ID) is unique-indexed so the daily
   sync can't insert the same video twice; `discovery` records whether a row
   came from a curated channel, the open Southeast-Asia keyword search, or
   was written by hand, since the two automated paths carry different trust

@@ -8,11 +8,10 @@ import styles from "./TopNav.module.css";
 
 const flatLinks = [
   { href: "/studio", label: "Happenings", index: "01" },
-  { href: "/journal", label: "Journal", index: "02" },
-  { href: "/shop", label: "Shop", index: "03" },
-  { href: "/about", label: "About", index: "04" },
-  { href: "/account/tickets", label: "Your tickets", index: "05" },
-  { href: "/account/orders", label: "Your orders", index: "06" },
+  { href: "/shop", label: "Shop", index: "02" },
+  { href: "/about", label: "About", index: "03" },
+  { href: "/account/tickets", label: "Your tickets", index: "04" },
+  { href: "/account/orders", label: "Your orders", index: "05" },
 ];
 
 function linkMatches(pathname: string, href: string) {
