@@ -1,0 +1,215 @@
+.journalBody {
+  max-width: 1920px;
+  margin-inline: auto;
+  padding: var(--space-2xl) var(--space-md);
+}
+
+@media (min-width: 900px) {
+  .journalBody {
+    padding-inline: var(--space-lg);
+  }
+}
+
+@media (min-width: 1400px) {
+  .journalBody {
+    padding-inline: var(--space-2xl);
+  }
+}
+
+.pageHead {
+  margin-bottom: var(--space-xl);
+}
+
+.pageHeadTitle {
+  margin-top: var(--space-2xs);
+  font-size: clamp(2.4rem, 6vw, 4rem);
+}
+
+.pageHeadDesc {
+  margin-top: var(--space-sm);
+  max-width: 44ch;
+  color: var(--fg-muted);
+  font-size: 1rem;
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-lg);
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  padding-block: var(--space-lg) var(--space-2xl);
+}
+
+/* ============ media card (release / news) ============ */
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+}
+
+.cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--surface);
+}
+
+.coverImg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.embed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.playBtn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.35) 100%);
+  border: none;
+  cursor: pointer;
+}
+
+.playIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 220ms var(--ease);
+}
+
+.playIcon::before {
+  content: "";
+  margin-left: 3px;
+  border-style: solid;
+  border-width: 0.5rem 0 0.5rem 0.85rem;
+  border-color: transparent transparent transparent currentColor;
+}
+
+.playBtn:hover .playIcon {
+  transform: scale(1.08);
+}
+
+.kindBadge {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(17, 14, 12, 0.7);
+  color: var(--paper);
+  backdrop-filter: blur(4px);
+}
+
+.body {
+  padding: var(--space-md);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.meta {
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
+
+.desc {
+  margin-top: var(--space-sm);
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  line-height: 1.5;
+}
+
+/* ============ poster card (event / product) — the same full-bleed
+   image + gradient-scrim idiom used across Happenings/Deals/Shop, so a
+   happening or a drop reads as part of the same family, not a bolted-on
+   card shape. ============ */
+.posterCard {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.posterImg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-size: cover;
+  background-position: center;
+  transition: transform 600ms var(--ease);
+}
+
+.posterCard:hover .posterImg {
+  transform: scale(1.05);
+}
+
+.posterScrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, transparent 40%, rgba(17, 14, 12, 0.92) 100%);
+}
+
+.posterBody {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--space-md);
+}
+
+.posterTitle {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--paper);
+  line-height: 1.2;
+}
+
+.posterMeta {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: rgba(244, 236, 220, 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .posterImg {
+    transition: none;
+  }
+
+  .playIcon {
+    transition: none;
+  }
+}

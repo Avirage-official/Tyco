@@ -290,14 +290,17 @@ certainly a field name needing a small correction, not the surrounding logic.
 
 ## Journal feed sync
 
-`/admin/feed` is an internal-only review table for music releases and
-creative-scene news (`feed_items`) — there's no public page for this yet.
-New `feed_items` rows can be written by hand there, or found automatically
-by `/api/cron/feed-sync`, on a monthly Vercel Cron schedule (`vercel.json`,
-the 1st of each month). Each run sweeps the current and previous calendar
-month (e.g. a September run covers August 1st onward) — that overlap is
-the buffer against a missed run, harmless since candidates are always
-deduped against `feed_items.source_id` before anything is inserted:
+`/journal` is the public page for music releases and creative-scene news
+(`feed_items`), merged at render time with recently-published events and
+shop drops — same "admin curates, public only sees what's published"
+pattern as `portfolio_items`/`events`/`products`. `/admin/feed` is the
+review table where new rows get approved. New `feed_items` rows can be
+written by hand there, or found automatically by `/api/cron/feed-sync`,
+on a monthly Vercel Cron schedule (`vercel.json`, the 1st of each month).
+Each run sweeps the current and previous calendar month (e.g. a September
+run covers August 1st onward) — that overlap is the buffer against a
+missed run, harmless since candidates are always deduped against
+`feed_items.source_id` before anything is inserted:
 
 1. **YouTube discovery** (`src/lib/feed/youtube.ts`) — an open keyword +
    region search across the 10 ASEAN country codes is the primary path
@@ -323,7 +326,8 @@ enable "YouTube Data API v3" → Credentials → API key), `ANTHROPIC_API_KEY`
 authenticates Vercel's own cron invocations via the `Authorization: Bearer`
 header it sends automatically once the env var is set). The site works fine
 with none of these set — the sync route just isn't reachable, and
-`/admin/feed` shows whatever's been added by hand (or nothing).
+`/journal` shows whatever's been published by hand (or nothing, via its
+empty state).
 
 ## Local setup
 
@@ -379,9 +383,9 @@ with none of these set — the sync route just isn't reachable, and
   events; "past" vs "upcoming" is derived from `event_date` at query time.
   `events.price_cents`/`capacity` are admin-set; `capacity_remaining` is a
   live decrementing counter, same relationship as `products.stock`.
-- **`feed_items`** — the `/admin/feed` review table: music releases and
-  creative-scene news, internal-only for now (no public page).
-  `source_id` (the YouTube video ID) is unique-indexed so the daily
+- **`feed_items`** — music releases and creative-scene news, shown on
+  `/journal` once published; reviewed/approved in `/admin/feed`.
+  `source_id` (the YouTube video ID) is unique-indexed so the monthly
   sync can't insert the same video twice; `discovery` records whether a row
   came from a curated channel, the open Southeast-Asia keyword search, or
   was written by hand, since the two automated paths carry different trust
