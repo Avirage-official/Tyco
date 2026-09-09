@@ -45,3 +45,21 @@ export async function deleteFeedItem(id: string) {
   if (error) throw new Error(error.message);
   revalidateFeed();
 }
+
+export async function bulkSetFeedPublished(ids: string[], isPublished: boolean) {
+  if (ids.length === 0) return;
+  const { supabase } = await requireAdmin();
+  const { error } = await supabase.from("feed_items").update({ is_published: isPublished }).in("id", ids);
+  if (error) throw new Error(error.message);
+  revalidateFeed();
+}
+
+// Deletes the rows outright from feed_items (Supabase) — not a soft-hide,
+// same as the single-item delete above.
+export async function bulkDeleteFeedItems(ids: string[]) {
+  if (ids.length === 0) return;
+  const { supabase } = await requireAdmin();
+  const { error } = await supabase.from("feed_items").delete().in("id", ids);
+  if (error) throw new Error(error.message);
+  revalidateFeed();
+}
