@@ -13,6 +13,11 @@ import { classifyCandidates } from "@/lib/feed/classify";
 // seeing (and skipping) already-known videos, not re-inserting them.
 const LOOKBACK_MONTHS = 2;
 
+// Discovery + chunked classification of a large candidate backlog (see
+// classify.ts) can run well past the platform's 10s default — 60s is the
+// Hobby-plan ceiling for a serverless function's maxDuration.
+export const maxDuration = 60;
+
 function lookbackStart(): Date {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (LOOKBACK_MONTHS - 1), 1));
@@ -63,10 +68,8 @@ export async function GET(request: Request) {
       });
     }
 
-    const classified = await classifyCandidates(newCandidates);
-    const toInsert = classified
-      .filter((c) => c.relevant)
-      .map((c) => ({
+    function toFeedRow(c: Awaited<ReturnType<typeof classifyCandidates>>[number]) {
+      return {
         type: c.type,
         title: c.candidate.title,
         body: c.blurb,
@@ -78,20 +81,28 @@ export async function GET(request: Request) {
         release_date: c.candidate.publishedAt,
         is_published: false,
         is_english: c.isEnglish,
-      }));
+      };
+    }
 
-    if (toInsert.length > 0) {
+    let inserted = 0;
+    // Inserting after each classification wave (rather than once at the
+    // very end) means a run that hits maxDuration partway through a large
+    // backlog still keeps whatever was classified before the cutoff.
+    const classified = await classifyCandidates(newCandidates, async (batch) => {
+      const toInsert = batch.filter((c) => c.relevant).map(toFeedRow);
+      if (toInsert.length === 0) return;
       const { error } = await supabase
         .from("feed_items")
         .upsert(toInsert, { onConflict: "source_id", ignoreDuplicates: true });
       if (error) throw new Error(error.message);
-    }
+      inserted += toInsert.length;
+    });
 
     return NextResponse.json({
       candidatesFound: candidates.length,
       newCandidates: newCandidates.length,
       classified: classified.length,
-      inserted: toInsert.length,
+      inserted,
       discoveryErrors,
     });
   } catch (err) {

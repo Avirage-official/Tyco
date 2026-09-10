@@ -58,17 +58,31 @@ function buildUserPrompt(candidates: YouTubeCandidate[]) {
   return `Candidates (discovery: "curated" = a channel we already follow, "search" = found via open keyword search and needs more scrutiny before you call it relevant):\n\n${JSON.stringify(items, null, 2)}`;
 }
 
+// A single request holding every candidate blew past the API's prompt-length
+// limit once Asia-wide discovery started actually returning volume (~1,400
+// candidates in one run measured ~217k prompt tokens against a 20k cap) — so
+// candidates are split into chunks well under that ceiling (a chunk this
+// size runs a few thousand tokens at most, comfortable margin) and each
+// chunk is its own request.
+const MAX_CANDIDATES_PER_CALL = 40;
+// Bounds how many chunk requests run at once, so a large backlog fans out
+// for speed without firing dozens of concurrent Anthropic requests at once.
+const MAX_CONCURRENT_CALLS = 5;
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += size) chunks.push(items.slice(i, i + size));
+  return chunks;
+}
+
 /**
- * Sends the whole candidate batch to Claude in one call — cheaper and
- * simpler than one call per video, and lets the model weigh candidates
+ * Sends one chunk to Claude in a single call — cheaper and simpler than one
+ * call per video, and lets the model weigh candidates in the same chunk
  * against each other (e.g. spotting a repost of something else in the
- * same batch). Returns only candidates Claude actually echoed a matching
+ * batch). Returns only candidates Claude actually echoed a matching
  * video_id for; anything else is dropped rather than trusted.
  */
-export async function classifyCandidates(candidates: YouTubeCandidate[]): Promise<ClassifiedCandidate[]> {
-  if (candidates.length === 0) return [];
-
-  const client = new Anthropic();
+async function classifyChunk(client: Anthropic, candidates: YouTubeCandidate[]): Promise<ClassifiedCandidate[]> {
   const byId = new Map(candidates.map((c) => [c.videoId, c]));
 
   const response = await client.messages.parse({
@@ -96,4 +110,31 @@ export async function classifyCandidates(candidates: YouTubeCandidate[]): Promis
     });
   }
   return out;
+}
+
+/**
+ * `onBatch`, if given, is awaited after each wave of chunk requests
+ * completes — the cron route uses it to upsert results incrementally, so a
+ * large backlog that runs long enough to hit the function's time limit
+ * still saves whatever was classified before that point, instead of
+ * losing a wave of completed (and already paid-for) Claude calls to an
+ * all-or-nothing insert at the very end.
+ */
+export async function classifyCandidates(
+  candidates: YouTubeCandidate[],
+  onBatch?: (batch: ClassifiedCandidate[]) => Promise<void> | void
+): Promise<ClassifiedCandidate[]> {
+  if (candidates.length === 0) return [];
+
+  const client = new Anthropic();
+  const chunks = chunk(candidates, MAX_CANDIDATES_PER_CALL);
+
+  const results: ClassifiedCandidate[] = [];
+  for (let i = 0; i < chunks.length; i += MAX_CONCURRENT_CALLS) {
+    const wave = chunks.slice(i, i + MAX_CONCURRENT_CALLS);
+    const waveResults = (await Promise.all(wave.map((c) => classifyChunk(client, c)))).flat();
+    results.push(...waveResults);
+    if (onBatch) await onBatch(waveResults);
+  }
+  return results;
 }
