@@ -18,6 +18,17 @@ const LOOKBACK_MONTHS = 2;
 // Hobby-plan ceiling for a serverless function's maxDuration.
 export const maxDuration = 60;
 
+// Caps how many new candidates get classified in a single run. Even
+// batched (see classify.ts), classifying a very large one-off backlog —
+// e.g. the first run after widening discovery to all of Asia, which found
+// on the order of 1,400 new candidates — takes longer than fits in
+// maxDuration, and the run gets killed with a 504 before finishing. Rather
+// than try to raise the ceiling further, cap the work per run: leftover
+// candidates are simply still "new" (not yet in feed_items) on the next
+// run, so a backlog above this cap drains steadily over a few runs
+// instead of needing to complete in one shot.
+const MAX_CANDIDATES_PER_RUN = 300;
+
 function lookbackStart(): Date {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (LOOKBACK_MONTHS - 1), 1));
@@ -84,11 +95,13 @@ export async function GET(request: Request) {
       };
     }
 
+    const toProcess = newCandidates.slice(0, MAX_CANDIDATES_PER_RUN);
+
     let inserted = 0;
     // Inserting after each classification wave (rather than once at the
-    // very end) means a run that hits maxDuration partway through a large
-    // backlog still keeps whatever was classified before the cutoff.
-    const classified = await classifyCandidates(newCandidates, async (batch) => {
+    // very end) means a run that hits maxDuration partway through still
+    // keeps whatever was classified before the cutoff.
+    const classified = await classifyCandidates(toProcess, async (batch) => {
       const toInsert = batch.filter((c) => c.relevant).map(toFeedRow);
       if (toInsert.length === 0) return;
       const { error } = await supabase
@@ -101,6 +114,8 @@ export async function GET(request: Request) {
     return NextResponse.json({
       candidatesFound: candidates.length,
       newCandidates: newCandidates.length,
+      processed: toProcess.length,
+      remaining: newCandidates.length - toProcess.length,
       classified: classified.length,
       inserted,
       discoveryErrors,
