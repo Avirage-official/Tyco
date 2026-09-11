@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { VideoHero } from "@/components/home/VideoHero";
 import { SwipeDashboard, type DealPreview } from "@/components/home/SwipeDashboard";
 import type { ShopItem } from "@/components/home/FeaturedShop";
+import { JournalStrip, type ReleasePreview } from "@/components/home/JournalStrip";
 import { fadeUpItem } from "@/lib/motion/variants";
 import type { DashboardSlideImages, DashboardSlideVisibility, EventSlide } from "@/lib/supabase/types";
 import styles from "./Dashboard.module.css";
@@ -13,6 +14,7 @@ export type DashboardProps = {
   events: EventSlide[];
   shopItems: ShopItem[];
   deals: DealPreview[];
+  releases: ReleasePreview[];
   slideImages: DashboardSlideImages;
   hiddenSlides: DashboardSlideVisibility;
 };
@@ -22,6 +24,7 @@ export function Dashboard({
   events,
   shopItems,
   deals,
+  releases,
   slideImages,
   hiddenSlides,
 }: DashboardProps) {
@@ -47,6 +50,8 @@ export function Dashboard({
         slideImages={slideImages}
         hiddenSlides={hiddenSlides}
       />
+
+      <JournalStrip releases={releases} />
     </>
   );
 }

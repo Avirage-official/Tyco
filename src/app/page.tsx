@@ -1,8 +1,25 @@
 import { Marketing } from "@/components/home/Marketing";
 import { Dashboard, type DashboardProps } from "@/components/home/Dashboard";
 import type { SpotlightProps } from "@/components/home/Spotlight";
+import type { ReleasePreview } from "@/components/home/JournalStrip";
 import { getSwipeDashboardData } from "@/lib/home/swipe-data";
 import { createClient } from "@/lib/supabase/server";
+
+const RELEASE_STRIP_LIMIT = 10;
+
+async function getFeaturedReleases(
+  supabase: Awaited<ReturnType<typeof createClient>>
+): Promise<ReleasePreview[]> {
+  const { data } = await supabase
+    .from("feed_items")
+    .select("id, title, cover_url, source_channel, release_date, published_at")
+    .eq("type", "release")
+    .eq("is_published", true)
+    .order("published_at", { ascending: false })
+    .limit(RELEASE_STRIP_LIMIT);
+
+  return data ?? [];
+}
 
 async function getSpotlight(
   supabase: Awaited<ReturnType<typeof createClient>>
@@ -35,8 +52,11 @@ async function getDashboardData(
   supabase: Awaited<ReturnType<typeof createClient>>,
   name: string
 ): Promise<DashboardProps> {
-  const swipeData = await getSwipeDashboardData(supabase);
-  return { name, ...swipeData };
+  const [swipeData, releases] = await Promise.all([
+    getSwipeDashboardData(supabase),
+    getFeaturedReleases(supabase),
+  ]);
+  return { name, releases, ...swipeData };
 }
 
 export default async function Home() {
@@ -57,10 +77,11 @@ export default async function Home() {
     return <Dashboard {...dashboardData} />;
   }
 
-  const [event, { data: settings }] = await Promise.all([
+  const [event, { data: settings }, releases] = await Promise.all([
     getSpotlight(supabase),
     supabase.from("site_settings").select("about_gallery").eq("id", true).maybeSingle(),
+    getFeaturedReleases(supabase),
   ]);
 
-  return <Marketing spotlight={event} slides={settings?.about_gallery ?? []} />;
+  return <Marketing spotlight={event} slides={settings?.about_gallery ?? []} releases={releases} />;
 }

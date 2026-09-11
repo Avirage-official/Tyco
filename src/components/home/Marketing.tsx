@@ -6,6 +6,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { Spotlight, type SpotlightProps } from "@/components/home/Spotlight";
 import { WhoWeAreHero } from "@/components/home/WhoWeAreHero";
 import { VideoHero } from "@/components/home/VideoHero";
+import { JournalStrip, type ReleasePreview } from "@/components/home/JournalStrip";
 import { fadeUpItem } from "@/lib/motion/variants";
 import type { AboutSlide } from "@/lib/supabase/types";
 import styles from "./Marketing.module.css";
@@ -13,9 +14,11 @@ import styles from "./Marketing.module.css";
 export function Marketing({
   spotlight,
   slides,
+  releases,
 }: {
   spotlight: SpotlightProps | null;
   slides: AboutSlide[];
+  releases: ReleasePreview[];
 }) {
   return (
     <>
@@ -50,6 +53,8 @@ export function Marketing({
           <Link href="/shop">Shop</Link>
         </motion.nav>
       </VideoHero>
+
+      <JournalStrip releases={releases} />
     </>
   );
 }
