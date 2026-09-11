@@ -242,6 +242,16 @@ export interface Database {
           updated_at?: string;
         }
       >;
+      feed_excluded_sources: Table<
+        {
+          source_id: string;
+          excluded_at: string;
+        },
+        {
+          source_id: string;
+          excluded_at?: string;
+        }
+      >;
       events: Table<
         {
           id: string;

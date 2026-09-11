@@ -53,6 +53,27 @@
   font-size: 0.82rem;
 }
 
+.headerRowActions {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* -- sync trigger --------------------------------------------------- */
+.syncBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.syncBlock .success,
+.syncBlock .error {
+  max-width: 28ch;
+  text-align: right;
+}
+
 /* -- bulk actions --------------------------------------------------- */
 .bulkBar {
   display: flex;

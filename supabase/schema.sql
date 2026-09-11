@@ -280,6 +280,28 @@ create index if not exists feed_items_published_idx
   on public.feed_items (is_published, coalesce(release_date, published_at) desc);
 
 -- ----------------------------------------------------------------------------
+-- feed_excluded_sources — deliberately tiny: just the YouTube video ID an
+-- admin deleted from feed_items, plus when. Deleting a feed_items row also
+-- deletes its source_id, so without this the next sync run sees that video
+-- as "new" again and re-discovers/re-classifies the exact thing an admin
+-- already rejected. Recording just the ID here (not an archived copy of the
+-- full row — title/blurb/images) is enough for the sync route to filter it
+-- out permanently, without keeping data nobody asked to keep.
+-- ----------------------------------------------------------------------------
+create table if not exists public.feed_excluded_sources (
+  source_id text primary key,
+  excluded_at timestamptz not null default now()
+);
+
+alter table public.feed_excluded_sources enable row level security;
+
+drop policy if exists "admins manage feed excluded sources" on public.feed_excluded_sources;
+create policy "admins manage feed excluded sources"
+  on public.feed_excluded_sources for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+-- ----------------------------------------------------------------------------
 -- events — past & upcoming. "Past" vs "upcoming" is derived from event_date
 -- at query time rather than stored, so it can never drift out of sync.
 -- ----------------------------------------------------------------------------
