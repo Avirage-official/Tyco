@@ -1,12 +1,13 @@
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 import { Wordmark } from "./Wordmark";
 import styles from "./Footer.module.css";
 
-const exploreLinks = [
-  { href: "/studio", label: "Happenings" },
-  { href: "/journal", label: "Journal" },
-  { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About" },
+const ALL_EXPLORE_LINKS = [
+  { href: "/studio", label: "Happenings", navKey: "happenings" as const },
+  { href: "/journal", label: "Journal", navKey: "journal" as const },
+  { href: "/shop", label: "Shop", navKey: "shop" as const },
+  { href: "/about", label: "About", navKey: "about" as const },
 ];
 
 const accountLinks = [
@@ -16,7 +17,16 @@ const accountLinks = [
   { href: "/account/deals", label: "Your deals" },
 ];
 
-export function Footer() {
+export async function Footer() {
+  const supabase = await createClient();
+  const { data: settings } = await supabase
+    .from("site_settings")
+    .select("nav_hidden_items")
+    .eq("id", true)
+    .maybeSingle();
+  const hidden = settings?.nav_hidden_items ?? {};
+  const exploreLinks = ALL_EXPLORE_LINKS.filter((item) => !hidden[item.navKey]);
+
   return (
     <footer className={styles.footer}>
       <div className={`container ${styles.top}`}>

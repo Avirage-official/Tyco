@@ -872,6 +872,13 @@ alter table public.site_settings add column if not exists dashboard_hidden_slide
 -- price at checkout (see deal_redemptions below) — snapshotted onto each
 -- redemption at purchase time so a later change never rewrites history.
 alter table public.site_settings add column if not exists deal_gateway_fee_percent numeric(5,2) not null default 3.00;
+-- Site-nav kill switch — {happenings, journal, shop, about}, each an
+-- optional boolean. true removes that link from every nav surface
+-- (desktop rail, mobile sheet, footer) without touching the page itself —
+-- a hidden section is still reachable by direct URL, just not linked to.
+-- Account/login/cart are core utility, not content, so they're not part
+-- of this and stay always-visible.
+alter table public.site_settings add column if not exists nav_hidden_items jsonb not null default '{}'::jsonb;
 
 insert into public.site_settings (id)
 values (true)

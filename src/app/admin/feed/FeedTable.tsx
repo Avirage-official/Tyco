@@ -25,15 +25,38 @@ type FeedRow = {
   is_english: boolean;
 };
 
+type StatusFilter = "all" | "published" | "draft";
+
+const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "published", label: "Published" },
+  { key: "draft", label: "Draft" },
+];
+
 export function FeedTable({ items }: { items: FeedRow[] }) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, setPending] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
-  const allSelected = items.length > 0 && selected.size === items.length;
+  const visibleItems = items.filter((item) => {
+    if (statusFilter === "published") return item.is_published;
+    if (statusFilter === "draft") return !item.is_published;
+    return true;
+  });
+
+  // Selection is scoped to the current filter (cleared on switch, see
+  // setFilter below) so "select all" and the bulk bar's count only ever
+  // refer to rows actually visible on screen.
+  const allSelected = visibleItems.length > 0 && selected.size === visibleItems.length;
+
+  function setFilter(next: StatusFilter) {
+    setStatusFilter(next);
+    setSelected(new Set());
+  }
 
   function toggleAll() {
-    setSelected(allSelected ? new Set() : new Set(items.map((item) => item.id)));
+    setSelected(allSelected ? new Set() : new Set(visibleItems.map((item) => item.id)));
   }
 
   function toggleOne(id: string) {
@@ -58,6 +81,20 @@ export function FeedTable({ items }: { items: FeedRow[] }) {
 
   return (
     <>
+      <div className={styles.filterRow}>
+        {STATUS_FILTERS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            className={styles.filterBtn}
+            data-active={statusFilter === key}
+            onClick={() => setFilter(key)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {selected.size > 0 && (
         <div className={styles.bulkBar}>
           <span className={styles.bulkCount}>{selected.size} selected</span>
@@ -111,7 +148,14 @@ export function FeedTable({ items }: { items: FeedRow[] }) {
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => (
+            {visibleItems.length === 0 && (
+              <tr>
+                <td colSpan={9} className={styles.empty}>
+                  No items match this filter.
+                </td>
+              </tr>
+            )}
+            {visibleItems.map((item) => (
               <tr key={item.id}>
                 <td>
                   <input

@@ -31,6 +31,13 @@ export type DashboardSlideVisibility = {
   happenings?: boolean;
 };
 
+export type NavHiddenItems = {
+  happenings?: boolean;
+  journal?: boolean;
+  shop?: boolean;
+  about?: boolean;
+};
+
 export type Vendor = {
   id: string;
   name: string;
@@ -433,6 +440,7 @@ export interface Database {
           dashboard_slide_images: DashboardSlideImages;
           dashboard_hidden_slides: DashboardSlideVisibility;
           deal_gateway_fee_percent: number;
+          nav_hidden_items: NavHiddenItems;
           updated_at: string;
         },
         {
@@ -448,6 +456,7 @@ export interface Database {
           dashboard_slide_images?: DashboardSlideImages;
           dashboard_hidden_slides?: DashboardSlideVisibility;
           deal_gateway_fee_percent?: number;
+          nav_hidden_items?: NavHiddenItems;
           updated_at?: string;
         }
       >;

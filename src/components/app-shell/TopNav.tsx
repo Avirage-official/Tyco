@@ -7,15 +7,16 @@ import styles from "./TopNav.module.css";
 
 export async function TopNav() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [{ data: { user } }, { data: settings }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.from("site_settings").select("nav_hidden_items").eq("id", true).maybeSingle(),
+  ]);
 
   return (
     <header className={styles.bar}>
       <div className={`container ${styles.inner}`}>
         <Wordmark />
-        <DesktopNav signedIn={Boolean(user)} />
+        <DesktopNav signedIn={Boolean(user)} hiddenItems={settings?.nav_hidden_items ?? {}} />
         <span className={styles.spacer} />
         {!user && (
           <div className={styles.authLinks}>
