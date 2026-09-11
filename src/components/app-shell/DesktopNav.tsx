@@ -4,13 +4,14 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import type { NavHiddenItems } from "@/lib/supabase/types";
 import styles from "./TopNav.module.css";
 
-const flatLinks = [
-  { href: "/studio", label: "Happenings", index: "01" },
-  { href: "/journal", label: "Journal", index: "02" },
-  { href: "/shop", label: "Shop", index: "03" },
-  { href: "/about", label: "About", index: "04" },
+const ALL_LINKS = [
+  { href: "/studio", label: "Happenings", index: "01", navKey: "happenings" as const },
+  { href: "/journal", label: "Journal", index: "02", navKey: "journal" as const },
+  { href: "/shop", label: "Shop", index: "03", navKey: "shop" as const },
+  { href: "/about", label: "About", index: "04", navKey: "about" as const },
   { href: "/account/tickets", label: "Your tickets", index: "05" },
   { href: "/account/orders", label: "Your orders", index: "06" },
 ];
@@ -19,7 +20,13 @@ function linkMatches(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function DesktopNav({ signedIn }: { signedIn: boolean }) {
+export function DesktopNav({
+  signedIn,
+  hiddenItems = {},
+}: {
+  signedIn: boolean;
+  hiddenItems?: NavHiddenItems;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const railRef = useRef<HTMLDivElement>(null);
@@ -27,6 +34,7 @@ export function DesktopNav({ signedIn }: { signedIn: boolean }) {
   const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
 
+  const flatLinks = ALL_LINKS.filter((item) => !item.navKey || !hiddenItems[item.navKey]);
   const activeHref = flatLinks.find((item) => linkMatches(pathname, item.href))?.href;
   const accountActive = pathname === "/account";
 

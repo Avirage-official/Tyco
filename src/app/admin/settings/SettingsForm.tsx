@@ -4,7 +4,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteFromBucket, uploadToBucket } from "@/lib/supabase/upload";
 import { Button } from "@/components/ui/Button";
-import type { AboutSlide, DashboardSlideImages, DashboardSlideVisibility } from "@/lib/supabase/types";
+import type {
+  AboutSlide,
+  DashboardSlideImages,
+  DashboardSlideVisibility,
+  NavHiddenItems,
+} from "@/lib/supabase/types";
 import { updateSiteSettings } from "./actions";
 import styles from "../admin.module.css";
 
@@ -13,6 +18,13 @@ const MAX_SLIDES = 8;
 const SWIPE_SLIDES: { key: keyof DashboardSlideImages; label: string }[] = [
   { key: "retail", label: "Retail" },
   { key: "happenings", label: "Happenings" },
+];
+
+const NAV_ITEMS: { key: keyof NavHiddenItems; label: string }[] = [
+  { key: "happenings", label: "Happenings" },
+  { key: "journal", label: "Journal" },
+  { key: "shop", label: "Shop" },
+  { key: "about", label: "About" },
 ];
 
 type Settings = {
@@ -25,6 +37,7 @@ type Settings = {
   about_gallery: AboutSlide[];
   dashboard_slide_images: DashboardSlideImages;
   dashboard_hidden_slides: DashboardSlideVisibility;
+  nav_hidden_items: NavHiddenItems;
 } | null;
 
 export function SettingsForm({ settings }: { settings: Settings }) {
@@ -47,6 +60,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   const [hiddenSlides, setHiddenSlides] = useState<DashboardSlideVisibility>(
     settings?.dashboard_hidden_slides ?? {}
   );
+  const [hiddenNav, setHiddenNav] = useState<NavHiddenItems>(settings?.nav_hidden_items ?? {});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,6 +104,10 @@ export function SettingsForm({ settings }: { settings: Settings }) {
 
   function toggleHidden(key: keyof DashboardSlideVisibility, hidden: boolean) {
     setHiddenSlides((prev) => ({ ...prev, [key]: hidden }));
+  }
+
+  function toggleNavHidden(key: keyof NavHiddenItems, hidden: boolean) {
+    setHiddenNav((prev) => ({ ...prev, [key]: hidden }));
   }
 
   const remainingSlots = MAX_SLIDES - slides.length - slideFiles.length;
@@ -157,6 +175,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         about_gallery: [...slides, ...newSlides],
         dashboard_slide_images: finalSwipeImages,
         dashboard_hidden_slides: hiddenSlides,
+        nav_hidden_items: hiddenNav,
       });
 
       // Save succeeded — now safe to clean up whatever it orphaned. Best
@@ -328,6 +347,26 @@ export function SettingsForm({ settings }: { settings: Settings }) {
           </div>
         );
       })}
+
+      <h3 style={{ marginTop: "var(--space-lg)" }}>Navigation</h3>
+      <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>
+        Hide a section from the desktop nav, mobile menu, and footer — the page itself stays up,
+        it just won&rsquo;t be linked to anywhere. Account isn&rsquo;t hideable.
+      </p>
+
+      {NAV_ITEMS.map(({ key, label }) => (
+        <label
+          key={key}
+          style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "var(--space-xs)" }}
+        >
+          <input
+            type="checkbox"
+            checked={Boolean(hiddenNav[key])}
+            onChange={(e) => toggleNavHidden(key, e.target.checked)}
+          />
+          <span style={{ fontSize: "0.85rem" }}>Hide {label} from navigation</span>
+        </label>
+      ))}
 
       <h3 style={{ marginTop: "var(--space-lg)" }}>Next project teaser</h3>
       <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>

@@ -17,7 +17,13 @@ import styles from "./MobileTopBar.module.css";
  * site). TopNav (the desktop link rail) takes over above the breakpoint
  * this hides at.
  */
-export function MobileTopBarNav({ signedIn }: { signedIn: boolean }) {
+export function MobileTopBarNav({
+  signedIn,
+  items = navItems,
+}: {
+  signedIn: boolean;
+  items?: typeof navItems;
+}) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -74,7 +80,7 @@ export function MobileTopBarNav({ signedIn }: { signedIn: boolean }) {
               exit={{ opacity: 0, y: -16, scale: 0.98 }}
               transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
             >
-              {navItems.map((item) => {
+              {items.map((item) => {
                 const active = isActive(pathname, item.href, item.match);
                 const Icon = item.icon;
                 return (
