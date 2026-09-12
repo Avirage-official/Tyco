@@ -4,12 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteFromBucket, uploadToBucket } from "@/lib/supabase/upload";
 import { Button } from "@/components/ui/Button";
-import type {
-  AboutSlide,
-  DashboardSlideImages,
-  DashboardSlideVisibility,
-  NavHiddenItems,
-} from "@/lib/supabase/types";
+import type { AboutSlide, DashboardSlideImages, NavHiddenItems } from "@/lib/supabase/types";
 import { updateSiteSettings } from "./actions";
 import styles from "../admin.module.css";
 
@@ -36,7 +31,6 @@ type Settings = {
   mission_blurb: string | null;
   about_gallery: AboutSlide[];
   dashboard_slide_images: DashboardSlideImages;
-  dashboard_hidden_slides: DashboardSlideVisibility;
   nav_hidden_items: NavHiddenItems;
 } | null;
 
@@ -56,9 +50,6 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   );
   const [swipeImageFiles, setSwipeImageFiles] = useState<Partial<Record<keyof DashboardSlideImages, File>>>(
     {}
-  );
-  const [hiddenSlides, setHiddenSlides] = useState<DashboardSlideVisibility>(
-    settings?.dashboard_hidden_slides ?? {}
   );
   const [hiddenNav, setHiddenNav] = useState<NavHiddenItems>(settings?.nav_hidden_items ?? {});
   const [saving, setSaving] = useState(false);
@@ -100,10 +91,6 @@ export function SettingsForm({ settings }: { settings: Settings }) {
       return next;
     });
     setSwipeImageFile(key, null);
-  }
-
-  function toggleHidden(key: keyof DashboardSlideVisibility, hidden: boolean) {
-    setHiddenSlides((prev) => ({ ...prev, [key]: hidden }));
   }
 
   function toggleNavHidden(key: keyof NavHiddenItems, hidden: boolean) {
@@ -174,7 +161,6 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         mission_blurb: missionBlurb || null,
         about_gallery: [...slides, ...newSlides],
         dashboard_slide_images: finalSwipeImages,
-        dashboard_hidden_slides: hiddenSlides,
         nav_hidden_items: hiddenNav,
       });
 
@@ -295,16 +281,13 @@ export function SettingsForm({ settings }: { settings: Settings }) {
 
       <h3 style={{ marginTop: "var(--space-lg)" }}>Explore sections</h3>
       <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>
-        Background photo and visibility for each slide of the swipeable Retail / Happenings
-        section — shown on the dashboard and reused as the hero on /shop and /studio. Hide a
-        slide to show a &ldquo;Coming soon&rdquo; placeholder instead of its real content, e.g.
-        mid-incident or between iterations — the slide and its tab stay in place, only the
-        content swaps.
+        Background photo for each slide of the swipeable Retail / Happenings section — shown on
+        the dashboard and reused as the hero on /shop and /studio. Visibility is controlled from
+        Navigation below, not here.
       </p>
 
       {SWIPE_SLIDES.map(({ key, label }) => {
         const previewUrl = swipeImagePreviews[key] ?? swipeImages[key];
-        const hidden = Boolean(hiddenSlides[key]);
         return (
           <div key={key} className={styles.field}>
             <label className={styles.label} htmlFor={`swipe-${key}`}>
@@ -334,16 +317,6 @@ export function SettingsForm({ settings }: { settings: Settings }) {
                 e.target.value = "";
               }}
             />
-            <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "var(--space-xs)" }}>
-              <input
-                type="checkbox"
-                checked={hidden}
-                onChange={(e) => toggleHidden(key, e.target.checked)}
-              />
-              <span style={{ fontSize: "0.85rem" }}>
-                Hide {label} (show &ldquo;Coming soon&rdquo; instead)
-              </span>
-            </label>
           </div>
         );
       })}
@@ -351,7 +324,9 @@ export function SettingsForm({ settings }: { settings: Settings }) {
       <h3 style={{ marginTop: "var(--space-lg)" }}>Navigation</h3>
       <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>
         Hide a section from the desktop nav, mobile menu, and footer — the page itself stays up,
-        it just won&rsquo;t be linked to anywhere. Account isn&rsquo;t hideable.
+        it just won&rsquo;t be linked to anywhere. Hiding Shop or Happenings also swaps its
+        homepage swipe slide (and the /shop or /studio hero) to a &ldquo;Coming soon&rdquo;
+        placeholder, so it isn&rsquo;t promoted anywhere either. Account isn&rsquo;t hideable.
       </p>
 
       {NAV_ITEMS.map(({ key, label }) => (

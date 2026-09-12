@@ -4,6 +4,12 @@ import type { ShopItem } from "@/components/home/FeaturedShop";
 import type { DealPreview } from "@/components/home/SwipeDashboard";
 import type { DashboardSlideImages, DashboardSlideVisibility, EventSlide } from "@/lib/supabase/types";
 
+// The swipeable Retail/Happenings section piggybacks on the nav's own kill
+// switch — hide Shop or Happenings from the nav and the matching swipe slide
+// falls back to its "Coming soon" placeholder too, rather than tracking a
+// second, easily-out-of-sync visibility toggle.
+const SLIDE_TO_NAV_KEY = { retail: "shop", happenings: "happenings" } as const;
+
 const SHOP_FIELDS = "id, name, price_cents, currency, images, category, published_at";
 
 /**
@@ -92,12 +98,18 @@ async function getSlideSettings(
 ): Promise<{ slideImages: DashboardSlideImages; hiddenSlides: DashboardSlideVisibility }> {
   const { data } = await supabase
     .from("site_settings")
-    .select("dashboard_slide_images, dashboard_hidden_slides")
+    .select("dashboard_slide_images, nav_hidden_items")
     .eq("id", true)
     .maybeSingle();
 
-  return {
-    slideImages: data?.dashboard_slide_images ?? {},
-    hiddenSlides: data?.dashboard_hidden_slides ?? {},
-  };
+  const navHidden = data?.nav_hidden_items ?? {};
+  const hiddenSlides: DashboardSlideVisibility = {};
+  for (const [slideKey, navKey] of Object.entries(SLIDE_TO_NAV_KEY) as [
+    keyof DashboardSlideVisibility,
+    keyof typeof navHidden,
+  ][]) {
+    hiddenSlides[slideKey] = Boolean(navHidden[navKey]);
+  }
+
+  return { slideImages: data?.dashboard_slide_images ?? {}, hiddenSlides };
 }
