@@ -6,8 +6,9 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { Wordmark } from "./Wordmark";
 import { CartLink } from "@/components/cart/CartLink";
-import { navItems, isActive } from "./nav-items";
+import { navItems, visibleNavItems, isActive } from "./nav-items";
 import { IconMenu, IconClose } from "@/components/icons";
+import type { NavHiddenItems } from "@/lib/supabase/types";
 import styles from "./MobileTopBar.module.css";
 
 /**
@@ -16,14 +17,21 @@ import styles from "./MobileTopBar.module.css";
  * bottom tab bar (the two used to coexist, which read as two navs for one
  * site). TopNav (the desktop link rail) takes over above the breakpoint
  * this hides at.
+ *
+ * Takes `hiddenItems` (plain booleans) rather than a pre-filtered item
+ * list — navItems carries icon component references, and passing those
+ * through a Server Component prop isn't serializable across the RSC
+ * boundary. Filtering happens here instead, against the statically
+ * imported navItems this Client Component already has in its own bundle.
  */
 export function MobileTopBarNav({
   signedIn,
-  items = navItems,
+  hiddenItems = {},
 }: {
   signedIn: boolean;
-  items?: typeof navItems;
+  hiddenItems?: NavHiddenItems;
 }) {
+  const items = visibleNavItems(navItems, hiddenItems);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 

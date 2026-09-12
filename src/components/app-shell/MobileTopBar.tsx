@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { navItems, visibleNavItems } from "./nav-items";
 import { MobileTopBarNav } from "./MobileTopBarNav";
 
 export async function MobileTopBar() {
@@ -9,10 +8,5 @@ export async function MobileTopBar() {
     supabase.from("site_settings").select("nav_hidden_items").eq("id", true).maybeSingle(),
   ]);
 
-  return (
-    <MobileTopBarNav
-      signedIn={Boolean(user)}
-      items={visibleNavItems(navItems, settings?.nav_hidden_items ?? {})}
-    />
-  );
+  return <MobileTopBarNav signedIn={Boolean(user)} hiddenItems={settings?.nav_hidden_items ?? {}} />;
 }
