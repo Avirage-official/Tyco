@@ -863,10 +863,11 @@ alter table public.site_settings add column if not exists legal_terms text;
 -- backgrounds) is reused as the hero on /shop and /studio, landing on the
 -- slide matching that page.
 alter table public.site_settings add column if not exists dashboard_slide_images jsonb not null default '{}'::jsonb;
--- Per-slide admin kill switch — {retail, happenings}, each an optional
--- boolean. true hides that slide's real content behind a
--- "coming soon" placeholder (e.g. mid-incident or between iterations)
--- without removing the slide/tab itself.
+-- Unused — superseded by nav_hidden_items below, which now also drives
+-- whether a slide falls back to its "coming soon" placeholder (hiding Shop
+-- or Happenings from the nav hides the matching slide's content too, rather
+-- than tracking a second visibility toggle that can drift out of sync).
+-- Column kept rather than dropped since app code no longer reads or writes it.
 alter table public.site_settings add column if not exists dashboard_hidden_slides jsonb not null default '{}'::jsonb;
 -- Default payment-gateway fee percent applied on top of a deal's member
 -- price at checkout (see deal_redemptions below) — snapshotted onto each
