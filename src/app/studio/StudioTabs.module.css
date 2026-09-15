@@ -1,27 +1,35 @@
 .tabs {
   display: flex;
-  gap: var(--space-sm);
+  gap: 0.2rem;
+  padding: 0.3rem;
+  /* Same frosted-glass pill-bar treatment as the homepage swiper's
+     Retail/Happenings tabs — this one sits directly on a hero video/photo
+     (EventHero), where a background-less bordered pill all but disappears
+     against busy footage. */
+  background: color-mix(in srgb, var(--bg) 65%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
 }
 
 .tab {
   flex: 1;
   text-align: center;
-  padding: 0.55rem 1rem;
+  white-space: nowrap;
+  padding: 0.6rem 1.1rem;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--border);
   color: var(--fg-muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  transition: color var(--dur) var(--ease), background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
 
 .tab:hover {
   color: var(--fg);
-  border-color: var(--fg-muted);
 }
 
 .tabActive {
   color: var(--on-accent);
   background: var(--accent);
-  border-color: var(--accent);
 }

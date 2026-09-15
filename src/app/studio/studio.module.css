@@ -59,13 +59,13 @@
 
 .pageHeadTabs {
   flex-shrink: 0;
-  max-width: 220px;
+  max-width: 280px;
   width: 100%;
 }
 
 @media (min-width: 640px) {
   .pageHeadTabs {
-    width: 220px;
+    width: 280px;
   }
 }
 
