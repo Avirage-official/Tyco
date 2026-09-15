@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { clearStoredCart } from "@/lib/cart/CartContext";
 import { IconArrowRight, IconLogout } from "@/components/icons";
 import styles from "./page.module.css";
 
@@ -11,6 +12,7 @@ export function SignOutRow() {
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
+    clearStoredCart();
     router.push("/");
     router.refresh();
   }

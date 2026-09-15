@@ -472,18 +472,33 @@ create index if not exists event_tickets_user_id_idx on public.event_tickets (us
 create index if not exists event_tickets_reference_code_idx on public.event_tickets (reference_code);
 
 -- decrement_event_capacity — called only from the checkout webhook handler
--- (service role) once a ticket payment is confirmed. Clamps at zero and is
--- a no-op when the event has no capacity limit set, same tolerance as
--- decrement_variant_stock below.
+-- (service role) once a ticket payment is confirmed, plus the synchronous
+-- free-ticket path in studio/actions.ts. Atomic conditional update: only
+-- succeeds (returns true) if there's still enough capacity_remaining, so
+-- two concurrent payments for the last spot can't both succeed silently —
+-- previously this clamped at zero instead of failing, so an event could be
+-- oversold with no record of it happening. A NULL capacity_remaining means
+-- "no limit" and always succeeds without being touched (NULL arithmetic
+-- stays NULL). Callers must check the return value: the synchronous
+-- free-ticket path can reject the purchase outright before any money
+-- moves; the webhook path can't undo a payment, so it logs a loud
+-- webhook_errors entry for manual review instead.
 create or replace function public.decrement_event_capacity(p_event_id uuid, p_quantity integer)
-returns void
-language sql
+returns boolean
+language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  v_ok boolean;
+begin
   update public.events
-  set capacity_remaining = greatest(0, capacity_remaining - p_quantity)
-  where id = p_event_id and capacity_remaining is not null;
+  set capacity_remaining = capacity_remaining - p_quantity
+  where id = p_event_id
+    and (capacity_remaining is null or capacity_remaining >= p_quantity)
+  returning true into v_ok;
+  return coalesce(v_ok, false);
+end;
 $$;
 
 grant execute on function public.decrement_event_capacity(uuid, integer) to service_role;
@@ -639,17 +654,29 @@ create trigger set_product_variants_updated_at
 create index if not exists product_variants_product_id_idx on public.product_variants (product_id);
 
 -- decrement_variant_stock — called only from the checkout webhook handler
--- (service role) once a payment is confirmed. Clamps at zero so a retried
--- webhook delivery can never oversell into negative stock.
+-- (service role) once a payment is confirmed. Atomic conditional update:
+-- only succeeds (returns true) if there's still enough stock, so two
+-- concurrent payments for the last unit can't both succeed silently —
+-- previously this clamped at zero instead of failing, so a variant could be
+-- oversold with no record of it happening. A retried webhook delivery still
+-- can't double-decrement (the caller only reaches this once, gated by the
+-- orders.status pending->paid conditional update). The caller can't undo a
+-- payment on failure, so it logs a loud webhook_errors entry instead.
 create or replace function public.decrement_variant_stock(p_variant_id uuid, p_quantity integer)
-returns void
-language sql
+returns boolean
+language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  v_ok boolean;
+begin
   update public.product_variants
-  set stock = greatest(0, stock - p_quantity)
-  where id = p_variant_id;
+  set stock = stock - p_quantity
+  where id = p_variant_id and stock >= p_quantity
+  returning true into v_ok;
+  return coalesce(v_ok, false);
+end;
 $$;
 
 grant execute on function public.decrement_variant_stock(uuid, integer) to service_role;
@@ -778,17 +805,14 @@ create policy "customers view items on their own orders"
     )
   );
 
+-- No client-facing INSERT policy: order_items are only ever written by
+-- startCheckout (src/app/cart/actions.ts) via the service-role client,
+-- which bypasses RLS entirely. A policy here would be pure attack surface —
+-- it previously let a signed-in customer insert arbitrary extra line items
+-- (any price/quantity) into their own still-pending order directly via
+-- supabase-js, which submitOrderToMerchize would then ship in full once the
+-- order's original (smaller) total was paid.
 drop policy if exists "customers add items to their own pending orders" on public.order_items;
-create policy "customers add items to their own pending orders"
-  on public.order_items for insert
-  with check (
-    exists (
-      select 1 from public.orders
-      where orders.id = order_items.order_id
-      and orders.user_id = auth.uid()
-      and orders.status = 'pending'
-    )
-  );
 
 drop policy if exists "admins manage all order items" on public.order_items;
 create policy "admins manage all order items"
@@ -1235,17 +1259,26 @@ $$;
 
 grant execute on function public.get_or_create_deal_cycle(uuid) to anon, authenticated;
 
--- Called only from the checkout webhook handler once a redemption payment is
--- confirmed — same "clamp, never oversell" pattern as decrement_variant_stock.
+-- Called from the checkout webhook handler once a redemption payment is
+-- confirmed, plus the synchronous free-deal path in studio/deals/actions.ts
+-- — same atomic-and-fail pattern as decrement_variant_stock, for the same
+-- reason: two concurrent redemptions for the month's last slot must not
+-- both succeed silently.
 create or replace function public.increment_deal_cycle_redemptions(p_cycle_id uuid, p_quantity integer default 1)
-returns void
-language sql
+returns boolean
+language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  v_ok boolean;
+begin
   update public.deal_cycles
-  set redemptions_used = least(redemptions_cap, redemptions_used + p_quantity)
-  where id = p_cycle_id;
+  set redemptions_used = redemptions_used + p_quantity
+  where id = p_cycle_id and redemptions_used + p_quantity <= redemptions_cap
+  returning true into v_ok;
+  return coalesce(v_ok, false);
+end;
 $$;
 
 grant execute on function public.increment_deal_cycle_redemptions(uuid, integer) to service_role;

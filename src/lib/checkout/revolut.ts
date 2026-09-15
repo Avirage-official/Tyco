@@ -75,10 +75,17 @@ export async function createRevolutOrder({
   if (!data.checkout_url) {
     throw new Error("Revolut order response did not include a checkout_url.");
   }
+  // Without this id we can never match Revolut's later webhook back to our
+  // order (see route.ts) — fail here, before the customer is sent to pay,
+  // rather than silently proceeding and leaving a paid order that can never
+  // be reconciled.
+  if (typeof data.id !== "string") {
+    throw new Error("Revolut order response did not include an order id.");
+  }
 
   return {
     checkoutUrl: data.checkout_url as string,
-    revolutOrderId: typeof data.id === "string" ? data.id : null,
+    revolutOrderId: data.id as string,
   };
 }
 

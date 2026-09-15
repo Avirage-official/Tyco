@@ -27,6 +27,19 @@ const STORAGE_KEY = "tyco-cart";
 
 const CartCtx = createContext<CartState | null>(null);
 
+/**
+ * The cart lives in localStorage with no per-user scoping, so it survives
+ * across accounts on a shared device unless something clears it. Called
+ * directly (not via useCart/clear) from sign-out handlers so it works
+ * regardless of whether CartProvider's own state has mounted in that part
+ * of the tree, and takes effect immediately rather than waiting on a
+ * render.
+ */
+export function clearStoredCart() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(STORAGE_KEY);
+}
+
 function readStoredCart(): CartItem[] {
   if (typeof window === "undefined") return [];
   try {

@@ -62,12 +62,21 @@ export async function startTicketCheckout(eventId: string, quantity: number, agr
     .single();
   if (ticketError || !ticket) throw new Error(ticketError?.message ?? "Could not start checkout.");
 
-  // Free tickets never touch Revolut — nothing to pay for.
+  // Free tickets never touch Revolut — nothing to pay for. No money has
+  // moved yet, so unlike the paid/webhook path below, an oversell here can
+  // just be rejected outright rather than logged for manual cleanup.
   if (totalCents === 0) {
-    await supabase.from("event_tickets").update({ status: "paid" }).eq("id", ticket.id);
     if (event.capacity != null) {
-      await supabase.rpc("decrement_event_capacity", { p_event_id: event.id, p_quantity: quantity });
+      const { data: reserved } = await supabase.rpc("decrement_event_capacity", {
+        p_event_id: event.id,
+        p_quantity: quantity,
+      });
+      if (!reserved) {
+        await supabase.from("event_tickets").update({ status: "cancelled" }).eq("id", ticket.id);
+        throw new Error("This event just sold out.");
+      }
     }
+    await supabase.from("event_tickets").update({ status: "paid" }).eq("id", ticket.id);
     return { checkoutUrl: `/account/tickets?ticket=${ticket.id}` };
   }
 
@@ -81,9 +90,7 @@ export async function startTicketCheckout(eventId: string, quantity: number, agr
     redirectUrl: `${origin}/account/tickets?ticket=${ticket.id}`,
   });
 
-  if (revolutOrderId) {
-    await supabase.from("event_tickets").update({ revolut_order_id: revolutOrderId }).eq("id", ticket.id);
-  }
+  await supabase.from("event_tickets").update({ revolut_order_id: revolutOrderId }).eq("id", ticket.id);
 
   return { checkoutUrl };
 }

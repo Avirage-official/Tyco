@@ -140,9 +140,7 @@ export async function startCheckout(lines: CheckoutLine[], shipping: ShippingDet
     redirectUrl: `${origin}/checkout/confirmation?order=${order.id}`,
   });
 
-  if (revolutOrderId) {
-    await supabase.from("orders").update({ revolut_order_id: revolutOrderId }).eq("id", order.id);
-  }
+  await supabase.from("orders").update({ revolut_order_id: revolutOrderId }).eq("id", order.id);
 
   return { checkoutUrl };
 }

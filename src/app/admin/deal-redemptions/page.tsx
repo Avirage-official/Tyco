@@ -24,7 +24,7 @@ export default async function AdminDealRedemptionsPage() {
     supabase
       .from("deal_redemptions")
       .select(
-        "id, deal_id, vendor_id, user_id, total_cents, currency, status, reference_code, approved_at, redeemed_location, created_at"
+        "id, deal_id, vendor_id, user_id, total_cents, currency, status, reference_code, approved_at, approved_by, redeemed_location, created_at"
       )
       .order("created_at", { ascending: false }),
     supabase.from("deals").select("id, title, locations"),
@@ -102,9 +102,15 @@ export default async function AdminDealRedemptionsPage() {
                     </td>
                     <td className={styles.rowMeta}>
                       {redemption.approved_at
-                        ? `${formatDate(redemption.approved_at)}${
-                            redemption.redeemed_location ? ` — ${redemption.redeemed_location}` : ""
-                          }`
+                        ? [
+                            formatDate(redemption.approved_at),
+                            redemption.redeemed_location,
+                            redemption.approved_by
+                              ? `by ${emailByUserId.get(redemption.approved_by) ?? "unknown staff"}`
+                              : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" — ")
                         : "—"}
                     </td>
                     <td>
