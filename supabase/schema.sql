@@ -483,7 +483,12 @@ create index if not exists event_tickets_reference_code_idx on public.event_tick
 -- free-ticket path can reject the purchase outright before any money
 -- moves; the webhook path can't undo a payment, so it logs a loud
 -- webhook_errors entry for manual review instead.
-create or replace function public.decrement_event_capacity(p_event_id uuid, p_quantity integer)
+--
+-- Dropped and recreated rather than `create or replace` — Postgres refuses
+-- to change a function's return type (this one used to return void) in
+-- place.
+drop function if exists public.decrement_event_capacity(uuid, integer);
+create function public.decrement_event_capacity(p_event_id uuid, p_quantity integer)
 returns boolean
 language plpgsql
 security definer
@@ -662,7 +667,12 @@ create index if not exists product_variants_product_id_idx on public.product_var
 -- can't double-decrement (the caller only reaches this once, gated by the
 -- orders.status pending->paid conditional update). The caller can't undo a
 -- payment on failure, so it logs a loud webhook_errors entry instead.
-create or replace function public.decrement_variant_stock(p_variant_id uuid, p_quantity integer)
+--
+-- Dropped and recreated rather than `create or replace` — Postgres refuses
+-- to change a function's return type (this one used to return void) in
+-- place.
+drop function if exists public.decrement_variant_stock(uuid, integer);
+create function public.decrement_variant_stock(p_variant_id uuid, p_quantity integer)
 returns boolean
 language plpgsql
 security definer
@@ -1264,7 +1274,12 @@ grant execute on function public.get_or_create_deal_cycle(uuid) to anon, authent
 -- — same atomic-and-fail pattern as decrement_variant_stock, for the same
 -- reason: two concurrent redemptions for the month's last slot must not
 -- both succeed silently.
-create or replace function public.increment_deal_cycle_redemptions(p_cycle_id uuid, p_quantity integer default 1)
+--
+-- Dropped and recreated rather than `create or replace` — Postgres refuses
+-- to change a function's return type (this one used to return void) in
+-- place.
+drop function if exists public.increment_deal_cycle_redemptions(uuid, integer);
+create function public.increment_deal_cycle_redemptions(p_cycle_id uuid, p_quantity integer default 1)
 returns boolean
 language plpgsql
 security definer
