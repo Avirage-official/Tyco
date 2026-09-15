@@ -30,11 +30,17 @@ export async function startTicketCheckout(eventId: string, quantity: number, agr
 
   const { data: event, error: eventError } = await supabase
     .from("events")
-    .select("id, title, price_cents, currency, is_published, capacity, capacity_remaining")
+    .select("id, title, price_cents, currency, is_published, capacity, capacity_remaining, event_date")
     .eq("id", eventId)
     .single();
   if (eventError || !event || !event.is_published) {
     throw new Error("This event is no longer available.");
+  }
+  // The studio listing only ever links to upcoming events, but that's a
+  // display-time filter — without this, a bookmarked/shared link to an
+  // event that has since passed could still be bought.
+  if (new Date(event.event_date).getTime() < Date.now()) {
+    throw new Error("This event has already happened.");
   }
 
   if (event.capacity != null && quantity > (event.capacity_remaining ?? 0)) {

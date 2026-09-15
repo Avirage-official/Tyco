@@ -583,9 +583,13 @@ export interface Database {
       };
       decrement_variant_stock: {
         Args: { p_variant_id: string; p_quantity: number };
-        Returns: undefined;
+        Returns: boolean;
       };
       decrement_event_capacity: {
+        Args: { p_event_id: string; p_quantity: number };
+        Returns: boolean;
+      };
+      restore_event_capacity: {
         Args: { p_event_id: string; p_quantity: number };
         Returns: undefined;
       };
@@ -599,7 +603,7 @@ export interface Database {
       };
       increment_deal_cycle_redemptions: {
         Args: { p_cycle_id: string; p_quantity: number };
-        Returns: undefined;
+        Returns: boolean;
       };
       approve_deal_redemption: {
         Args: { p_redemption_id: string; p_location: string | null };

@@ -77,26 +77,36 @@ export async function startCheckout(lines: CheckoutLine[], shipping: ShippingDet
 
   const productById = new Map((products ?? []).map((p) => [p.id, p]));
 
+  // Collapse repeated lines for the same variant before checking stock —
+  // otherwise the same variantId split across two lines (each under the
+  // stock limit on its own) could order more units than are actually in
+  // stock, since each line was only ever checked against stock alone.
+  const quantityByVariantId = new Map<string, number>();
+  for (const line of lines) {
+    if (line.quantity < 1) throw new Error("One of the items in your cart has an invalid quantity.");
+    quantityByVariantId.set(line.variantId, (quantityByVariantId.get(line.variantId) ?? 0) + line.quantity);
+  }
+
   let totalCents = 0;
   let currency = "usd";
   const orderItemRows: { variant_id: string; quantity: number; unit_price_cents: number }[] = [];
 
-  for (const line of lines) {
-    const variant = variantById.get(line.variantId);
+  for (const [variantId, quantity] of quantityByVariantId) {
+    const variant = variantById.get(variantId);
     const product = variant ? productById.get(variant.product_id) : undefined;
 
     if (!variant || !product || !product.is_published) {
       throw new Error("One of the items in your cart is no longer available.");
     }
-    if (line.quantity < 1 || line.quantity > variant.stock) {
-      throw new Error(`Only ${variant.stock} left in stock for one of your items.`);
+    if (quantity > variant.stock) {
+      throw new Error(`Only ${variant.stock} left in stock for "${product.name}".`);
     }
 
-    totalCents += product.price_cents * line.quantity;
+    totalCents += product.price_cents * quantity;
     currency = product.currency;
     orderItemRows.push({
       variant_id: variant.id,
-      quantity: line.quantity,
+      quantity,
       unit_price_cents: product.price_cents,
     });
   }

@@ -89,22 +89,28 @@ export function CartPageContent({ signedIn }: { signedIn: boolean }) {
               <span className={styles.name}>{item.productName}</span>
               <span className={styles.size}>Size {item.size}</span>
             </div>
-            <div className={styles.qtyStepper}>
-              <button
-                type="button"
-                onClick={() => setQuantity(item.variantId, item.quantity - 1)}
-                aria-label="Decrease quantity"
-              >
-                −
-              </button>
-              <span>{item.quantity}</span>
-              <button
-                type="button"
-                onClick={() => setQuantity(item.variantId, item.quantity + 1)}
-                aria-label="Increase quantity"
-              >
-                +
-              </button>
+            <div className={styles.qtyCol}>
+              <div className={styles.qtyStepper}>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(item.variantId, item.quantity - 1)}
+                  aria-label="Decrease quantity"
+                >
+                  −
+                </button>
+                <span>{item.quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(item.variantId, Math.min(item.stock, item.quantity + 1))}
+                  disabled={item.quantity >= item.stock}
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
+              {item.quantity >= item.stock && (
+                <span className={styles.size}>Only {item.stock} in stock</span>
+              )}
             </div>
             <span className={styles.price}>{formatPrice(item.priceCents * item.quantity, item.currency)}</span>
             <button
