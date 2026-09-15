@@ -10,6 +10,10 @@ export type CartItem = {
   priceCents: number;
   currency: string;
   coverUrl: string | null;
+  // A snapshot from when the item was added/last re-added — a client-side
+  // guardrail for the qty stepper, not a live feed. Checkout always
+  // re-validates against the real stock in the database regardless.
+  stock: number;
   quantity: number;
 };
 
@@ -78,8 +82,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => {
       const existing = prev.find((i) => i.variantId === item.variantId);
       if (existing) {
+        // Refresh price/stock too, not just quantity — the product page's
+        // values are more current than whatever was cached from an earlier
+        // add.
         return prev.map((i) =>
-          i.variantId === item.variantId ? { ...i, quantity: i.quantity + quantity } : i
+          i.variantId === item.variantId ? { ...i, ...item, quantity: i.quantity + quantity } : i
         );
       }
       return [...prev, { ...item, quantity }];

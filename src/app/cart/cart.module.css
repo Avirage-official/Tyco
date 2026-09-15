@@ -51,6 +51,14 @@
   color: var(--fg-muted);
 }
 
+.qtyCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
 .qtyStepper {
   display: flex;
   align-items: center;
@@ -60,6 +68,11 @@
   padding: 0.3rem 0.75rem;
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
+}
+
+.qtyStepper button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .qtyStepper button {

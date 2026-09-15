@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { deleteStorageUrls } from "@/lib/supabase/storage-cleanup";
 
 export type PortfolioInput = {
   title: string;
@@ -42,7 +43,13 @@ export async function togglePortfolioPublish(id: string, isPublished: boolean) {
 
 export async function deletePortfolioItem(id: string) {
   const { supabase } = await requireAdmin();
+
+  const { data: item } = await supabase.from("portfolio_items").select("cover_url, images").eq("id", id).single();
+
   const { error } = await supabase.from("portfolio_items").delete().eq("id", id);
   if (error) throw new Error(error.message);
+
+  if (item) await deleteStorageUrls(supabase, "portfolio", [item.cover_url, ...(item.images ?? [])]);
+
   revalidatePortfolio();
 }

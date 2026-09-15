@@ -40,16 +40,7 @@ export async function refundTicket(ticketId: string) {
     .eq("status", "paid");
   if (statusError) throw new Error(statusError.message);
 
-  const { data: event } = await supabase
-    .from("events")
-    .select("capacity, capacity_remaining")
-    .eq("id", ticket.event_id)
-    .maybeSingle();
-
-  if (event?.capacity != null) {
-    const restored = Math.min(event.capacity, (event.capacity_remaining ?? 0) + ticket.quantity);
-    await supabase.from("events").update({ capacity_remaining: restored }).eq("id", ticket.event_id);
-  }
+  await supabase.rpc("restore_event_capacity", { p_event_id: ticket.event_id, p_quantity: ticket.quantity });
 
   revalidatePath("/admin/tickets");
   revalidatePath("/admin/events");

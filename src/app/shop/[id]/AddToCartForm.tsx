@@ -48,6 +48,7 @@ export function AddToCartForm({
         priceCents,
         currency,
         coverUrl,
+        stock: selected.stock,
       },
       quantity
     );
