@@ -81,10 +81,19 @@ export async function startDealCheckout(dealId: string, agreedToNoRefundPolicy: 
     throw new Error(redemptionError?.message ?? "Could not start checkout.");
   }
 
-  // Free deals never touch Revolut — nothing to pay for.
+  // Free deals never touch Revolut — nothing to pay for. No money has
+  // moved yet, so unlike the paid/webhook path below, an oversell here can
+  // just be rejected outright rather than logged for manual cleanup.
   if (totalCents === 0) {
+    const { data: reserved } = await supabase.rpc("increment_deal_cycle_redemptions", {
+      p_cycle_id: cycle.id,
+      p_quantity: 1,
+    });
+    if (!reserved) {
+      await supabase.from("deal_redemptions").update({ status: "cancelled" }).eq("id", redemption.id);
+      throw new Error("This deal is fully claimed for the month — check back next month.");
+    }
     await supabase.from("deal_redemptions").update({ status: "paid" }).eq("id", redemption.id);
-    await supabase.rpc("increment_deal_cycle_redemptions", { p_cycle_id: cycle.id, p_quantity: 1 });
     return { checkoutUrl: `/account/deals?redemption=${redemption.id}` };
   }
 
@@ -98,9 +107,7 @@ export async function startDealCheckout(dealId: string, agreedToNoRefundPolicy: 
     redirectUrl: `${origin}/account/deals?redemption=${redemption.id}`,
   });
 
-  if (revolutOrderId) {
-    await supabase.from("deal_redemptions").update({ revolut_order_id: revolutOrderId }).eq("id", redemption.id);
-  }
+  await supabase.from("deal_redemptions").update({ revolut_order_id: revolutOrderId }).eq("id", redemption.id);
 
   return { checkoutUrl };
 }

@@ -82,10 +82,22 @@ export async function POST(request: Request) {
         .maybeSingle();
 
       if (updated) {
-        await supabase.rpc("increment_deal_cycle_redemptions", {
+        const { data: reserved } = await supabase.rpc("increment_deal_cycle_redemptions", {
           p_cycle_id: dealMatch.deal_cycle_id,
           p_quantity: 1,
         });
+        if (!reserved) {
+          // Payment already captured — can't undo that here. Flag loudly
+          // instead: this redemption is paid but the month's cap was
+          // already full by the time it settled (two concurrent buyers
+          // raced the last slot), so it needs a human decision (honor it
+          // anyway, or refund).
+          await logWebhookError(
+            "revolut",
+            "OVERSOLD: deal redemption paid but monthly cap already reached — needs manual review",
+            { redemptionId: dealMatch.id, dealCycleId: dealMatch.deal_cycle_id }
+          );
+        }
       }
     } else if (PAYMENT_FAILED_EVENTS.has(eventType)) {
       await supabase
@@ -122,10 +134,22 @@ export async function POST(request: Request) {
         .maybeSingle();
 
       if (updated) {
-        await supabase.rpc("decrement_event_capacity", {
+        const { data: reserved } = await supabase.rpc("decrement_event_capacity", {
           p_event_id: updated.event_id,
           p_quantity: updated.quantity,
         });
+        if (!reserved) {
+          // Payment already captured — can't undo that here. Flag loudly
+          // instead: this ticket is paid but capacity was already gone by
+          // the time it settled (two concurrent buyers raced the last
+          // spot), so it needs a human decision (honor it anyway, or
+          // refund).
+          await logWebhookError(
+            "revolut",
+            "OVERSOLD: ticket paid but event capacity already reached — needs manual review",
+            { ticketId: ticketMatch.id, eventId: updated.event_id, quantity: updated.quantity }
+          );
+        }
       }
     } else if (PAYMENT_FAILED_EVENTS.has(eventType)) {
       await supabase
@@ -177,10 +201,22 @@ export async function POST(request: Request) {
         .eq("order_id", updated.id);
 
       for (const item of items ?? []) {
-        await supabase.rpc("decrement_variant_stock", {
+        const { data: reserved } = await supabase.rpc("decrement_variant_stock", {
           p_variant_id: item.variant_id,
           p_quantity: item.quantity,
         });
+        if (!reserved) {
+          // Payment already captured — can't undo that here. Flag loudly
+          // instead: this order is paid but the variant sold out by the
+          // time it settled (two concurrent buyers raced the last unit),
+          // so it needs a human decision (fulfill anyway, substitute, or
+          // refund).
+          await logWebhookError(
+            "revolut",
+            "OVERSOLD: order paid but variant stock already exhausted — needs manual review",
+            { orderId: updated.id, variantId: item.variant_id, quantity: item.quantity }
+          );
+        }
       }
     }
 

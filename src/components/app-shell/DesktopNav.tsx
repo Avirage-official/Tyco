@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { clearStoredCart } from "@/lib/cart/CartContext";
 import type { NavHiddenItems } from "@/lib/supabase/types";
 import styles from "./TopNav.module.css";
 
@@ -87,6 +88,7 @@ export function DesktopNav({
     setAccountOpen(false);
     const supabase = createClient();
     await supabase.auth.signOut();
+    clearStoredCart();
     router.push("/");
     router.refresh();
   }
