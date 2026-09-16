@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { fadeUpContainer, fadeUpItem, revealViewport } from "@/lib/motion/variants";
 import { formatDate, formatEventDateTime, formatPrice } from "@/lib/format";
+import { Button } from "@/components/ui/Button";
+import { resumeTicketCheckout } from "./actions";
 import styles from "./tickets.module.css";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -40,6 +43,29 @@ export function TicketList({
   eventById: Map<string, EventRow>;
   justPurchasedId?: string;
 }) {
+  const [resumingId, setResumingId] = useState<string | null>(null);
+  const [errorId, setErrorId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (redirectUrl) window.location.href = redirectUrl;
+  }, [redirectUrl]);
+
+  async function handleResume(ticketId: string) {
+    setResumingId(ticketId);
+    setErrorId(null);
+    setError(null);
+    try {
+      const { checkoutUrl } = await resumeTicketCheckout(ticketId);
+      setRedirectUrl(checkoutUrl);
+    } catch (err) {
+      setErrorId(ticketId);
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setResumingId(null);
+    }
+  }
+
   return (
     <motion.ul
       className={styles.list}
@@ -95,11 +121,24 @@ export function TicketList({
                 </>
               )}
 
-              {justPurchased && ticket.status === "pending" && (
+              {ticket.status === "pending" && justPurchased && (
                 <p className={styles.confirming}>
                   We&rsquo;re confirming your payment — refresh this page in a moment if it doesn&rsquo;t
                   update.
                 </p>
+              )}
+
+              {ticket.status === "pending" && !justPurchased && (
+                <div className={styles.resume}>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleResume(ticket.id)}
+                    disabled={resumingId === ticket.id}
+                  >
+                    {resumingId === ticket.id ? "Redirecting…" : "Complete payment"}
+                  </Button>
+                  {errorId === ticket.id && <p className={styles.error}>{error}</p>}
+                </div>
               )}
 
               {ticket.checked_in_at && (
