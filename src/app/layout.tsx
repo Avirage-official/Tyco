@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Jost } from "next/font/google";
 import { AppShell } from "@/components/app-shell/AppShell";
-import { SplashScreen } from "@/components/brand/SplashScreen";
 import "./globals.css";
 
 // Display: expressive editorial serif (stands in for the licensed "Museum"
@@ -52,7 +51,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fraunces.variable} ${jost.variable}`}>
       <body>
-        <SplashScreen />
         <AppShell>{children}</AppShell>
       </body>
     </html>

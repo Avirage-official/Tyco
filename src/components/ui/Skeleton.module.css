@@ -1,0 +1,143 @@
+.block {
+  display: block;
+  background: var(--surface-2);
+  background-image: linear-gradient(
+    90deg,
+    var(--surface-2) 0%,
+    color-mix(in srgb, var(--surface-2) 70%, var(--fg) 30%) 50%,
+    var(--surface-2) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.r_sm {
+  border-radius: var(--radius-sm);
+}
+
+.r_md {
+  border-radius: var(--radius-md);
+}
+
+.r_lg {
+  border-radius: var(--radius-lg);
+}
+
+.r_pill {
+  border-radius: var(--radius-pill);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+}
+
+/* -- page layouts ---------------------------------------------------- */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding-block: var(--space-xl);
+}
+
+.chips {
+  display: flex;
+  gap: var(--space-2xs);
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1000px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.cardMedia {
+  aspect-ratio: 4 / 3;
+  border-radius: 0;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: var(--space-sm);
+}
+
+.hero {
+  height: 60vh;
+  height: 60dvh;
+  min-height: 320px;
+  border-radius: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.rowBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 400px;
+  margin: var(--space-2xl) auto;
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block {
+    animation: none;
+    background-image: none;
+  }
+}

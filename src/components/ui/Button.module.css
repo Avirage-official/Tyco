@@ -3,50 +3,87 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  height: 2.85rem;
-  padding-inline: 1.5rem;
+  height: 2.75rem;
+  padding-inline: 1.25rem;
   border-radius: var(--radius-pill);
+  border: 1px solid transparent;
   font-family: var(--font-body);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1;
   white-space: nowrap;
-  transition: background var(--dur) var(--ease), color var(--dur) var(--ease),
-    border-color var(--dur) var(--ease);
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease),
+    opacity var(--dur-fast) var(--ease);
 }
+
+.btn:disabled {
+  opacity: 0.5;
+}
+
+.btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.sm {
+  height: 2.25rem;
+  padding-inline: 0.9rem;
+  font-size: var(--text-xs);
+}
+
+.full {
+  width: 100%;
+}
+
+/* -- variants ------------------------------------------------------- */
 
 .primary {
   background: var(--accent);
   color: var(--on-accent);
-  border: 1px solid var(--accent);
 }
 
-.primary:hover {
-  background: var(--accent-strong);
-  border-color: var(--accent-strong);
+.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.primary:active:not(:disabled) {
+  background: var(--accent-pressed);
+}
+
+.secondary {
+  background: var(--surface-2);
+  color: var(--fg);
+}
+
+.secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--surface-2) 80%, var(--fg) 20%);
 }
 
 .ghost {
   background: transparent;
   color: var(--fg);
-  border: 1px solid var(--border);
+  border-color: var(--border);
 }
 
-.ghost:hover {
-  border-color: var(--fg);
+.ghost:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
 }
 
-.ink {
-  background: var(--fg);
-  color: var(--bg);
-  border: 1px solid var(--fg);
+.link {
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  color: var(--accent-2);
+  font-weight: 500;
 }
 
-.ink:hover {
-  background: var(--fg-muted);
-}
-
-.full {
-  width: 100%;
+.link:hover:not(:disabled) {
+  color: var(--accent-2-hover);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }

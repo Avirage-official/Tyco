@@ -1,0 +1,50 @@
+.group {
+  display: flex;
+  gap: var(--space-2xs);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* Room for the focus ring so it isn't clipped by overflow. */
+  padding: 2px;
+  margin: -2px;
+}
+
+.group::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 2rem;
+  padding-inline: 0.9rem;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.chip:hover {
+  color: var(--fg);
+}
+
+.active {
+  color: var(--bg);
+}
+
+.indicator {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-pill);
+  background: var(--fg);
+}
+
+.label {
+  position: relative;
+  z-index: 1;
+}

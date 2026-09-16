@@ -1,5 +1,5 @@
-import { PageLoader } from "@/components/ui/Loader";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 
 export default function Loading() {
-  return <PageLoader />;
+  return <PageSkeleton kind="form" />;
 }
