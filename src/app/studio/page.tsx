@@ -17,26 +17,29 @@ export default async function StudioEventsPage() {
   const supabase = await createClient();
   const nowIso = new Date().toISOString();
 
-  const [{ data: upcoming }, { data: past }, { data: userData }, swipeData] = await Promise.all([
-    supabase
-      .from("events")
-      .select(
-        "id, title, description, location, organizer, event_date, cover_url, cover_video_url, price_cents, currency, capacity, capacity_remaining"
-      )
-      .eq("is_published", true)
-      .gte("event_date", nowIso)
-      .order("event_date", { ascending: true }),
-    supabase
-      .from("events")
-      .select("id, title, location, event_date, cover_url")
-      .eq("is_published", true)
-      .lt("event_date", nowIso)
-      .order("event_date", { ascending: false }),
-    supabase.auth.getUser(),
-    getSwipeDashboardData(supabase),
-  ]);
+  const [{ data: upcoming }, { data: past }, { data: userData }, { data: settings }, swipeData] =
+    await Promise.all([
+      supabase
+        .from("events")
+        .select(
+          "id, title, description, location, organizer, event_date, cover_url, cover_video_url, price_cents, currency, capacity, capacity_remaining"
+        )
+        .eq("is_published", true)
+        .gte("event_date", nowIso)
+        .order("event_date", { ascending: true }),
+      supabase
+        .from("events")
+        .select("id, title, location, event_date, cover_url")
+        .eq("is_published", true)
+        .lt("event_date", nowIso)
+        .order("event_date", { ascending: false }),
+      supabase.auth.getUser(),
+      supabase.from("site_settings").select("nav_hidden_items").eq("id", true).maybeSingle(),
+      getSwipeDashboardData(supabase),
+    ]);
 
   const signedIn = Boolean(userData.user);
+  const hiddenNavItems = settings?.nav_hidden_items ?? {};
 
   const [featured, ...restUpcoming] = upcoming ?? [];
   const hasPast = past && past.length > 0;
@@ -55,7 +58,7 @@ export default async function StudioEventsPage() {
 
   return (
     <div>
-      {featured && <EventHero event={featured} signedIn={signedIn} />}
+      {featured && <EventHero event={featured} signedIn={signedIn} hiddenNavItems={hiddenNavItems} />}
 
       <Marquee items={MARQUEE_ITEMS} />
 

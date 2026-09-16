@@ -5,6 +5,7 @@ import styles from "./Footer.module.css";
 
 const ALL_EXPLORE_LINKS = [
   { href: "/studio", label: "Happenings", navKey: "happenings" as const },
+  { href: "/studio/deals", label: "Deals", navKey: "deals" as const },
   { href: "/journal", label: "Journal", navKey: "journal" as const },
   { href: "/shop", label: "Shop", navKey: "shop" as const },
   { href: "/about", label: "About", navKey: "about" as const },

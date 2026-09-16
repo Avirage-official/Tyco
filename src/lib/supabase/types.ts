@@ -33,6 +33,7 @@ export type DashboardSlideVisibility = {
 
 export type NavHiddenItems = {
   happenings?: boolean;
+  deals?: boolean;
   journal?: boolean;
   shop?: boolean;
   about?: boolean;

@@ -17,6 +17,7 @@ const SWIPE_SLIDES: { key: keyof DashboardSlideImages; label: string }[] = [
 
 const NAV_ITEMS: { key: keyof NavHiddenItems; label: string }[] = [
   { key: "happenings", label: "Happenings" },
+  { key: "deals", label: "Deals" },
   { key: "journal", label: "Journal" },
   { key: "shop", label: "Shop" },
   { key: "about", label: "About" },

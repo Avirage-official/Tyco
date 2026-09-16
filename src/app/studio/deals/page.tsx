@@ -32,6 +32,7 @@ export default async function StudioDealsPage({
     { data: vendors },
     { data: cycles },
     { data: userData },
+    { data: settings },
   ] = await Promise.all([
     supabase.from("deal_categories").select("id, name, display_order, is_hidden").order("display_order"),
     supabase
@@ -51,7 +52,9 @@ export default async function StudioDealsPage({
       .select("deal_id, redemptions_cap, redemptions_used")
       .eq("cycle_start", currentCycleStart()),
     supabase.auth.getUser(),
+    supabase.from("site_settings").select("nav_hidden_items").eq("id", true).maybeSingle(),
   ]);
+  const hiddenNavItems = settings?.nav_hidden_items ?? {};
 
   const visibleCategories = (categories ?? []).filter((c) => !c.is_hidden);
   const subcategoryById = new Map((subcategories ?? []).map((s) => [s.id, s]));
@@ -91,7 +94,7 @@ export default async function StudioDealsPage({
           </p>
         </div>
         <div className={styles.pageHeadTabs}>
-          <StudioTabs />
+          <StudioTabs hiddenNavItems={hiddenNavItems} />
         </div>
       </div>
 
