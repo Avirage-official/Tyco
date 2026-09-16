@@ -200,14 +200,47 @@
   color: var(--fg-muted);
 }
 
-/* The door decision form — staff (no account of their own) type their
-   name on the ticket holder's own phone and tap Approve/Deny. */
-.doorForm {
+/* The single low-risk trigger on the ticket card itself — everything that
+   can actually change the ticket's status lives behind the Modal this
+   opens, not exposed inline where a scroll-tap could hit Approve/Deny by
+   accident. */
+.doorOpenBtn {
   margin-top: var(--space-sm);
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--fg-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.doorOpenBtn:hover {
+  color: var(--fg);
+  border-color: var(--fg-muted);
+}
+
+/* The door decision form inside the Modal — staff (no account of their
+   own) type their name on the ticket holder's own phone and tap a
+   decision. */
+.doorModalBody {
+  max-width: 480px;
+  margin-inline: auto;
+  padding: var(--space-lg) var(--space-md) var(--space-2xl);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 0.6rem;
+}
+
+.doorModalTitle {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+
+.doorModalHint {
+  font-size: 0.82rem;
+  color: var(--fg-muted);
 }
 
 .doorInput {
@@ -229,16 +262,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-}
-
-.dangerLink {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--fg-muted);
-}
-
-.dangerLink:hover {
-  color: var(--accent);
 }
 
 .reasonList {
