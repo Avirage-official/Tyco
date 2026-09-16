@@ -3,6 +3,7 @@ import { formatEventDateParts, formatPrice } from "@/lib/format";
 import { StudioTabs } from "./StudioTabs";
 import { TicketPurchase } from "./TicketPurchase";
 import { MobileBookingBar } from "./MobileBookingBar";
+import type { NavHiddenItems } from "@/lib/supabase/types";
 import styles from "./EventHero.module.css";
 
 type HeroEvent = {
@@ -20,7 +21,15 @@ type HeroEvent = {
   capacity_remaining: number | null;
 };
 
-export function EventHero({ event, signedIn }: { event: HeroEvent; signedIn: boolean }) {
+export function EventHero({
+  event,
+  signedIn,
+  hiddenNavItems,
+}: {
+  event: HeroEvent;
+  signedIn: boolean;
+  hiddenNavItems?: NavHiddenItems;
+}) {
   const { month, day, weekday, time } = formatEventDateParts(event.event_date);
   const going =
     event.capacity != null && event.capacity_remaining != null
@@ -46,7 +55,7 @@ export function EventHero({ event, signedIn }: { event: HeroEvent; signedIn: boo
       <div className={`container ${styles.top}`}>
         <p className={styles.eyebrow}>Next up</p>
         <div className={styles.tabsSlot}>
-          <StudioTabs />
+          <StudioTabs hiddenNavItems={hiddenNavItems} />
         </div>
       </div>
 

@@ -5,21 +5,20 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { clearStoredCart } from "@/lib/cart/CartContext";
+import { getActiveHref } from "./nav-items";
 import type { NavHiddenItems } from "@/lib/supabase/types";
 import styles from "./TopNav.module.css";
 
 const ALL_LINKS = [
   { href: "/studio", label: "Happenings", index: "01", navKey: "happenings" as const },
-  { href: "/journal", label: "Journal", index: "02", navKey: "journal" as const },
-  { href: "/shop", label: "Shop", index: "03", navKey: "shop" as const },
-  { href: "/about", label: "About", index: "04", navKey: "about" as const },
-  { href: "/account/tickets", label: "Your tickets", index: "05" },
-  { href: "/account/orders", label: "Your orders", index: "06" },
+  { href: "/studio/deals", label: "Deals", index: "02", navKey: "deals" as const },
+  { href: "/journal", label: "Journal", index: "03", navKey: "journal" as const },
+  { href: "/shop", label: "Shop", index: "04", navKey: "shop" as const },
+  { href: "/about", label: "About", index: "05", navKey: "about" as const },
+  { href: "/account/tickets", label: "Your tickets", index: "06" },
+  { href: "/account/orders", label: "Your orders", index: "07" },
+  { href: "/account/deals", label: "Your deals", index: "08" },
 ];
-
-function linkMatches(pathname: string, href: string) {
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
 
 export function DesktopNav({
   signedIn,
@@ -36,7 +35,7 @@ export function DesktopNav({
   const [accountOpen, setAccountOpen] = useState(false);
 
   const flatLinks = ALL_LINKS.filter((item) => !item.navKey || !hiddenItems[item.navKey]);
-  const activeHref = flatLinks.find((item) => linkMatches(pathname, item.href))?.href;
+  const activeHref = getActiveHref(flatLinks, pathname);
   const accountActive = pathname === "/account";
 
   function movePillTo(el: HTMLElement | null | undefined) {

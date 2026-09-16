@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { Wordmark } from "./Wordmark";
 import { CartLink } from "@/components/cart/CartLink";
-import { navItems, visibleNavItems, isActive } from "./nav-items";
+import { navItems, visibleNavItems, getActiveHref } from "./nav-items";
 import { IconMenu, IconClose } from "@/components/icons";
 import type { NavHiddenItems } from "@/lib/supabase/types";
 import styles from "./MobileTopBar.module.css";
@@ -32,8 +32,11 @@ export function MobileTopBarNav({
   hiddenItems?: NavHiddenItems;
 }) {
   const items = visibleNavItems(navItems, hiddenItems);
+  const exploreItems = items.filter((item) => item.section !== "account");
+  const accountItems = items.filter((item) => item.section === "account");
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const activeHref = getActiveHref(items, pathname);
 
   // Close the sheet on navigation. Adjusting state during render (rather
   // than in an effect) avoids an extra cascading render pass — see
@@ -88,8 +91,25 @@ export function MobileTopBarNav({
               exit={{ opacity: 0, y: -16, scale: 0.98 }}
               transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
             >
-              {items.map((item) => {
-                const active = isActive(pathname, item.href, item.match);
+              {exploreItems.map((item) => {
+                const active = item.href === activeHref;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={active ? `${styles.sheetLink} ${styles.sheetLinkActive}` : styles.sheetLink}
+                  >
+                    <Icon className={styles.sheetIcon} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+
+              <span className={styles.sheetDivider} aria-hidden />
+
+              {accountItems.map((item) => {
+                const active = item.href === activeHref;
                 const Icon = item.icon;
                 return (
                   <Link
