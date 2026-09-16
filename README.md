@@ -16,47 +16,29 @@ on Vercel, backed by Supabase.
 
 ## Design system
 
-- **Palette**: warm black (`--ink`), deep/bright red (`--red*`), cream white
-  (`--paper*`). Tokens are in `src/app/globals.css`. Black is the fixed
-  background — deliberately no `prefers-color-scheme` override, so the look
-  doesn't change based on the visitor's system theme.
-- **Type**: Inter, one family for both display and body, loaded once in
-  `layout.tsx` and set on the shared `--font-display`/`--font-body` tokens
-  in `globals.css` — every component reads through those two tokens rather
-  than naming a font directly, so this was a two-file change even though it
-  touches every page. Deliberately not the original Fraunces/Work Sans
-  pairing — moved to a cleaner, more neutral retail-catalog feel.
-- **Icons**: a small hand-built SVG set in `src/components/icons.tsx`, not a
-  library import — every mark carries a small red dot as a recurring motif.
-- App icon / favicon / manifest icons are generated in code with `next/og`
-  (`src/app/icon.tsx`, `apple-icon.tsx`, `web-icon-192/512`), no image
-  assets to keep in sync.
-- **Crest logo** (`src/components/brand/CrestLogo.tsx`) — the crown/shield/T
-  mark, hand-built as SVG (ring text on `<textPath>` arcs computed from a
-  small polar-coordinate helper in `src/lib/geometry.ts`, not traced from a
-  raster image). Takes a `playing` prop that turns on a staggered draw-in
-  animation (ring → crown → shield halves → the T → ring text → dots);
-  without it, the mark just renders in its final state. Swap in a real
-  vector export later by replacing the path data — the animation choreography
-  and component API stay the same.
-- **Splash screen** (`src/components/brand/SplashScreen.tsx`) — plays the
-  full animated crest once per browser session (gated on `sessionStorage`,
-  not `localStorage`, so it replays on a fresh session but not on every
-  internal navigation), then fades out. Mounted once in the root layout.
-- **Loading states**: a small shared `Loader`/`PageLoader`
-  (`src/components/ui/Loader.tsx`) — an orbiting-arc mark in the brand's
-  red, not a generic spinner import — wired into a `loading.tsx` in every
-  top-level route segment (`/`, `/studio`, `/shop`, `/admin`,
-  `/account`, `/login`+`/signup`), so any nested route that doesn't define
-  its own loading state inherits one automatically.
-- **Page transitions**: `PageTransition` (`src/components/app-shell/`)
-  re-keys its children by pathname so every route change replays a short
-  fade/rise-in — no animation library, just a CSS keyframe retriggered by
-  a React remount. Wired once into `AppShell`, so new pages get it for free.
-- **Micro-interactions**: a shared `.lift` utility class in `globals.css`
-  plus hover/active rules baked directly into the shared card styles
-  (product cards, the home page's pillar cards) — a small rise on hover, a
-  settle on tap. Everything motion-related respects `prefers-reduced-motion`.
+The full spec — palette, type scale, components, motion rules, per-page
+layouts with their references, and the order of work — lives in
+[`docs/design-system.md`](docs/design-system.md). That document is the
+source of truth; this section is only the short version.
+
+- **Palette**: dark theme on a warm charcoal (`--ink`), cream text
+  (`--fg`), red as the primary accent (`--accent`) and a complementary teal
+  as the secondary accent (`--accent-2`) for availability, success and info
+  states. All tokens are in `src/app/globals.css`; components only ever use
+  the semantic aliases, never raw hex values. No `prefers-color-scheme`
+  override — the look is fixed regardless of system theme.
+- **Type**: Fraunces (display) and Jost (body/UI), loaded once in
+  `layout.tsx` and exposed as `--font-display` / `--font-body`. Every
+  component reads those two tokens rather than naming a font.
+- **Motion**: the `motion` package only, through the shared variants in
+  `src/lib/motion/variants.ts`. Quiet by design — short entrances, hover
+  lifts, a 200ms page cross-fade — and everything respects
+  `prefers-reduced-motion`.
+- **Icons**: a small hand-built SVG set in `src/components/icons.tsx`.
+- **App icons / manifest**: generated in code with `next/og`
+  (`src/app/icon.tsx`, `apple-icon.tsx`, `web-icon-192/512`).
+- **Navigation**: a desktop top rail, and on mobile a top bar whose menu
+  button opens a sheet. There is no bottom tab bar.
 
 ## App structure
 
