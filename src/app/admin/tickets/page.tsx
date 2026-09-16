@@ -21,7 +21,7 @@ export default async function AdminTicketsPage() {
     supabase
       .from("event_tickets")
       .select(
-        "id, event_id, user_id, quantity, total_cents, currency, status, reference_code, checked_in_at, created_at"
+        "id, event_id, user_id, quantity, total_cents, currency, status, reference_code, checked_in_at, checked_in_by_name, denied_at, denied_by_name, denied_reasons, reversed_at, reversed_by_name, reversed_reasons, created_at"
       )
       .order("created_at", { ascending: false }),
     supabase.from("events").select("id, title"),
@@ -93,7 +93,29 @@ export default async function AdminTicketsPage() {
                     </span>
                   </td>
                   <td className={styles.rowMeta}>
-                    {ticket.checked_in_at ? formatDate(ticket.checked_in_at) : "—"}
+                    {ticket.checked_in_at ? (
+                      <>
+                        {formatDate(ticket.checked_in_at)}
+                        {ticket.checked_in_by_name ? ` — ${ticket.checked_in_by_name}` : ""}
+                        {ticket.reversed_at && ticket.denied_by_name && (
+                          <div>
+                            Denied by {ticket.denied_by_name}
+                            {ticket.denied_reasons?.length ? ` (${ticket.denied_reasons.join(", ")})` : ""},
+                            reversed by {ticket.reversed_by_name}
+                            {ticket.reversed_reasons?.length
+                              ? ` (${ticket.reversed_reasons.join(", ")})`
+                              : ""}
+                          </div>
+                        )}
+                      </>
+                    ) : ticket.denied_at ? (
+                      <>
+                        Denied{ticket.denied_by_name ? ` by ${ticket.denied_by_name}` : ""}
+                        {ticket.denied_reasons?.length ? ` (${ticket.denied_reasons.join(", ")})` : ""}
+                      </>
+                    ) : (
+                      "—"
+                    )}
                   </td>
                   <td>
                     <div className={styles.actions}>

@@ -154,6 +154,13 @@ export type EventTicket = {
   reference_code: string;
   checked_in_at: string | null;
   checked_in_by: string | null;
+  checked_in_by_name: string | null;
+  denied_at: string | null;
+  denied_by_name: string | null;
+  denied_reasons: string[] | null;
+  reversed_at: string | null;
+  reversed_by_name: string | null;
+  reversed_reasons: string[] | null;
   created_at: string;
   updated_at: string;
 };
@@ -314,6 +321,13 @@ export interface Database {
           reference_code?: string;
           checked_in_at?: string | null;
           checked_in_by?: string | null;
+          checked_in_by_name?: string | null;
+          denied_at?: string | null;
+          denied_by_name?: string | null;
+          denied_reasons?: string[] | null;
+          reversed_at?: string | null;
+          reversed_by_name?: string | null;
+          reversed_reasons?: string[] | null;
           created_at?: string;
           updated_at?: string;
         }
@@ -595,6 +609,18 @@ export interface Database {
       };
       check_in_ticket: {
         Args: { p_ticket_id: string };
+        Returns: EventTicket;
+      };
+      approve_ticket_checkin: {
+        Args: { p_ticket_id: string; p_staff_name: string };
+        Returns: EventTicket;
+      };
+      deny_ticket_checkin: {
+        Args: { p_ticket_id: string; p_staff_name: string; p_reasons: string[] };
+        Returns: EventTicket;
+      };
+      reverse_ticket_denial: {
+        Args: { p_ticket_id: string; p_staff_name: string; p_reasons: string[] };
         Returns: EventTicket;
       };
       get_or_create_deal_cycle: {

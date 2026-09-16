@@ -184,6 +184,82 @@
   color: var(--fg-muted);
 }
 
+.doorStatus {
+  margin-top: var(--space-sm);
+}
+
+.denied {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.doorHistory {
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+
+/* The door decision form — staff (no account of their own) type their
+   name on the ticket holder's own phone and tap Approve/Deny. */
+.doorForm {
+  margin-top: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.doorInput {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.doorInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.doorButtons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.dangerLink {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.dangerLink:hover {
+  color: var(--accent);
+}
+
+.reasonList {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  width: 100%;
+}
+
+.reasonCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}
+
 .cardFooter {
   display: flex;
   justify-content: space-between;

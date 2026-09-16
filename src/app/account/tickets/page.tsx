@@ -30,7 +30,7 @@ export default async function TicketsPage({
   const { data: tickets } = await supabase
     .from("event_tickets")
     .select(
-      "id, quantity, total_cents, currency, status, reference_code, checked_in_at, created_at, event_id"
+      "id, quantity, total_cents, currency, status, reference_code, checked_in_at, checked_in_by_name, denied_at, denied_by_name, denied_reasons, reversed_at, reversed_by_name, reversed_reasons, created_at, event_id"
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });

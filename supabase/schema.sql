@@ -444,6 +444,51 @@ alter table public.event_tickets add constraint event_tickets_status_check
 alter table public.event_tickets drop constraint if exists event_tickets_reference_code_key;
 alter table public.event_tickets add constraint event_tickets_reference_code_key unique (reference_code);
 
+-- Door check-in from the ticket holder's own device — venue staff have no
+-- Tyco account at all, so unlike checked_in_by (an admin acting from
+-- /admin/tickets), there's no auth.uid() to attribute this to. Staff just
+-- types their own name into a field on the buyer's already-signed-in
+-- ticket page and taps Approve/Deny; a denial can later be reversed
+-- (approved-then-denied is not supported — check-in is otherwise final).
+-- Reversing keeps the original denial fields rather than clearing them,
+-- so the full history (denied by whom/why, then reversed by whom/why)
+-- stays visible next to the ticket.
+alter table public.event_tickets add column if not exists checked_in_by_name text;
+alter table public.event_tickets add column if not exists denied_at timestamptz;
+alter table public.event_tickets add column if not exists denied_by_name text;
+alter table public.event_tickets add column if not exists denied_reasons text[];
+alter table public.event_tickets add column if not exists reversed_at timestamptz;
+alter table public.event_tickets add column if not exists reversed_by_name text;
+alter table public.event_tickets add column if not exists reversed_reasons text[];
+
+-- Kept in sync with DENIAL_REASONS in src/lib/tickets/doorReasons.ts — a
+-- constraint here is just defense-in-depth against a direct RPC call
+-- bypassing the app's own checkbox list, not the source of truth for it.
+alter table public.event_tickets drop constraint if exists event_tickets_denied_reasons_valid;
+alter table public.event_tickets add constraint event_tickets_denied_reasons_valid
+  check (
+    denied_reasons is null or denied_reasons <@ array[
+      'Ticket already used',
+      'Name/ID doesn''t match the ticket',
+      'Wrong event or date',
+      'Looks fake / duplicated',
+      'Event at capacity',
+      'Other'
+    ]
+  );
+
+-- Kept in sync with REVERSAL_REASONS in src/lib/tickets/doorReasons.ts.
+alter table public.event_tickets drop constraint if exists event_tickets_reversed_reasons_valid;
+alter table public.event_tickets add constraint event_tickets_reversed_reasons_valid
+  check (
+    reversed_reasons is null or reversed_reasons <@ array[
+      'Denied by mistake — ticket was valid',
+      'Issue resolved with guest',
+      'Wrong ticket was checked',
+      'Other'
+    ]
+  );
+
 alter table public.event_tickets enable row level security;
 
 drop policy if exists "buyers see their own tickets" on public.event_tickets;
@@ -535,11 +580,14 @@ $$;
 
 grant execute on function public.restore_event_capacity(uuid, integer) to authenticated;
 
--- check_in_ticket — the one and only way a ticket's checked_in_at gets
--- set. Admin-only (matches the event_tickets RLS policy above), and
--- refuses a ticket that's already checked in rather than silently
--- overwriting the original check-in time/admin, so re-scanning a used
--- ticket surfaces as an error instead of quietly resetting it.
+-- check_in_ticket — the admin-side way a ticket's checked_in_at gets set
+-- (from /admin/tickets, by a Tyco admin who has an actual account). The
+-- venue-staff-at-the-door path is approve_ticket_checkin below, which has
+-- no admin account to check since staff don't have one — see the comment
+-- on the door-decision columns above event_tickets' RLS policies. Refuses
+-- a ticket that's already checked in rather than silently overwriting the
+-- original check-in time/admin, so re-scanning a used ticket surfaces as
+-- an error instead of quietly resetting it.
 create or replace function public.check_in_ticket(p_ticket_id uuid)
 returns public.event_tickets
 language plpgsql
@@ -577,6 +625,158 @@ end;
 $$;
 
 grant execute on function public.check_in_ticket(uuid) to authenticated;
+
+-- approve_ticket_checkin / deny_ticket_checkin / reverse_ticket_denial —
+-- the door flow: the ticket holder shows their already-signed-in ticket
+-- page to venue staff, staff types their own name (no account of their
+-- own to check against) and taps a decision. Ownership is enforced here
+-- (user_id = auth.uid()) rather than relying only on the caller reaching
+-- this from their own account page, same defense-in-depth as every other
+-- security-definer RPC in this file.
+create or replace function public.approve_ticket_checkin(p_ticket_id uuid, p_staff_name text)
+returns public.event_tickets
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_ticket public.event_tickets;
+  v_staff_name text := nullif(trim(p_staff_name), '');
+begin
+  if v_staff_name is null then
+    raise exception 'Staff name is required';
+  end if;
+
+  select * into v_ticket
+  from public.event_tickets
+  where id = p_ticket_id and user_id = auth.uid()
+  for update;
+
+  if v_ticket.id is null then
+    raise exception 'Ticket not found';
+  end if;
+
+  if v_ticket.status != 'paid' then
+    raise exception 'Ticket is not paid';
+  end if;
+
+  if v_ticket.checked_in_at is not null then
+    raise exception 'Ticket already checked in';
+  end if;
+
+  update public.event_tickets
+  set checked_in_at = now(), checked_in_by_name = v_staff_name
+  where id = p_ticket_id
+  returning * into v_ticket;
+
+  return v_ticket;
+end;
+$$;
+
+grant execute on function public.approve_ticket_checkin(uuid, text) to authenticated;
+
+create or replace function public.deny_ticket_checkin(p_ticket_id uuid, p_staff_name text, p_reasons text[])
+returns public.event_tickets
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_ticket public.event_tickets;
+  v_staff_name text := nullif(trim(p_staff_name), '');
+begin
+  if v_staff_name is null then
+    raise exception 'Staff name is required';
+  end if;
+
+  if p_reasons is null or array_length(p_reasons, 1) is null then
+    raise exception 'At least one reason is required';
+  end if;
+
+  select * into v_ticket
+  from public.event_tickets
+  where id = p_ticket_id and user_id = auth.uid()
+  for update;
+
+  if v_ticket.id is null then
+    raise exception 'Ticket not found';
+  end if;
+
+  if v_ticket.status != 'paid' then
+    raise exception 'Ticket is not paid';
+  end if;
+
+  if v_ticket.checked_in_at is not null then
+    raise exception 'Ticket already checked in';
+  end if;
+
+  if v_ticket.denied_at is not null then
+    raise exception 'Ticket already denied';
+  end if;
+
+  update public.event_tickets
+  set denied_at = now(), denied_by_name = v_staff_name, denied_reasons = p_reasons
+  where id = p_ticket_id
+  returning * into v_ticket;
+
+  return v_ticket;
+end;
+$$;
+
+grant execute on function public.deny_ticket_checkin(uuid, text, text[]) to authenticated;
+
+create or replace function public.reverse_ticket_denial(p_ticket_id uuid, p_staff_name text, p_reasons text[])
+returns public.event_tickets
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_ticket public.event_tickets;
+  v_staff_name text := nullif(trim(p_staff_name), '');
+begin
+  if v_staff_name is null then
+    raise exception 'Staff name is required';
+  end if;
+
+  if p_reasons is null or array_length(p_reasons, 1) is null then
+    raise exception 'At least one reason is required';
+  end if;
+
+  select * into v_ticket
+  from public.event_tickets
+  where id = p_ticket_id and user_id = auth.uid()
+  for update;
+
+  if v_ticket.id is null then
+    raise exception 'Ticket not found';
+  end if;
+
+  if v_ticket.denied_at is null then
+    raise exception 'Ticket was not denied';
+  end if;
+
+  if v_ticket.checked_in_at is not null then
+    raise exception 'Ticket already checked in';
+  end if;
+
+  -- The reverser is the one letting the holder in, so they become the
+  -- check-in's staff name too — the original denial's fields are left
+  -- untouched so both halves of the story stay visible afterward.
+  update public.event_tickets
+  set checked_in_at = now(),
+      checked_in_by_name = v_staff_name,
+      reversed_at = now(),
+      reversed_by_name = v_staff_name,
+      reversed_reasons = p_reasons
+  where id = p_ticket_id
+  returning * into v_ticket;
+
+  return v_ticket;
+end;
+$$;
+
+grant execute on function public.reverse_ticket_denial(uuid, text, text[]) to authenticated;
 
 -- ----------------------------------------------------------------------------
 -- products — the retail shop. Stock lives on product_variants, not here:

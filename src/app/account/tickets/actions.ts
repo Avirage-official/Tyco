@@ -1,9 +1,11 @@
 "use server";
 
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { createRevolutOrder } from "@/lib/checkout/revolut";
+import { DENIAL_REASONS, REVERSAL_REASONS } from "@/lib/tickets/doorReasons";
 
 /**
  * Re-issues a Revolut payment link for a ticket that's still pending —
@@ -72,4 +74,56 @@ export async function resumeTicketCheckout(ticketId: string) {
   await supabase.from("event_tickets").update({ revolut_order_id: revolutOrderId }).eq("id", ticket.id);
 
   return { checkoutUrl };
+}
+
+function validateReasons(reasons: string[], allowed: readonly string[]) {
+  if (reasons.length === 0) throw new Error("Choose at least one reason.");
+  if (!reasons.every((reason) => allowed.includes(reason))) {
+    throw new Error("Choose a reason from the list.");
+  }
+}
+
+/**
+ * The door flow: the ticket holder shows their own (already signed-in)
+ * ticket page to venue staff, who have no Tyco account of their own —
+ * there's nothing to authenticate them against, so they just type their
+ * name and tap a decision. Ownership is re-checked inside the RPC itself
+ * (user_id = auth.uid()), not just assumed from this page being reachable
+ * only by the ticket's owner.
+ */
+export async function approveTicketCheckIn(ticketId: string, staffName: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("approve_ticket_checkin", {
+    p_ticket_id: ticketId,
+    p_staff_name: staffName,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/account/tickets");
+  return data;
+}
+
+export async function denyTicketCheckIn(ticketId: string, staffName: string, reasons: string[]) {
+  validateReasons(reasons, DENIAL_REASONS);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("deny_ticket_checkin", {
+    p_ticket_id: ticketId,
+    p_staff_name: staffName,
+    p_reasons: reasons,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/account/tickets");
+  return data;
+}
+
+export async function reverseTicketDenial(ticketId: string, staffName: string, reasons: string[]) {
+  validateReasons(reasons, REVERSAL_REASONS);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("reverse_ticket_denial", {
+    p_ticket_id: ticketId,
+    p_staff_name: staffName,
+    p_reasons: reasons,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/account/tickets");
+  return data;
 }

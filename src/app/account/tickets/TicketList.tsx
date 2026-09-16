@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { fadeUpContainer, fadeUpItem, revealViewport } from "@/lib/motion/variants";
-import { formatDate, formatEventDateTime, formatPrice } from "@/lib/format";
+import { formatEventDateTime, formatPrice } from "@/lib/format";
 import { Button } from "@/components/ui/Button";
 import { resumeTicketCheckout } from "./actions";
+import { TicketDoorPanel } from "./TicketDoorPanel";
 import styles from "./tickets.module.css";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -30,6 +31,13 @@ type Ticket = {
   status: string;
   reference_code: string;
   checked_in_at: string | null;
+  checked_in_by_name: string | null;
+  denied_at: string | null;
+  denied_by_name: string | null;
+  denied_reasons: string[] | null;
+  reversed_at: string | null;
+  reversed_by_name: string | null;
+  reversed_reasons: string[] | null;
   created_at: string;
   event_id: string;
 };
@@ -141,9 +149,7 @@ export function TicketList({
                 </div>
               )}
 
-              {ticket.checked_in_at && (
-                <p className={styles.checkedIn}>Checked in {formatDate(ticket.checked_in_at)}</p>
-              )}
+              {ticket.status === "paid" && <TicketDoorPanel ticket={ticket} />}
 
               <div className={styles.cardFooter}>
                 <span>Total</span>
