@@ -298,7 +298,8 @@ Motion: chips animate, cards fade-up in a 40ms stagger.
 
 Reference: Airbnb listing page.
 
-1. **Media**: cover image at 16:9, full container width.
+1. **Media**: cover image at 16:9, full container width, capped at 480px
+   tall so the title and redeem card start above the fold on a laptop.
 2. **Two columns on desktop**: left has vendor, title, locations, category,
    description, "What you get", terms accordion, and "More from this
    vendor" row. Right has a sticky redeem card: member price, original
@@ -308,8 +309,8 @@ Reference: Airbnb listing page.
    the agreement checkbox and the final "Confirm and pay" button. The
    sign-in prompt uses the same sheet for signed-out users.
 
-Motion: hero parallax up to 8%, sticky card fades in after the hero scrolls
-past, sheet springs up.
+Motion: hero parallax up to 5%, the sticky card fades up on load, the sheet
+slides up.
 
 ### 10.5 Happenings (`/happenings`)
 

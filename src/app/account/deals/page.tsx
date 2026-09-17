@@ -68,7 +68,7 @@ export default async function AccountDealsPage({
           <EmptyState
             title="No deals redeemed yet"
             description="Deals you redeem from the Membership network show up here — this is what you show at the vendor counter."
-            action={<LinkButton href="/studio/deals">See deals</LinkButton>}
+            action={<LinkButton href="/deals">See deals</LinkButton>}
           />
         ) : (
           <ul className={styles.list}>

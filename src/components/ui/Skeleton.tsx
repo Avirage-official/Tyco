@@ -47,12 +47,12 @@ function CardSkeleton() {
   );
 }
 
-export type PageSkeletonKind = "grid" | "list" | "hero" | "form";
+export type PageSkeletonKind = "grid" | "list" | "hero" | "form" | "detail";
 
 /**
- * Whole-page placeholders matching the four page shapes in the design
- * system: a card grid with a header, a vertical list, a hero followed by a
- * card row, and a centred form.
+ * Whole-page placeholders matching the page shapes in the design system:
+ * a card grid with a header, a vertical list, a hero followed by a card
+ * row, a centred form, and a detail page (media, two columns).
  */
 export function PageSkeleton({ kind }: { kind: PageSkeletonKind }) {
   if (kind === "form") {
@@ -63,6 +63,24 @@ export function PageSkeleton({ kind }: { kind: PageSkeletonKind }) {
         <Skeleton height="2.75rem" />
         <Skeleton height="2.75rem" />
         <Skeleton height="2.75rem" radius="pill" />
+      </div>
+    );
+  }
+
+  if (kind === "detail") {
+    return (
+      <div className={`container ${styles.section}`} role="status" aria-label="Loading">
+        <Skeleton height="0.9rem" width="8rem" />
+        <Skeleton className={styles.detailMedia} height="auto" width="100%" radius="md" />
+        <div className={styles.detailColumns}>
+          <div className={styles.detailMain}>
+            <Skeleton height="0.9rem" width="6rem" />
+            <Skeleton height="2.2rem" width="70%" />
+            <Skeleton height="0.9rem" width="40%" />
+            <SkeletonText lines={4} />
+          </div>
+          <Skeleton className={styles.detailSide} height="11rem" width="100%" radius="md" />
+        </div>
       </div>
     );
   }

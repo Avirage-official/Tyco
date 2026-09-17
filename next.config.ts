@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "i.ytimg.com" },
     ],
   },
+  async redirects() {
+    // Routes renamed in the UI pass (docs/design-system.md §11). Permanent
+    // so shared links and search results move over.
+    return [{ source: "/studio/deals", destination: "/deals", permanent: true }];
+  },
 };
 
 export default nextConfig;

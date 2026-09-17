@@ -11,12 +11,11 @@ export type NavItem = {
 
 /**
  * The public sections, in nav order. Deals first: it is the product.
- * Hrefs still point at the /studio routes until the route rename lands
- * with the Deals and Happenings page steps — this is the one place to
- * change them.
+ * Happenings still points at /studio until its page step renames the
+ * route — this is the one place to change it.
  */
 export const primaryNav: NavItem[] = [
-  { href: "/studio/deals", label: "Deals", navKey: "deals" },
+  { href: "/deals", label: "Deals", navKey: "deals" },
   { href: "/studio", label: "Happenings", navKey: "happenings" },
   { href: "/journal", label: "Journal", navKey: "journal" },
   { href: "/shop", label: "Shop", navKey: "shop" },
@@ -46,8 +45,8 @@ export function isActive(pathname: string, href: string, match: "exact" | "prefi
 
 /**
  * Which single item reads as "active" for the current path: the most
- * specific (longest) matching href, so /studio/deals lights up Deals and
- * not Happenings even though both prefixes match.
+ * specific (longest) matching href, so /account/deals lights up "Your
+ * deals" and not "Account" even though both prefixes match.
  */
 export function getActiveHref<T extends { href: string; match?: "exact" | "prefix" }>(
   items: T[],
