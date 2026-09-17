@@ -24,6 +24,6 @@ export async function updateSiteSettings(input: SiteSettingsInput) {
   revalidatePath("/");
   revalidatePath("/about");
   revalidatePath("/shop");
-  revalidatePath("/studio");
+  revalidatePath("/happenings");
   revalidatePath("/journal");
 }

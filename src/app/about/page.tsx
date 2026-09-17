@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "About" };
 
 const pillars = [
   {
-    href: "/studio",
+    href: "/happenings",
     icon: IconMark,
     title: "Happenings",
     desc: "The creative work behind the collective, and every event we've thrown or have coming up.",

@@ -7,7 +7,7 @@ import styles from "./Modal.module.css";
 
 // Client-only mount detection without an effect-driven setState (which
 // trips react-hooks/set-state-in-effect) — same pattern as
-// MobileBookingBar. getServerSnapshot returns false so SSR and the first
+// StickyBar. getServerSnapshot returns false so SSR and the first
 // client render agree (both render nothing), then useSyncExternalStore
 // itself forces the reconciling re-render once real client state (true)
 // is available, after hydration.
@@ -29,7 +29,7 @@ function getServerSnapshot() {
  * its column counting thrown off by an inline <dialog> sibling, and a
  * portal sidesteps that entirely rather than relying on the (currently
  * true, but fragile to depend on) top-layer exemption from ancestor
- * transforms — same reasoning as MobileBookingBar elsewhere in /studio.
+ * transforms — same reasoning as StickyBar on the detail pages.
  */
 export function Modal({
   open,

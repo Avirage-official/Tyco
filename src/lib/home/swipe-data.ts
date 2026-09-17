@@ -15,7 +15,7 @@ const SHOP_FIELDS = "id, name, price_cents, currency, images, category, publishe
 /**
  * Everything the swipeable Retail/Happenings section needs — shared because
  * the same swiper is embedded on the homepage and reused as the hero on
- * /shop and /studio.
+ * /shop.
  */
 export async function getSwipeDashboardData(supabase: Awaited<ReturnType<typeof createClient>>) {
   const [shopItems, events, deals, { slideImages, hiddenSlides }] = await Promise.all([

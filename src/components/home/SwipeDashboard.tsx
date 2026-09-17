@@ -196,7 +196,7 @@ export function SwipeDashboard({
           eyebrow="Happenings"
           title="What's on next"
           image={slideImages?.happenings}
-          href={hiddenSlides?.happenings ? undefined : "/studio"}
+          href={hiddenSlides?.happenings ? undefined : "/happenings"}
           linkLabel={hiddenSlides?.happenings ? undefined : "See all happenings"}
         >
           {hiddenSlides?.happenings ? (
@@ -208,7 +208,7 @@ export function SwipeDashboard({
                 {events.length > 0 ? (
                   <div className={styles.eventList}>
                     {events.slice(0, 2).map((ev) => (
-                      <Link key={ev.id} href="/studio" className={styles.eventCard}>
+                      <Link key={ev.id} href={`/happenings/${ev.id}`} className={styles.eventCard}>
                         <span
                           className={styles.eventCover}
                           style={ev.cover_url ? { backgroundImage: `url(${ev.cover_url})` } : undefined}

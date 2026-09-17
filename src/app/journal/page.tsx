@@ -51,7 +51,7 @@ export default async function JournalPage() {
       description: event.description,
       coverUrl: event.cover_url,
       date: event.published_at ?? event.event_date,
-      href: "/studio",
+      href: `/happenings/${event.id}`,
       meta: null,
     })),
     ...(products ?? []).map((product): JournalEntry => ({

@@ -11,12 +11,10 @@ export type NavItem = {
 
 /**
  * The public sections, in nav order. Deals first: it is the product.
- * Happenings still points at /studio until its page step renames the
- * route — this is the one place to change it.
  */
 export const primaryNav: NavItem[] = [
   { href: "/deals", label: "Deals", navKey: "deals" },
-  { href: "/studio", label: "Happenings", navKey: "happenings" },
+  { href: "/happenings", label: "Happenings", navKey: "happenings" },
   { href: "/journal", label: "Journal", navKey: "journal" },
   { href: "/shop", label: "Shop", navKey: "shop" },
   { href: "/about", label: "About", navKey: "about" },

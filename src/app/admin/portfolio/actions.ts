@@ -14,7 +14,7 @@ export type PortfolioInput = {
 
 function revalidatePortfolio() {
   revalidatePath("/admin/portfolio");
-  revalidatePath("/studio");
+  revalidatePath("/happenings");
 }
 
 export async function createPortfolioItem(input: PortfolioInput) {

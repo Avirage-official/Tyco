@@ -27,6 +27,18 @@ export function formatEventDateTime(iso: string | null) {
   });
 }
 
+/** Weekday, full date and start time on one line — the event detail header. */
+export function formatEventDateLong(iso: string) {
+  return new Date(iso).toLocaleString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 /** Month/day/time split out separately — for a gig-list date block, where
  * the day number is set large and the rest reads as supporting detail. */
 export function formatEventDateParts(iso: string) {
