@@ -77,25 +77,26 @@
   border-top: 1px solid var(--border);
 }
 
-@media (min-width: 860px) {
-  .backdrop {
-    align-items: stretch;
-    justify-content: flex-end;
-  }
+/* Right-side panel: the desktop form of every sheet, and the nav menu's
+   form at every width. Applied by class (not a media query) so the
+   component and the stylesheet agree on which variant is showing. */
+.backdropRight {
+  align-items: stretch;
+  justify-content: flex-end;
+}
 
-  .panel {
-    width: min(480px, 100%);
-    max-height: none;
-    height: 100%;
-    border-radius: 0;
-    padding-bottom: 0;
-  }
+.panelRight {
+  width: min(420px, 100%);
+  max-height: none;
+  height: 100%;
+  border-radius: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
 
-  .handle {
-    display: none;
-  }
+.panelRight .handle {
+  display: none;
+}
 
-  .header {
-    padding-top: var(--space-md);
-  }
+.panelRight .header {
+  padding-top: var(--space-md);
 }

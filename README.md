@@ -131,15 +131,15 @@ source of truth; this section is only the short version.
 Anything published in the last two weeks shows an automatic "New" tag on
 `/shop` and `/studio` — no manual step, it's driven off `published_at`.
 
-Mobile gets a bottom tab bar (Home / Studio / Shop / Account) so the
-site behaves like an installed app; desktop gets a top nav instead, which
-checks auth server-side and shows a "Sign out" link next to the cart when
-you're signed in (`TopNav` is a server component; `NavLinks` and
-`TopNavSignOut` are the client-side pieces inside it). The
-`manifest.webmanifest` + icons make "Add to Home Screen" produce a real app
-icon and standalone window. A site-wide footer sits under every page's
-content with the wordmark, tagline, and a second set of links (Creators,
-Studio, Shop, About, Account, Terms & Conditions).
+Navigation is one shell (`components/app-shell/AppShell.tsx`, a server
+component) that reads the session and the admin's nav-visibility settings
+once per request and hands them to three plain components: `SiteHeader`
+(desktop: wordmark, a centred rail of the public sections, then Log in /
+Sign up or an avatar menu with the user's own pages and Sign out, plus the
+cart), `MobileHeader` (menu button, wordmark, cart; the menu opens a
+full-height sheet from the right), and `Footer`. The section list lives in
+`nav-items.ts`. The `manifest.webmanifest` + icons make "Add to Home
+Screen" produce a real app icon and standalone window.
 
 ## Admin panel
 

@@ -238,9 +238,9 @@ References: Airbnb (structure), DICE (mobile).
   full-height sheet from the right with grouped links (Explore, Your
   account, then Login / Sign up when signed out), 56px tap targets, and the
   active item highlighted in red text.
-- **Footer**: four columns on desktop (Explore, Account, Company, Legal),
-  stacked on mobile. Wordmark and a one-line description. One `--border`
-  line above. No statement copy.
+- **Footer**: three columns on desktop (Explore, Account, Company — the
+  last holds About and Terms), two on mobile. Wordmark and a one-line
+  description. One `--border` line above. No statement copy.
 - **Loading**: each route segment renders its own skeleton.
 
 ## 10. Page specifications

@@ -27,6 +27,7 @@ export function Sheet({
   title,
   children,
   footer,
+  side = "auto",
 }: {
   open: boolean;
   onClose: () => void;
@@ -34,9 +35,12 @@ export function Sheet({
   children: React.ReactNode;
   /** Pinned to the bottom of the panel; usually the confirm button. */
   footer?: React.ReactNode;
+  /** "auto": bottom sheet on mobile, right panel on desktop. "right": right panel at every width (the nav menu). */
+  side?: "auto" | "right";
 }) {
   const mounted = useMounted();
   const isMobile = useIsMobile();
+  const fromRight = side === "right" || !isMobile;
   const panelRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<Element | null>(null);
   const titleId = useId();
@@ -79,7 +83,7 @@ export function Sheet({
 
   if (!mounted) return null;
 
-  const panelMotion = isMobile
+  const panelMotion = !fromRight
     ? {
         initial: { y: "100%" },
         animate: { y: 0, transition: { duration: DUR_SLOW, ease: EASE_IN_OUT } },
@@ -95,7 +99,7 @@ export function Sheet({
     <AnimatePresence>
       {open && (
         <motion.div
-          className={styles.backdrop}
+          className={fromRight ? `${styles.backdrop} ${styles.backdropRight}` : styles.backdrop}
           onClick={onClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { duration: DUR, ease: EASE_IN_OUT } }}
@@ -107,7 +111,7 @@ export function Sheet({
             aria-modal="true"
             aria-labelledby={titleId}
             tabIndex={-1}
-            className={styles.panel}
+            className={fromRight ? `${styles.panel} ${styles.panelRight}` : styles.panel}
             onClick={(e) => e.stopPropagation()}
             {...panelMotion}
           >

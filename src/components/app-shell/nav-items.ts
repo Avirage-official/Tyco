@@ -1,49 +1,37 @@
-import {
-  IconBag,
-  IconHome,
-  IconMark,
-  IconTag,
-  IconTicket,
-  IconUser,
-  IconWave,
-} from "@/components/icons";
 import type { NavHiddenItems } from "@/lib/supabase/types";
 
-// `section: "account"` items are always shown regardless of sign-in state
-// (same as Account itself always was) — each of their pages already
-// redirects to /login on its own, so there's no need to duplicate that
-// check here just to decide whether to show the link.
-export const navItems = [
-  { href: "/", label: "Home", icon: IconHome, match: "exact" as const },
-  { href: "/studio", label: "Happenings", icon: IconMark, match: "prefix" as const, navKey: "happenings" as const },
-  { href: "/studio/deals", label: "Deals", icon: IconTag, match: "prefix" as const, navKey: "deals" as const },
-  { href: "/journal", label: "Journal", icon: IconWave, match: "prefix" as const, navKey: "journal" as const },
-  { href: "/shop", label: "Shop", icon: IconBag, match: "prefix" as const, navKey: "shop" as const },
-  {
-    href: "/account/tickets",
-    label: "Your tickets",
-    icon: IconTicket,
-    match: "prefix" as const,
-    section: "account" as const,
-  },
-  {
-    href: "/account/orders",
-    label: "Your orders",
-    icon: IconBag,
-    match: "prefix" as const,
-    section: "account" as const,
-  },
-  {
-    href: "/account/deals",
-    label: "Your deals",
-    icon: IconTag,
-    match: "prefix" as const,
-    section: "account" as const,
-  },
-  { href: "/account", label: "Account", icon: IconUser, match: "prefix" as const, section: "account" as const },
+export type NavItem = {
+  href: string;
+  label: string;
+  /** "prefix" (default) also matches child routes; "exact" matches only itself. */
+  match?: "exact" | "prefix";
+  /** Set when an admin can hide the section from the nav (see /admin/settings). */
+  navKey?: keyof NavHiddenItems;
+};
+
+/**
+ * The public sections, in nav order. Deals first: it is the product.
+ * Hrefs still point at the /studio routes until the route rename lands
+ * with the Deals and Happenings page steps — this is the one place to
+ * change them.
+ */
+export const primaryNav: NavItem[] = [
+  { href: "/studio/deals", label: "Deals", navKey: "deals" },
+  { href: "/studio", label: "Happenings", navKey: "happenings" },
+  { href: "/journal", label: "Journal", navKey: "journal" },
+  { href: "/shop", label: "Shop", navKey: "shop" },
+  { href: "/about", label: "About", navKey: "about" },
 ];
 
-/** Drops any nav item whose navKey an admin has hidden (see /admin/settings). Items with no navKey (Home, Account, and the personal account links) are core utility and always shown. */
+/** The signed-in user's own pages. Each already redirects to /login on its own. */
+export const accountNav: NavItem[] = [
+  { href: "/account/deals", label: "Your deals" },
+  { href: "/account/tickets", label: "Your tickets" },
+  { href: "/account/orders", label: "Your orders" },
+  { href: "/account", label: "Account", match: "exact" },
+];
+
+/** Drops any item whose section an admin has hidden. Items with no navKey are always shown. */
 export function visibleNavItems<T extends { navKey?: keyof NavHiddenItems }>(
   items: T[],
   hidden: NavHiddenItems
@@ -57,12 +45,9 @@ export function isActive(pathname: string, href: string, match: "exact" | "prefi
 }
 
 /**
- * Which single item should read as "active" for the current path. Needed
- * because /studio and /studio/deals are now siblings rather than one
- * nested under the other in the nav — a plain per-item prefix match would
- * mark Happenings active on /studio/deals too (it starts with "/studio/"),
- * so this picks the most specific (longest) matching href instead of
- * whichever item happens to come first.
+ * Which single item reads as "active" for the current path: the most
+ * specific (longest) matching href, so /studio/deals lights up Deals and
+ * not Happenings even though both prefixes match.
  */
 export function getActiveHref<T extends { href: string; match?: "exact" | "prefix" }>(
   items: T[],
