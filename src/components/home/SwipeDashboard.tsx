@@ -233,7 +233,7 @@ export function SwipeDashboard({
                 {deals.length > 0 ? (
                   <div className={styles.eventList}>
                     {deals.slice(0, 2).map((deal) => (
-                      <Link key={deal.id} href="/studio" className={styles.eventCard}>
+                      <Link key={deal.id} href={`/deals/${deal.id}`} className={styles.eventCard}>
                         <span
                           className={styles.eventCover}
                           style={deal.cover_url ? { backgroundImage: `url(${deal.cover_url})` } : undefined}

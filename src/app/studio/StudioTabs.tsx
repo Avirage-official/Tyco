@@ -7,7 +7,7 @@ import styles from "./StudioTabs.module.css";
 
 const tabs = [
   { href: "/studio", label: "Happenings", navKey: "happenings" as const },
-  { href: "/studio/deals", label: "Deals", navKey: "deals" as const },
+  { href: "/deals", label: "Deals", navKey: "deals" as const },
 ];
 
 export function StudioTabs({ hiddenNavItems = {} }: { hiddenNavItems?: NavHiddenItems }) {

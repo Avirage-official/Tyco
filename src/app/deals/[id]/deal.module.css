@@ -1,0 +1,323 @@
+.page {
+  padding-block: var(--space-md) var(--space-2xl);
+}
+
+@media (min-width: 860px) {
+  .page {
+    padding-top: var(--space-lg);
+  }
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  margin-bottom: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+
+.breadcrumb a {
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.breadcrumb a:hover {
+  color: var(--fg);
+}
+
+/* -- media ------------------------------------------------------------ */
+
+.media {
+  aspect-ratio: 16 / 9;
+  /* Capped so the title and the redeem card still land above the fold on
+     a laptop; the image crops to cover. */
+  max-height: 480px;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+@media (min-width: 860px) {
+  .media {
+    border-radius: var(--radius-lg);
+  }
+}
+
+/* -- two-column layout --------------------------------------------- */
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+}
+
+@media (min-width: 860px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.vendor {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--fg-muted);
+}
+
+.title {
+  font-size: var(--text-h1);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2xs) var(--space-sm);
+  margin-top: var(--space-2xs);
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+
+.metaLocation {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.metaLocation svg {
+  width: 15px;
+  height: 15px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.sectionTitle {
+  font-size: var(--text-h3);
+}
+
+.prose {
+  color: var(--fg-muted);
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.inlineLink {
+  color: var(--accent-2);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* -- how it works --------------------------------------------------- */
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.step {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+}
+
+.stepNumber {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--surface-2);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.stepTitle {
+  display: block;
+  font-weight: 500;
+}
+
+.stepBody {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+
+/* -- redeem card (desktop) ----------------------------------------- */
+
+.side {
+  display: none;
+}
+
+@media (min-width: 860px) {
+  .side {
+    display: block;
+    position: sticky;
+    top: calc(var(--nav-h) + var(--space-md));
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.cardNote {
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+
+.priceBlock {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2xs);
+}
+
+.price {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.priceOriginal {
+  font-size: var(--text-sm);
+  color: var(--fg-faint);
+}
+
+/* -- mobile sticky bar --------------------------------------------- */
+
+.barOnly {
+  display: contents;
+}
+
+@media (min-width: 760px) {
+  .barOnly {
+    display: none;
+  }
+}
+
+.barPrice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.barPrice .price {
+  font-size: 1.25rem;
+}
+
+.barAvailability {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.barAction {
+  flex: 0 1 12rem;
+}
+
+/* -- confirm sheet -------------------------------------------------- */
+
+.sheetSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.sheetTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: 600;
+}
+
+.sheetMeta {
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+
+.sheetPriceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-top: var(--space-2xs);
+}
+
+.sheetTerms {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin-block: var(--space-sm);
+  padding-left: 1.1rem;
+  list-style: disc;
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+
+.agree {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2xs);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.agree input {
+  margin-top: 0.2rem;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent);
+}
+
+.error {
+  margin-top: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--accent-hover);
+}
+
+.sheetLead {
+  color: var(--fg-muted);
+}
+
+.sheetActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin-top: var(--space-md);
+}
+
+/* -- more from vendor ---------------------------------------------- */
+
+.more {
+  margin-top: var(--space-2xl);
+}
