@@ -1,7 +1,5 @@
-import styles from "./NewBadge.module.css";
+import { Badge } from "./Badge";
 
 export function NewBadge() {
-  return (
-    <span className={styles.badge}>New</span>
-  );
+  return <Badge tone="success">New</Badge>;
 }

@@ -6,12 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
 import { EventHero } from "./EventHero";
 import { EventCard } from "./EventCard";
-import { Marquee } from "@/components/motion/Marquee";
 import styles from "./studio.module.css";
 
 export const metadata: Metadata = { title: "Events" };
-
-const MARQUEE_ITEMS = ["Happenings", "Studio Nights", "Live Sets", "Tyco"];
 
 export default async function StudioEventsPage() {
   const supabase = await createClient();
@@ -59,8 +56,6 @@ export default async function StudioEventsPage() {
   return (
     <div>
       {featured && <EventHero event={featured} signedIn={signedIn} hiddenNavItems={hiddenNavItems} />}
-
-      <Marquee items={MARQUEE_ITEMS} />
 
       <div className={styles.studioBody}>
         <SwipeDashboard {...swipeData} initialSlide={1} />

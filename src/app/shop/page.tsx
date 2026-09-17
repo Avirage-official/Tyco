@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SwipeDashboard } from "@/components/home/SwipeDashboard";
-import { Marquee } from "@/components/motion/Marquee";
 import { getSwipeDashboardData } from "@/lib/home/swipe-data";
 import { createClient } from "@/lib/supabase/server";
 import { ShopGrid } from "./ShopGrid";
 import styles from "./shop.module.css";
 
 export const metadata: Metadata = { title: "Shop" };
-
-const MARQUEE_ITEMS = ["Wear The Collective", "New Arrivals", "Shop", "Tyco"];
 
 export default async function ShopPage() {
   const supabase = await createClient();
@@ -25,7 +22,6 @@ export default async function ShopPage() {
   return (
     <>
       <SwipeDashboard {...swipeData} initialSlide={0} />
-      <Marquee items={MARQUEE_ITEMS} />
 
       <div className={styles.shopBody}>
         <div className={styles.pageHead}>

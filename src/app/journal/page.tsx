@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Marquee } from "@/components/motion/Marquee";
 import { createClient } from "@/lib/supabase/server";
 import { JournalList, type JournalEntry } from "./JournalList";
 import styles from "./journal.module.css";
 
 export const metadata: Metadata = { title: "Journal" };
 
-const MARQUEE_ITEMS = ["New Releases", "Southeast Asia", "The Journal", "Tyco"];
 const MERGED_LIMIT = 12;
 
 export default async function JournalPage() {
@@ -70,7 +68,6 @@ export default async function JournalPage() {
 
   return (
     <>
-      <Marquee items={MARQUEE_ITEMS} />
 
       <div className={styles.journalBody}>
         <div className={styles.pageHead}>

@@ -2,54 +2,56 @@
 
 import { motion, type HTMLMotionProps } from "motion/react";
 import { MotionLink } from "@/lib/motion/MotionLink";
+import { pressSpring } from "@/lib/motion/variants";
 import styles from "./Button.module.css";
 
-type Variant = "primary" | "ghost" | "ink";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "link";
+export type ButtonSize = "md" | "sm";
 
 type CommonProps = {
-  variant?: Variant;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   full?: boolean;
+  className?: string;
   children: React.ReactNode;
 };
 
 const press = {
-  whileHover: { scale: 1.03 },
-  whileTap: { scale: 0.96 },
-  transition: { type: "spring", stiffness: 420, damping: 28 } as const,
+  whileTap: { scale: 0.97 },
+  transition: pressSpring,
 };
 
-function classesFor({ variant = "primary", full }: { variant?: Variant; full?: boolean }) {
-  return [styles.btn, styles[variant], full ? styles.full : ""].filter(Boolean).join(" ");
+function classesFor({ variant = "primary", size = "md", full, className }: CommonProps) {
+  return [styles.btn, styles[variant], size === "sm" ? styles.sm : "", full ? styles.full : "", className ?? ""]
+    .filter(Boolean)
+    .join(" ");
 }
 
 export function Button({
   variant,
+  size,
   full,
   className,
+  children,
   ...rest
-}: CommonProps & HTMLMotionProps<"button"> & { className?: string }) {
+}: CommonProps & Omit<HTMLMotionProps<"button">, "children">) {
   return (
-    <motion.button
-      className={`${classesFor({ variant, full })} ${className ?? ""}`}
-      {...press}
-      {...rest}
-    />
+    <motion.button className={classesFor({ variant, size, full, className, children })} {...press} {...rest}>
+      {children}
+    </motion.button>
   );
 }
 
 export function LinkButton({
   href,
   variant,
+  size,
   full,
-  children,
   className,
-}: CommonProps & { href: string; className?: string }) {
+  children,
+}: CommonProps & { href: string }) {
   return (
-    <MotionLink
-      href={href}
-      className={`${classesFor({ variant, full })} ${className ?? ""}`}
-      {...press}
-    >
+    <MotionLink href={href} className={classesFor({ variant, size, full, className, children })} {...press}>
       {children}
     </MotionLink>
   );

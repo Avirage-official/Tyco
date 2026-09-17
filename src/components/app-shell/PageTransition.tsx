@@ -1,16 +1,15 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion, MotionConfig, type Variants } from "motion/react";
+import { AnimatePresence, motion, MotionConfig } from "motion/react";
+import { DUR_FAST, DUR, EASE_IN_OUT, EASE_OUT } from "@/lib/motion/variants";
 
-const EASE = [0.4, 0, 0.2, 1] as const;
-
-const variants: Variants = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.38, ease: EASE } },
-  exit: { opacity: 0, transition: { duration: 0.16, ease: EASE } },
-};
-
+/**
+ * A short cross-fade between routes. Deliberately no vertical movement:
+ * a transform on this wrapper would become the containing block for any
+ * `position: fixed` descendant (sticky bars, sheets) and pin them to the
+ * page instead of the viewport.
+ */
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   return (
@@ -18,10 +17,9 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={pathname}
-          variants={variants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { duration: DUR, ease: EASE_IN_OUT } }}
+          exit={{ opacity: 0, transition: { duration: DUR_FAST, ease: EASE_OUT } }}
         >
           {children}
         </motion.div>

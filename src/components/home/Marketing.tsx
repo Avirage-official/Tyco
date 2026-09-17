@@ -38,7 +38,7 @@ export function Marketing({
           <LinkButton href="/login" variant="ghost">
             Sign in
           </LinkButton>
-          <LinkButton href="/studio/deals" variant="ink">
+          <LinkButton href="/studio/deals" variant="secondary">
             See Deals
           </LinkButton>
         </motion.div>
