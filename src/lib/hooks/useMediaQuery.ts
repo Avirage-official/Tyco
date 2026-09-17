@@ -20,7 +20,7 @@ export function useMediaQuery(query: string): boolean {
   );
 }
 
-/** Below the desktop breakpoint used by the shell (see TopNav / MobileTopBar). */
+/** Below the desktop breakpoint used by the shell (see SiteHeader / MobileHeader). */
 export const MOBILE_QUERY = "(max-width: 859px)";
 
 export function useIsMobile(): boolean {

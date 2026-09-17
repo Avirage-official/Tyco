@@ -21,7 +21,7 @@
   height: 1.1rem;
   padding-inline: 0.25rem;
   border-radius: var(--radius-pill);
-  background: var(--accent-strong);
+  background: var(--accent);
   color: var(--on-accent);
   font-size: 0.65rem;
   font-weight: 700;
