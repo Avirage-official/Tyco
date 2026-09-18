@@ -41,6 +41,25 @@
   cursor: not-allowed;
 }
 
+/* An input with a control tucked inside its right edge. The padding keeps
+   typed text from running under it. */
+.adorned {
+  position: relative;
+  display: flex;
+}
+
+.hasTrailing {
+  padding-right: 2.9rem;
+}
+
+.trailing {
+  position: absolute;
+  inset-block: 0;
+  right: 0.15rem;
+  display: flex;
+  align-items: center;
+}
+
 .select {
   appearance: none;
   padding-right: 2.5rem;

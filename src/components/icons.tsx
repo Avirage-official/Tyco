@@ -204,3 +204,24 @@ export function IconBoat(props: IconProps) {
     </svg>
   );
 }
+
+export function IconEye(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M2.6 12S6.2 5.8 12 5.8 21.4 12 21.4 12 17.8 18.2 12 18.2 2.6 12 2.6 12Z" />
+      <circle cx="12" cy="12" r="3.1" />
+      <circle cx="12" cy="12" r="0.7" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function IconEyeOff(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 4.4 20 19.6" />
+      <path d="M9.9 6.1A9.7 9.7 0 0 1 12 5.8c5.8 0 9.4 6.2 9.4 6.2a17.6 17.6 0 0 1-3.3 3.9" />
+      <path d="M6.2 8.3A17.7 17.7 0 0 0 2.6 12S6.2 18.2 12 18.2a9.9 9.9 0 0 0 3.1-.5" />
+      <path d="M10.4 10.5a2.2 2.2 0 0 0 3.1 3" />
+    </svg>
+  );
+}

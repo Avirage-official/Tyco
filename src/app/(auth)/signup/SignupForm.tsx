@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Field";
 import { GoogleAuthButton } from "../GoogleAuthButton";
+import { PasswordInput } from "../PasswordInput";
+import { scopeOf, errorFor, type ErrorScope } from "../authErrors";
+import { safeNext } from "../next";
 import styles from "../auth.module.css";
 
 export function SignupForm({ next }: { next?: string }) {
@@ -13,6 +17,7 @@ export function SignupForm({ next }: { next?: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [scope, setScope] = useState<ErrorScope>("form");
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +28,8 @@ export function SignupForm({ next }: { next?: string }) {
     setNotice(null);
 
     const callbackUrl = new URL("/auth/callback", window.location.origin);
-    if (next) callbackUrl.searchParams.set("next", next);
+    const destination = safeNext(next);
+    if (destination) callbackUrl.searchParams.set("next", destination);
 
     const supabase = createClient();
     const { data, error } = await supabase.auth.signUp({
@@ -36,14 +42,14 @@ export function SignupForm({ next }: { next?: string }) {
     });
 
     if (error) {
+      setScope(scopeOf(error.message));
       setError(error.message);
       setLoading(false);
       return;
     }
 
     if (data.session) {
-      const destination = next && next.startsWith("/") && !next.startsWith("//") ? next : "/account";
-      router.push(destination);
+      router.push(destination ?? "/account");
       router.refresh();
       return;
     }
@@ -56,54 +62,53 @@ export function SignupForm({ next }: { next?: string }) {
     <>
       <GoogleAuthButton next={next} />
       <div className={styles.divider}>or</div>
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="displayName">
-            Name
-          </label>
-          <input
-            id="displayName"
+
+      <form onSubmit={handleSubmit} noValidate>
+        {error && scope === "form" && (
+          <p className={styles.alert} role="alert">
+            {error}
+          </p>
+        )}
+        {notice && (
+          <p className={styles.notice} role="status">
+            {notice}
+          </p>
+        )}
+
+        <div className={styles.fields}>
+          <Input
+            label="Name"
             type="text"
             autoComplete="name"
-            className={styles.input}
+            helper="How you'll be greeted, and the name staff see when you redeem."
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
           />
-        </div>
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
+
+          <Input
+            label="Email"
             type="email"
             required
             autoComplete="email"
-            className={styles.input}
             value={email}
+            error={errorFor(scope, error, "email")}
             onChange={(e) => setEmail(e.target.value)}
           />
-        </div>
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            required
-            minLength={6}
+
+          <PasswordInput
+            label="Password"
             autoComplete="new-password"
-            className={styles.input}
+            minLength={6}
+            helper="At least 6 characters."
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
+            error={errorFor(scope, error, "password")}
           />
+
+          <Button type="submit" full className={styles.submit} disabled={loading}>
+            {loading ? "Creating account…" : "Create account"}
+          </Button>
         </div>
-        {error && <p className={styles.error}>{error}</p>}
-        {notice && <p className={styles.notice}>{notice}</p>}
-        <Button type="submit" full disabled={loading}>
-          {loading ? "Creating account…" : "Create account"}
-        </Button>
       </form>
     </>
   );

@@ -1,0 +1,36 @@
+.stack {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* Each slide sits on top of the last and fades in. The slow scale is a
+   drift, not an effect: over five seconds it is barely perceptible, and it
+   stops the photograph reading as a flat backdrop. */
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.05);
+  transition:
+    opacity 1200ms var(--ease),
+    transform 7000ms linear;
+}
+
+.slide[data-active="true"] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    transform: none;
+    transition: opacity 200ms linear;
+  }
+}
