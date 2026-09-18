@@ -128,6 +128,13 @@ export type DealRedemption = {
   reference_code: string;
   approved_at: string | null;
   approved_by: string | null;
+  approved_by_name: string | null;
+  declined_at: string | null;
+  declined_by_name: string | null;
+  declined_reasons: string[] | null;
+  reversed_at: string | null;
+  reversed_by_name: string | null;
+  reversed_reasons: string[] | null;
   redeemed_location: string | null;
   created_at: string;
   updated_at: string;
@@ -634,6 +641,18 @@ export interface Database {
       };
       approve_deal_redemption: {
         Args: { p_redemption_id: string; p_location: string | null };
+        Returns: DealRedemption;
+      };
+      approve_deal_checkin: {
+        Args: { p_redemption_id: string; p_staff_name: string };
+        Returns: DealRedemption;
+      };
+      decline_deal_checkin: {
+        Args: { p_redemption_id: string; p_staff_name: string; p_reasons: string[] };
+        Returns: DealRedemption;
+      };
+      reverse_deal_decline: {
+        Args: { p_redemption_id: string; p_staff_name: string; p_reasons: string[] };
         Returns: DealRedemption;
       };
       expire_stale_deal_redemptions: {

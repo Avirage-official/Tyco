@@ -1659,6 +1659,212 @@ $$;
 
 grant execute on function public.approve_deal_redemption(uuid, text) to authenticated;
 
+-- ----------------------------------------------------------------------------
+-- Deal counter decisions, mirroring the event_tickets door columns. Vendor
+-- staff have no Tyco account, so the member opens the redemption on their own
+-- phone and hands it over; staff type their own name and approve or decline.
+-- approve_deal_redemption above stays for the admin fallback at
+-- /admin/deal-checkins; these three are the member-phone path.
+-- ----------------------------------------------------------------------------
+alter table public.deal_redemptions add column if not exists approved_by_name text;
+alter table public.deal_redemptions add column if not exists declined_at timestamptz;
+alter table public.deal_redemptions add column if not exists declined_by_name text;
+alter table public.deal_redemptions add column if not exists declined_reasons text[];
+alter table public.deal_redemptions add column if not exists reversed_at timestamptz;
+alter table public.deal_redemptions add column if not exists reversed_by_name text;
+alter table public.deal_redemptions add column if not exists reversed_reasons text[];
+
+-- Defense-in-depth against a direct RPC call; src/lib/deals/doorReasons.ts is
+-- what the panel actually offers.
+alter table public.deal_redemptions drop constraint if exists deal_redemptions_declined_reasons_valid;
+alter table public.deal_redemptions add constraint deal_redemptions_declined_reasons_valid
+  check (
+    declined_reasons is null or declined_reasons <@ array[
+      'Already redeemed',
+      'Not valid at this outlet',
+      'Outside the offer hours or dates',
+      'Item or service unavailable',
+      'Details do not match the member',
+      'Other'
+    ]::text[]
+  );
+
+alter table public.deal_redemptions drop constraint if exists deal_redemptions_reversed_reasons_valid;
+alter table public.deal_redemptions add constraint deal_redemptions_reversed_reasons_valid
+  check (
+    reversed_reasons is null or reversed_reasons <@ array[
+      'Declined by mistake - the deal was valid',
+      'Issue resolved with the member',
+      'Wrong deal was checked',
+      'Other'
+    ]::text[]
+  );
+
+create or replace function public.approve_deal_checkin(p_redemption_id uuid, p_staff_name text)
+returns public.deal_redemptions
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_redemption public.deal_redemptions;
+  v_staff_name text := nullif(trim(p_staff_name), '');
+begin
+  if v_staff_name is null then
+    raise exception 'Staff name is required';
+  end if;
+
+  select * into v_redemption
+  from public.deal_redemptions
+  where id = p_redemption_id and user_id = auth.uid()
+  for update;
+
+  if v_redemption.id is null then
+    raise exception 'Redemption not found';
+  end if;
+
+  if v_redemption.status != 'paid' then
+    raise exception 'Redemption is not paid';
+  end if;
+
+  if v_redemption.approved_at is not null then
+    raise exception 'Redemption already approved';
+  end if;
+
+  if v_redemption.declined_at is not null then
+    raise exception 'Redemption was declined';
+  end if;
+
+  update public.deal_redemptions
+  set approved_at = now(), approved_by_name = v_staff_name
+  where id = p_redemption_id
+  returning * into v_redemption;
+
+  return v_redemption;
+end;
+$$;
+
+grant execute on function public.approve_deal_checkin(uuid, text) to authenticated;
+
+create or replace function public.decline_deal_checkin(p_redemption_id uuid, p_staff_name text, p_reasons text[])
+returns public.deal_redemptions
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_redemption public.deal_redemptions;
+  v_staff_name text := nullif(trim(p_staff_name), '');
+begin
+  if v_staff_name is null then
+    raise exception 'Staff name is required';
+  end if;
+
+  if p_reasons is null or array_length(p_reasons, 1) is null then
+    raise exception 'At least one reason is required';
+  end if;
+
+  select * into v_redemption
+  from public.deal_redemptions
+  where id = p_redemption_id and user_id = auth.uid()
+  for update;
+
+  if v_redemption.id is null then
+    raise exception 'Redemption not found';
+  end if;
+
+  if v_redemption.status != 'paid' then
+    raise exception 'Redemption is not paid';
+  end if;
+
+  if v_redemption.approved_at is not null then
+    raise exception 'Redemption already approved';
+  end if;
+
+  if v_redemption.declined_at is not null then
+    raise exception 'Redemption already declined';
+  end if;
+
+  update public.deal_redemptions
+  set declined_at = now(), declined_by_name = v_staff_name, declined_reasons = p_reasons
+  where id = p_redemption_id
+  returning * into v_redemption;
+
+  -- The vendor never served this one, so the month's slot goes back to the
+  -- pool. The money is not touched: a decline opens a claim that Tyco settles
+  -- by hand, it is never an automatic refund.
+  update public.deal_cycles
+  set redemptions_used = greatest(0, redemptions_used - 1)
+  where id = v_redemption.deal_cycle_id;
+
+  return v_redemption;
+end;
+$$;
+
+grant execute on function public.decline_deal_checkin(uuid, text, text[]) to authenticated;
+
+create or replace function public.reverse_deal_decline(p_redemption_id uuid, p_staff_name text, p_reasons text[])
+returns public.deal_redemptions
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_redemption public.deal_redemptions;
+  v_staff_name text := nullif(trim(p_staff_name), '');
+begin
+  if v_staff_name is null then
+    raise exception 'Staff name is required';
+  end if;
+
+  if p_reasons is null or array_length(p_reasons, 1) is null then
+    raise exception 'At least one reason is required';
+  end if;
+
+  select * into v_redemption
+  from public.deal_redemptions
+  where id = p_redemption_id and user_id = auth.uid()
+  for update;
+
+  if v_redemption.id is null then
+    raise exception 'Redemption not found';
+  end if;
+
+  if v_redemption.declined_at is null then
+    raise exception 'Redemption was not declined';
+  end if;
+
+  if v_redemption.approved_at is not null then
+    raise exception 'Redemption already approved';
+  end if;
+
+  -- The reverser is the one serving the member, so they become the approving
+  -- staff name too; the decline's own fields are left untouched so both halves
+  -- of the story stay visible afterward.
+  update public.deal_redemptions
+  set approved_at = now(),
+      approved_by_name = v_staff_name,
+      reversed_at = now(),
+      reversed_by_name = v_staff_name,
+      reversed_reasons = p_reasons
+  where id = p_redemption_id
+  returning * into v_redemption;
+
+  -- Take the slot back if the month still has room. If someone else claimed
+  -- it in between, the member is standing at the counter being served, so the
+  -- approval wins and that month simply ran one over its cap. Payout counts
+  -- approved redemptions directly, so nothing financial depends on this.
+  update public.deal_cycles
+  set redemptions_used = redemptions_used + 1
+  where id = v_redemption.deal_cycle_id
+    and redemptions_used < redemptions_cap;
+
+  return v_redemption;
+end;
+$$;
+
+grant execute on function public.reverse_deal_decline(uuid, text, text[]) to authenticated;
+
 -- Sweeps a redemption/ticket stuck at "pending" (an abandoned Revolut
 -- checkout that never completed) to "cancelled" once it's old enough that
 -- it's never coming back. Called lazily from the account and admin list
