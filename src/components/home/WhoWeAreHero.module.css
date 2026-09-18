@@ -144,10 +144,6 @@
   color: var(--paper);
 }
 
-.title em {
-  font-style: italic;
-  color: var(--accent);
-}
 
 .cta {
   display: inline-flex;
