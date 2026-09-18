@@ -3,10 +3,10 @@
    be readable across a counter, at arm's length, by someone who has never
    seen the app. */
 
+/* Flush to the tile's edges — see Pass.module.css's .slot. Square, because
+   the tile is. */
 .band {
-  margin-top: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-md);
   border-left: 3px solid transparent;
 }
 
@@ -55,23 +55,27 @@
 
 /* -- waiting state ---------------------------------------------------- */
 
-.primary {
-  margin-top: var(--space-sm);
-  /* Comfortably past the 44pt/48dp minimums — this is tapped by someone
-     else, holding a phone that isn't theirs. */
-  min-height: 3.25rem;
+/* Doubled class to beat the shared Button's pill radius: this one runs the
+   full width of a square tile. Comfortably past the 44pt/48dp minimums —
+   it is tapped by someone else, on a phone that isn't theirs. */
+.primary.primary {
+  min-height: 3.5rem;
+  border-radius: 0;
   font-size: 1rem;
 }
 
 .handHint {
-  margin-top: var(--space-2xs);
+  padding: 0 var(--space-md) var(--space-2xs);
   text-align: center;
   font-size: var(--text-xs);
   color: var(--fg-faint);
 }
 
 .undo {
-  margin-top: var(--space-2xs);
+  display: block;
+  width: 100%;
+  padding: var(--space-2xs) var(--space-md) var(--space-xs);
+  text-align: left;
   font-size: var(--text-xs);
   color: var(--fg-faint);
   text-decoration: underline;

@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/Badge";
-import { Card, CardMeta, CardPrice, CardTitle } from "@/components/ui/Card";
+import { Card } from "@/components/ui/Card";
 import { CoverImage } from "@/components/ui/CoverImage";
 import type { DealSummary } from "@/lib/deals/catalog";
 import { formatPrice } from "@/lib/format";
@@ -13,11 +13,12 @@ export function availabilityLabel(capRemaining: number) {
 
 export function DealCard({ deal }: { deal: DealSummary }) {
   const availability = availabilityLabel(deal.capRemaining);
+  const meta = [deal.subcategoryName, deal.locations[0]].filter(Boolean).join(" · ");
 
   return (
     <Card
       href={`/deals/${deal.id}`}
-      ratio="4/3"
+      ratio="3/4"
       media={
         <CoverImage
           src={deal.coverUrl}
@@ -26,14 +27,11 @@ export function DealCard({ deal }: { deal: DealSummary }) {
         />
       }
       badge={<Badge tone={availability.tone}>{availability.text}</Badge>}
-    >
-      <CardMeta>{deal.vendorName}</CardMeta>
-      <CardTitle>{deal.title}</CardTitle>
-      <CardPrice
-        original={deal.originalPriceCents != null ? formatPrice(deal.originalPriceCents, deal.currency) : undefined}
-      >
-        {formatPrice(deal.memberPriceCents, deal.currency)}
-      </CardPrice>
-    </Card>
+      kicker={deal.vendorName}
+      title={deal.title}
+      meta={meta || undefined}
+      price={formatPrice(deal.memberPriceCents, deal.currency)}
+      priceWas={deal.originalPriceCents != null ? formatPrice(deal.originalPriceCents, deal.currency) : null}
+    />
   );
 }

@@ -4,62 +4,76 @@ import { MotionLink } from "@/lib/motion/MotionLink";
 import { fadeUpItem } from "@/lib/motion/variants";
 import styles from "./Card.module.css";
 
-export type CardRatio = "4/3" | "3/4" | "1/1" | "16/9";
+export type CardRatio = "3/4" | "4/3" | "1/1" | "16/9";
 
 /**
- * The single card anatomy: media on top at a fixed ratio, body below on
- * `--surface`. The whole card is one link. Put a `CoverImage` (or any
- * fill-positioned media) in `media`; put text in `children`. Cards inside
- * a `motion` container carrying `fadeUpContainer` stagger in on their own.
+ * The single card anatomy: the photograph *is* the card. Text sits on the
+ * image rather than in a panel below it, which is how every image-led
+ * product does this — a filled box around a photo is the thing that reads
+ * as a component library rather than a designed page.
+ *
+ * One radius, on the card, with nothing nested inside it. No chips, and no
+ * button per card: the whole card is the link, so a grid stays scannable
+ * and there is nothing to mis-tap.
+ *
+ * Cards inside a `motion` container carrying `fadeUpContainer` stagger in
+ * on their own.
  */
 export function Card({
   href,
   media,
-  ratio = "4/3",
+  ratio = "3/4",
   badge,
-  children,
+  kicker,
+  title,
+  meta,
+  price,
+  priceWas,
+  muted = false,
   className,
   ariaLabel,
 }: {
   href: string;
   media: React.ReactNode;
   ratio?: CardRatio;
-  /** Rendered in the top-left corner of the media. */
+  /** One small tag, top-left: availability, status. Never a row of them. */
   badge?: React.ReactNode;
-  children: React.ReactNode;
+  /** The line above the title — a vendor, or a date. */
+  kicker?: string;
+  title: string;
+  /** Category, venue, location. */
+  meta?: string;
+  price?: string;
+  /** Struck through beside the price, where there is a saving to show. */
+  priceWas?: string | null;
+  /** Past events and spent passes: dimmed, and still. */
+  muted?: boolean;
   className?: string;
   ariaLabel?: string;
 }) {
   return (
     <MotionLink
       href={href}
-      className={className ? `${styles.card} ${className}` : styles.card}
+      className={[styles.card, muted ? styles.muted : "", className ?? ""].filter(Boolean).join(" ")}
+      style={{ aspectRatio: ratio }}
       variants={fadeUpItem}
       aria-label={ariaLabel}
     >
-      <span className={styles.media} style={{ aspectRatio: ratio }}>
-        {media}
-        {badge && <span className={styles.badge}>{badge}</span>}
+      <span className={styles.media}>{media}</span>
+      <span className={styles.scrim} aria-hidden />
+      {badge && <span className={styles.badge}>{badge}</span>}
+
+      <span className={styles.body}>
+        {kicker && <span className={styles.kicker}>{kicker}</span>}
+        <span className={styles.title}>{title}</span>
+        {meta && <span className={styles.meta}>{meta}</span>}
+        {price && (
+          <span className={styles.priceRow}>
+            <span className={styles.price}>{price}</span>
+            {priceWas && <s className={styles.priceWas}>{priceWas}</s>}
+          </span>
+        )}
       </span>
-      <span className={styles.body}>{children}</span>
     </MotionLink>
-  );
-}
-
-/** Title / meta / price helpers so card bodies stay consistent. */
-export function CardTitle({ children }: { children: React.ReactNode }) {
-  return <span className={styles.title}>{children}</span>;
-}
-
-export function CardMeta({ children }: { children: React.ReactNode }) {
-  return <span className={styles.meta}>{children}</span>;
-}
-
-export function CardPrice({ children, original }: { children: React.ReactNode; original?: React.ReactNode }) {
-  return (
-    <span className={styles.priceRow}>
-      <span className={styles.price}>{children}</span>
-      {original && <s className={styles.priceOriginal}>{original}</s>}
-    </span>
   );
 }

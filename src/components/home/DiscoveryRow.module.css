@@ -11,17 +11,23 @@
 .grid {
   display: grid;
   gap: var(--space-sm);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 560px) {
   .grid {
     gap: var(--space-md);
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1000px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1400px) {
   .grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }

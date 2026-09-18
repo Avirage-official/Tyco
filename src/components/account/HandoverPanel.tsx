@@ -186,10 +186,10 @@ export function HandoverPanel({
 
   return (
     <>
+      <p className={styles.handHint}>Hand your phone to staff</p>
       <Button full onClick={() => setOpen(true)} className={styles.primary}>
         {actionLabel}
       </Button>
-      <p className={styles.handHint}>Hand your phone to staff</p>
 
       <Modal open={open} onClose={closeModal} labelledBy={titleId}>
         <div className={styles.sheet}>

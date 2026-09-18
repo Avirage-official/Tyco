@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Pass, PassCode } from "@/components/account/Pass";
+import { Pass, type PassTone } from "@/components/account/Pass";
 import { HandoverPanel } from "@/components/account/HandoverPanel";
 import { fadeUpContainer, fadeUpItem, revealViewport } from "@/lib/motion/variants";
-import { formatEventDateTime, formatPrice } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { DENIAL_REASONS, REVERSAL_REASONS } from "@/lib/tickets/doorReasons";
 import { approveTicketCheckIn, denyTicketCheckIn, reverseTicketDenial, resumeTicketCheckout } from "./actions";
 import styles from "./tickets.module.css";
@@ -84,37 +83,19 @@ export function TicketList({
       {tickets.map((ticket) => {
         const event = eventById.get(ticket.event_id);
         const title = event?.title ?? "Event";
-        const meta = event
-          ? [formatEventDateTime(event.event_date), event.location].filter(Boolean).join(" · ")
-          : undefined;
 
         return (
           <motion.li key={ticket.id} variants={fadeUpItem}>
             <Pass
-              coverUrl={event?.cover_url ?? null}
-              coverAlt={title}
+              artworkUrl={event?.cover_url ?? null}
+              artworkAlt={title}
               title={title}
-              meta={meta}
+              date={event ? formatDate(event.event_date) : "—"}
+              status={statusOf(ticket).label}
+              tone={statusOf(ticket).tone}
               holderName={holderName}
+              code={ticket.reference_code}
               highlight={ticket.id === justPurchasedId}
-              status={
-                ticket.status !== "paid" ? (
-                  <span className={styles.statusSlot}>
-                    <Badge tone={ticket.status === "pending" ? "warning" : "neutral"}>
-                      {ticket.status === "pending" ? "Payment pending" : ticket.status}
-                    </Badge>
-                  </span>
-                ) : null
-              }
-              footer={
-                <>
-                  <PassCode code={ticket.reference_code} />
-                  <span>
-                    {ticket.quantity} {ticket.quantity === 1 ? "person" : "people"} ·{" "}
-                    {formatPrice(ticket.total_cents, ticket.currency)}
-                  </span>
-                </>
-              }
             >
               {ticket.status === "paid" && (
                 <HandoverPanel
@@ -174,6 +155,15 @@ export function TicketList({
       })}
     </motion.ul>
   );
+}
+
+/** The label and colour at the top of the tile — the first thing staff read. */
+function statusOf(ticket: Ticket): { label: string; tone: PassTone } {
+  if (ticket.status === "pending") return { label: "Payment pending", tone: "refused" };
+  if (ticket.status !== "paid") return { label: ticket.status, tone: "muted" };
+  if (ticket.checked_in_at) return { label: "Checked in", tone: "done" };
+  if (ticket.denied_at) return { label: "Denied", tone: "refused" };
+  return { label: "Ready", tone: "ready" };
 }
 
 type TicketDecisionFields = {
