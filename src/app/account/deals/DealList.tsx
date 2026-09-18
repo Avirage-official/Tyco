@@ -1,11 +1,9 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Badge } from "@/components/ui/Badge";
-import { Pass, PassCode } from "@/components/account/Pass";
+import { Pass, type PassTone } from "@/components/account/Pass";
 import { HandoverPanel } from "@/components/account/HandoverPanel";
 import { fadeUpContainer, fadeUpItem, revealViewport } from "@/lib/motion/variants";
-import { formatPrice } from "@/lib/format";
 import { DECLINE_REASONS, REVERSAL_REASONS } from "@/lib/deals/doorReasons";
 import { approveDealCheckIn, declineDealCheckIn, reverseDealDecline } from "./actions";
 import styles from "./deals.module.css";
@@ -59,27 +57,15 @@ export function DealList({
         return (
           <motion.li key={redemption.id} variants={fadeUpItem}>
             <Pass
-              coverUrl={deal?.cover_url ?? null}
-              coverAlt={`${title} at ${vendor}`}
+              artworkUrl={deal?.cover_url ?? null}
+              artworkAlt={`${title} at ${vendor}`}
               title={title}
-              meta={vendor}
+              date={vendor}
+              status={statusOf(redemption).label}
+              tone={statusOf(redemption).tone}
               holderName={holderName}
+              code={redemption.reference_code}
               highlight={redemption.id === justPurchasedId}
-              status={
-                redemption.status !== "paid" ? (
-                  <span className={styles.statusSlot}>
-                    <Badge tone={redemption.status === "pending" ? "warning" : "neutral"}>
-                      {redemption.status === "pending" ? "Payment pending" : redemption.status}
-                    </Badge>
-                  </span>
-                ) : null
-              }
-              footer={
-                <>
-                  <PassCode code={redemption.reference_code} />
-                  <span>{formatPrice(redemption.total_cents, redemption.currency)}</span>
-                </>
-              }
             >
               {redemption.status === "paid" && (
                 <HandoverPanel
@@ -121,6 +107,15 @@ export function DealList({
       })}
     </motion.ul>
   );
+}
+
+/** The label and colour at the top of the tile — the first thing staff read. */
+function statusOf(r: Redemption): { label: string; tone: PassTone } {
+  if (r.status === "pending") return { label: "Payment pending", tone: "refused" };
+  if (r.status !== "paid") return { label: r.status, tone: "muted" };
+  if (r.approved_at) return { label: "Redeemed", tone: "done" };
+  if (r.declined_at) return { label: "Declined", tone: "refused" };
+  return { label: "Ready", tone: "ready" };
 }
 
 type RedemptionDecisionFields = {

@@ -1,71 +1,67 @@
-import { CoverImage } from "@/components/ui/CoverImage";
+import Image from "next/image";
 import styles from "./Pass.module.css";
+
+export type PassTone = "ready" | "done" | "refused" | "muted";
 
 /**
  * One anatomy for everything a member holds and shows to staff — an event
- * ticket, a deal redemption. Wallet passes and paper tickets settle on the
- * same order for the same reason: what it is, when, and *who it belongs to*
- * on top, because staff verify the person in front of them before anything
- * else. The action comes next. Money, quantities and the reference code are
- * true but irrelevant at the counter, so they sit last, small.
+ * ticket, a deal redemption. A flat panel on a tight grid: the gutters do
+ * the containing, so the tile needs no shape, fill contrast or shadow of
+ * its own.
+ *
+ * Reading order follows what happens at a counter: what state it's in, then
+ * what it is, then *who holds it*, because staff verify the person before
+ * anything else. The reference code is the admin fallback — staff type
+ * their own name, they never read it — so it sits last, as small print.
  */
 export function Pass({
-  coverUrl,
-  coverAlt,
-  title,
-  meta,
-  holderName,
+  artworkUrl,
+  artworkAlt,
   status,
+  tone = "ready",
+  date,
+  title,
+  holderName,
+  code,
   children,
-  footer,
   highlight = false,
 }: {
-  coverUrl: string | null;
-  coverAlt: string;
+  artworkUrl: string | null;
+  artworkAlt: string;
+  /** The small label top-left: Ready, Redeemed, Declined, Payment pending. */
+  status: string;
+  tone?: PassTone;
+  date: string;
   title: string;
-  meta?: string;
-  /** The member's own name — what staff check against the person present. */
   holderName: string;
-  /** Payment state, when it isn't simply paid. */
-  status?: React.ReactNode;
-  /** The handover panel, or whatever action this pass currently needs. */
+  code: string;
+  /** The action, or the settled state — rendered flush to the tile's edges. */
   children?: React.ReactNode;
-  /** Reference code, totals — small print. */
-  footer?: React.ReactNode;
   highlight?: boolean;
 }) {
   return (
     <article className={highlight ? `${styles.pass} ${styles.highlight}` : styles.pass}>
-      <div className={styles.cover}>
-        <CoverImage src={coverUrl} alt={coverAlt} sizes="(min-width: 760px) 520px, 100vw" />
+      <div className={styles.top}>
+        <span className={styles.mark}>
+          {artworkUrl ? (
+            <Image src={artworkUrl} alt={artworkAlt} fill sizes="56px" className={styles.markImg} />
+          ) : (
+            <span className={styles.markEmpty} aria-label={artworkAlt} role="img" />
+          )}
+        </span>
+        <span className={styles.date}>{date}</span>
       </div>
 
-      <div className={styles.body}>
-        <header className={styles.header}>
-          <h3 className={styles.title}>{title}</h3>
-          {meta && <p className={styles.meta}>{meta}</p>}
-          {status}
-        </header>
+      <p className={`${styles.status} ${styles[tone]}`}>{status}</p>
+      <h3 className={styles.title}>{title}</h3>
 
-        <p className={styles.holder}>
-          <span className={styles.holderLabel}>Held by</span>
-          <span className={styles.holderName}>{holderName}</span>
-        </p>
-
-        {children}
-
-        {footer && <div className={styles.footer}>{footer}</div>}
+      <div className={styles.foot}>
+        <p className={styles.holderLabel}>Held by</p>
+        <p className={styles.holder}>{holderName}</p>
+        <p className={styles.code}>{code}</p>
       </div>
+
+      {children && <div className={styles.slot}>{children}</div>}
     </article>
-  );
-}
-
-/** Reference code, set as small print: it is the admin fallback, not the
- *  thing staff read — they type their own name instead. */
-export function PassCode({ code, label = "Reference" }: { code: string; label?: string }) {
-  return (
-    <span className={styles.code}>
-      {label} <b>{code}</b>
-    </span>
   );
 }
