@@ -27,6 +27,14 @@ export default async function TicketsPage({
   // more than 12 hours old is never coming back.
   await supabase.rpc("expire_stale_event_tickets");
 
+  // Staff check the name on the pass against the person holding the phone.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("id", user.id)
+    .maybeSingle();
+  const holderName = profile?.display_name ?? user.email?.split("@")[0] ?? "Member";
+
   const { data: tickets } = await supabase
     .from("event_tickets")
     .select(
@@ -64,7 +72,12 @@ export default async function TicketsPage({
             action={<LinkButton href="/happenings">See what&rsquo;s on</LinkButton>}
           />
         ) : (
-          <TicketList tickets={tickets} eventById={eventById} justPurchasedId={justPurchasedId} />
+          <TicketList
+            tickets={tickets}
+            eventById={eventById}
+            holderName={holderName}
+            justPurchasedId={justPurchasedId}
+          />
         )}
       </div>
     </>

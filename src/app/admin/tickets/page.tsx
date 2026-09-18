@@ -31,9 +31,20 @@ export default async function AdminTicketsPage() {
   const eventTitleById = new Map((events ?? []).map((e) => [e.id, e.title]));
   const emailByUserId = new Map((userList?.users ?? []).map((u) => [u.id, u.email]));
 
+  /** Matches /admin/deal-redemptions: the door decision sits on the holder's
+   *  own phone, so a repeat denier is the signal worth watching. */
+  const DENIAL_FLAG_THRESHOLD = 5;
+
   const paidTickets = (tickets ?? []).filter((t) => t.status === "paid");
   const revenueCents = paidTickets.reduce((sum, t) => sum + t.total_cents, 0);
   const paxSold = paidTickets.reduce((sum, t) => sum + t.quantity, 0);
+  const deniedCount = paidTickets.filter((t) => t.denied_at).length;
+
+  const denialsByUser = new Map<string, number>();
+  for (const t of tickets ?? []) {
+    if (!t.denied_at) continue;
+    denialsByUser.set(t.user_id, (denialsByUser.get(t.user_id) ?? 0) + 1);
+  }
 
   return (
     <div>
@@ -53,6 +64,10 @@ export default async function AdminTicketsPage() {
         <div className={styles.stat}>
           <div className={styles.statValue}>{(tickets ?? []).filter((t) => t.status === "pending").length}</div>
           <div className={styles.statLabel}>Pending payment</div>
+        </div>
+        <div className={styles.stat}>
+          <div className={styles.statValue}>{deniedCount}</div>
+          <div className={styles.statLabel}>Denied at the door</div>
         </div>
       </div>
 
@@ -79,7 +94,14 @@ export default async function AdminTicketsPage() {
                 <tr key={ticket.id}>
                   <td className={styles.rowTitle}>{ticket.reference_code}</td>
                   <td className={styles.rowMeta}>{eventTitleById.get(ticket.event_id) ?? "—"}</td>
-                  <td className={styles.rowMeta}>{emailByUserId.get(ticket.user_id) ?? "—"}</td>
+                  <td className={styles.rowMeta}>
+                    {emailByUserId.get(ticket.user_id) ?? "—"}
+                    {(denialsByUser.get(ticket.user_id) ?? 0) >= DENIAL_FLAG_THRESHOLD && (
+                      <span className={`${styles.badge} ${styles.badgeDraft}`} style={{ marginLeft: "0.4rem" }}>
+                        {denialsByUser.get(ticket.user_id)} denials
+                      </span>
+                    )}
+                  </td>
                   <td className={styles.rowMeta}>{ticket.quantity}</td>
                   <td className={styles.rowMeta}>{formatPrice(ticket.total_cents, ticket.currency)}</td>
                   <td className={styles.rowMeta}>{formatDate(ticket.created_at)}</td>

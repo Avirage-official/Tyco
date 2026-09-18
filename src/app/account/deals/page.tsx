@@ -4,18 +4,9 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/server";
-import { formatPrice } from "@/lib/format";
-import { DealDoorPanel } from "./DealDoorPanel";
-import styles from "./deals.module.css";
+import { DealList } from "./DealList";
 
 export const metadata: Metadata = { title: "Your deals" };
-
-const STATUS_LABEL: Record<string, string> = {
-  pending: "Payment pending",
-  paid: "Paid",
-  cancelled: "Cancelled",
-  refunded: "Refunded",
-};
 
 export default async function AccountDealsPage({
   searchParams,
@@ -37,6 +28,14 @@ export default async function AccountDealsPage({
   // doesn't sit forever with a stale "confirming your payment" message.
   await supabase.rpc("expire_stale_deal_redemptions");
 
+  // Staff check the name on the pass against the person holding the phone.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("id", user.id)
+    .maybeSingle();
+  const holderName = profile?.display_name ?? user.email?.split("@")[0] ?? "Member";
+
   const { data: redemptions } = await supabase
     .from("deal_redemptions")
     .select(
@@ -46,10 +45,10 @@ export default async function AccountDealsPage({
     .order("created_at", { ascending: false });
 
   const dealIds = Array.from(new Set((redemptions ?? []).map((r) => r.deal_id)));
-  type DealRow = { id: string; title: string };
+  type DealRow = { id: string; title: string; cover_url: string | null };
   let deals: DealRow[] = [];
   if (dealIds.length > 0) {
-    const { data } = await supabase.from("deals").select("id, title").in("id", dealIds);
+    const { data } = await supabase.from("deals").select("id, title, cover_url").in("id", dealIds);
     deals = data ?? [];
   }
   const dealById = new Map(deals.map((d) => [d.id, d]));
@@ -74,50 +73,13 @@ export default async function AccountDealsPage({
             action={<LinkButton href="/deals">See deals</LinkButton>}
           />
         ) : (
-          <ul className={styles.list}>
-            {redemptions.map((redemption) => {
-              const justPurchased = redemption.id === justPurchasedId;
-              return (
-                <li
-                  key={redemption.id}
-                  className={justPurchased ? `${styles.card} ${styles.cardHighlight}` : styles.card}
-                >
-                  <div className={styles.cardHeader}>
-                    <div>
-                      <p className={styles.dealTitle}>{dealById.get(redemption.deal_id)?.title ?? "Deal"}</p>
-                      <p className={styles.dealMeta}>{vendorById.get(redemption.vendor_id) ?? "Vendor"}</p>
-                    </div>
-                    <span className={`${styles.status} ${styles[`status_${redemption.status}`] ?? ""}`}>
-                      {STATUS_LABEL[redemption.status] ?? redemption.status}
-                    </span>
-                  </div>
-
-                  {redemption.status === "paid" && (
-                    <div className={styles.proof}>
-                      <div>
-                        <p className={styles.proofLabel}>Show this at the counter</p>
-                        <p className={styles.referenceCode}>{redemption.reference_code}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {justPurchased && redemption.status === "pending" && (
-                    <p className={styles.confirming}>
-                      We&rsquo;re confirming your payment — refresh this page in a moment if it doesn&rsquo;t
-                      update.
-                    </p>
-                  )}
-
-                  {redemption.status === "paid" && <DealDoorPanel redemption={redemption} />}
-
-                  <div className={styles.cardFooter}>
-                    <span>Total</span>
-                    <span className={styles.total}>{formatPrice(redemption.total_cents, redemption.currency)}</span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          <DealList
+            redemptions={redemptions}
+            dealById={dealById}
+            vendorById={vendorById}
+            holderName={holderName}
+            justPurchasedId={justPurchasedId}
+          />
         )}
       </div>
     </>
