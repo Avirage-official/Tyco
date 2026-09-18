@@ -95,9 +95,7 @@ export function WhoWeAreHero({ slides }: { slides: AboutSlide[] }) {
 
             <div className={styles.copy}>
               <p className="eyebrow">Who we are</p>
-              <h2 className={styles.title}>
-                Not just deals. <em>A movement.</em>
-              </h2>
+              <h2 className={styles.title}>The scene, at member prices.</h2>
             </div>
           </div>
 

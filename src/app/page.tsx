@@ -1,11 +1,15 @@
 import { Marketing } from "@/components/home/Marketing";
 import { Dashboard, type DashboardProps } from "@/components/home/Dashboard";
-import type { SpotlightProps } from "@/components/home/Spotlight";
 import type { ReleasePreview } from "@/components/home/JournalStrip";
 import { getSwipeDashboardData } from "@/lib/home/swipe-data";
+import { getDealCatalog } from "@/lib/deals/catalog";
+import { getEventCatalog } from "@/lib/events/catalog";
 import { createClient } from "@/lib/supabase/server";
 
 const RELEASE_STRIP_LIMIT = 10;
+
+/** Deals and events shown on the homepage before "See all" takes over. */
+const ROW_LIMIT = 4;
 
 async function getFeaturedReleases(
   supabase: Awaited<ReturnType<typeof createClient>>
@@ -19,33 +23,6 @@ async function getFeaturedReleases(
     .limit(RELEASE_STRIP_LIMIT);
 
   return data ?? [];
-}
-
-async function getSpotlight(
-  supabase: Awaited<ReturnType<typeof createClient>>
-): Promise<SpotlightProps | null> {
-  const nowIso = new Date().toISOString();
-
-  const { data: event } = await supabase
-    .from("events")
-    .select("id, title, location, organizer, event_date, cover_url")
-    .eq("is_published", true)
-    .gte("event_date", nowIso)
-    .order("event_date", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (!event) return null;
-
-  return {
-    kind: "event",
-    href: `/happenings/${event.id}`,
-    title: event.title,
-    location: event.location,
-    organizer: event.organizer,
-    date: event.event_date,
-    coverUrl: event.cover_url,
-  };
 }
 
 async function getDashboardData(
@@ -77,11 +54,19 @@ export default async function Home() {
     return <Dashboard {...dashboardData} />;
   }
 
-  const [event, { data: settings }, releases] = await Promise.all([
-    getSpotlight(supabase),
+  const [{ deals }, { upcoming }, { data: settings }, releases] = await Promise.all([
+    getDealCatalog(supabase),
+    getEventCatalog(supabase),
     supabase.from("site_settings").select("about_gallery").eq("id", true).maybeSingle(),
     getFeaturedReleases(supabase),
   ]);
 
-  return <Marketing spotlight={event} slides={settings?.about_gallery ?? []} releases={releases} />;
+  return (
+    <Marketing
+      deals={deals.slice(0, ROW_LIMIT)}
+      events={upcoming.slice(0, ROW_LIMIT)}
+      slides={settings?.about_gallery ?? []}
+      releases={releases}
+    />
+  );
 }
