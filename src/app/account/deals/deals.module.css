@@ -112,3 +112,116 @@
 .total {
   font-weight: 700;
 }
+
+/* -- counter decision panel ------------------------------------------
+   Mirrors the event door panel in ../tickets/tickets.module.css. The two
+   are deliberately duplicated for now; step 6 of docs/design-system.md
+   redesigns both passes together and unifies them. */
+
+.doorStatus {
+  margin-top: var(--space-sm);
+}
+
+.approved {
+  margin-top: var(--space-sm);
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+
+.declined {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.doorHistory {
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+
+/* The single low-risk trigger on the card itself — everything that can
+   actually change the redemption lives behind the Modal this opens, not
+   exposed inline where a scroll-tap could hit Approve by accident. */
+.doorOpenBtn {
+  margin-top: var(--space-sm);
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--fg-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition:
+    color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+
+.doorOpenBtn:hover {
+  color: var(--fg);
+  border-color: var(--fg-muted);
+}
+
+.doorModalBody {
+  max-width: 480px;
+  margin-inline: auto;
+  padding: var(--space-lg) var(--space-md) var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.doorModalTitle {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+
+.doorModalHint {
+  font-size: 0.82rem;
+  color: var(--fg-muted);
+}
+
+.doorInput {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.doorInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.doorButtons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.reasonList {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  width: 100%;
+}
+
+.reasonCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.doorError {
+  font-size: 0.8rem;
+  color: var(--accent);
+}

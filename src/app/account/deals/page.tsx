@@ -4,7 +4,8 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
+import { DealDoorPanel } from "./DealDoorPanel";
 import styles from "./deals.module.css";
 
 export const metadata: Metadata = { title: "Your deals" };
@@ -38,7 +39,9 @@ export default async function AccountDealsPage({
 
   const { data: redemptions } = await supabase
     .from("deal_redemptions")
-    .select("id, total_cents, currency, status, reference_code, approved_at, created_at, deal_id, vendor_id")
+    .select(
+      "id, total_cents, currency, status, reference_code, approved_at, approved_by_name, declined_at, declined_by_name, declined_reasons, reversed_at, reversed_by_name, reversed_reasons, created_at, deal_id, vendor_id"
+    )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -105,9 +108,7 @@ export default async function AccountDealsPage({
                     </p>
                   )}
 
-                  {redemption.approved_at && (
-                    <p className={styles.approved}>Redeemed {formatDate(redemption.approved_at)}</p>
-                  )}
+                  {redemption.status === "paid" && <DealDoorPanel redemption={redemption} />}
 
                   <div className={styles.cardFooter}>
                     <span>Total</span>
