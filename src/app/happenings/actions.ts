@@ -36,7 +36,7 @@ export async function startTicketCheckout(eventId: string, quantity: number, agr
   if (eventError || !event || !event.is_published) {
     throw new Error("This event is no longer available.");
   }
-  // The studio listing only ever links to upcoming events, but that's a
+  // The Happenings listing only ever links to upcoming events, but that's a
   // display-time filter — without this, a bookmarked/shared link to an
   // event that has since passed could still be bought.
   if (new Date(event.event_date).getTime() < Date.now()) {

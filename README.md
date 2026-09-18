@@ -84,21 +84,26 @@ source of truth; this section is only the short version.
   `spotify_url` a floating corner player mounted only on that creator's
   page. Published products tied to the creator (`products.creator_id`)
   close the page out as a shop grid.
-- `/studio` and `/studio/creators` — events and a Creators teaser (published
-  creator profiles, linking into their full `/creators/[slug]` pages),
-  tabbed together under "Happenings" — Events first, since that's the more
-  time-sensitive of the two. Upcoming events render as a gig list (a large
-  date block, and on hover/focus the row reveals the event's cover image
-  behind a scrim); past events are a numbered cover-art grid, most recent
-  first — either section is omitted when it's empty. Upcoming events sell
-  tickets: pick a pax count, pay through the same Revolut flow as the shop
-  (skipped entirely for free events), and the ticket shows up in
-  `/account/tickets` with a short reference code and a pax badge — that's
-  what the buyer shows at the door. Buying a ticket requires being signed
-  in, unlike shop checkout, since the whole point is that it's tied to an
-  account staff can check in. Capacity (if the event has one) is tracked
-  the same way shop stock is: decremented only once payment actually
-  clears, not at checkout.
+- `/happenings` and `/happenings/[id]` — the event calendar and event
+  detail. The list leads with the next date as a full-width featured
+  block, then an upcoming list grouped into "This week", "Later this
+  month" and "Later" (each row a date block, poster thumbnail, venue and
+  price), then a muted grid of past events. Either section is omitted when
+  it's empty. `/studio` permanently redirects here. The detail page carries
+  the description, organiser and venue (with a Maps link) alongside a
+  sticky ticket card — price per person, capacity remaining, a quantity
+  stepper and "Get tickets" — which becomes a fixed bottom bar on mobile.
+  Confirming opens a sheet with the terms and the agreement checkbox, so
+  the primary button is never disabled by unread legal text; signed-out
+  visitors get a sign-in sheet that returns them to the event. Payment runs
+  through the same Revolut flow as the shop (skipped entirely for free
+  events), and the ticket shows up in `/account/tickets` with a short
+  reference code and a pax badge — that's what the buyer shows at the door.
+  Buying a ticket requires being signed in, unlike shop checkout, since the
+  whole point is that it's tied to an account staff can check in. Capacity
+  (if the event has one) is tracked the same way shop stock is: decremented
+  only once payment actually clears, not at checkout. Past events render
+  read-only, with no ticket panel.
 - `/shop` and `/shop/[id]` — retail product grid and product detail, with
   per-size stock (sold-out sizes show as struck through) and up to 5 photos
   per product in a thumbnail-driven gallery (`Gallery.tsx` — a vertical
@@ -129,7 +134,7 @@ source of truth; this section is only the short version.
   else gets redirected before rendering anything.
 
 Anything published in the last two weeks shows an automatic "New" tag on
-`/shop` and `/studio` — no manual step, it's driven off `published_at`.
+`/shop` and `/happenings` — no manual step, it's driven off `published_at`.
 
 Navigation is one shell (`components/app-shell/AppShell.tsx`, a server
 component) that reads the session and the admin's nav-visibility settings

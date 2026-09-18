@@ -48,7 +48,7 @@ export function Marketing({
           </motion.div>
         )}
         <motion.nav className={styles.quickLinks} aria-label="Quick links" variants={fadeUpItem}>
-          <Link href="/studio">Happenings</Link>
+          <Link href="/happenings">Happenings</Link>
           <span aria-hidden>&middot;</span>
           <Link href="/shop">Shop</Link>
         </motion.nav>

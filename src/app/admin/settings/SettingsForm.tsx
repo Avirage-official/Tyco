@@ -283,7 +283,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
       <h3 style={{ marginTop: "var(--space-lg)" }}>Explore sections</h3>
       <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>
         Background photo for each slide of the swipeable Retail / Happenings section — shown on
-        the dashboard and reused as the hero on /shop and /studio. Visibility is controlled from
+        the dashboard and reused as the hero on /shop. Visibility is controlled from
         Navigation below, not here.
       </p>
 
@@ -326,7 +326,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
       <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>
         Hide a section from the desktop nav, mobile menu, and footer — the page itself stays up,
         it just won&rsquo;t be linked to anywhere. Hiding Shop or Happenings also swaps its
-        homepage swipe slide (and the /shop or /studio hero) to a &ldquo;Coming soon&rdquo;
+        homepage swipe slide (and the /shop hero) to a &ldquo;Coming soon&rdquo;
         placeholder, so it isn&rsquo;t promoted anywhere either. Account isn&rsquo;t hideable.
       </p>
 

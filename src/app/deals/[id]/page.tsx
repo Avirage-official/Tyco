@@ -3,13 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Accordion } from "@/components/ui/Accordion";
 import { CoverImage } from "@/components/ui/CoverImage";
+import { ParallaxMedia } from "@/components/ui/ParallaxMedia";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { StickyBarSpacer } from "@/components/ui/StickyBar";
 import { IconPin } from "@/components/icons";
 import { createClient } from "@/lib/supabase/server";
 import { getDealCatalog } from "@/lib/deals/catalog";
 import { DealsGrid } from "../DealsGrid";
-import { ParallaxMedia } from "./ParallaxMedia";
 import { RedeemPanel } from "./RedeemPanel";
 import styles from "./deal.module.css";
 

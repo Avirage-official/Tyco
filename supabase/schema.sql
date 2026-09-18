@@ -1129,7 +1129,7 @@ alter table public.site_settings add column if not exists mission_blurb text;
 alter table public.site_settings add column if not exists legal_terms text;
 -- Background photo per swipeable-dashboard slide — {retail, happenings},
 -- each an optional storage URL. The same swiper (and these same
--- backgrounds) is reused as the hero on /shop and /studio, landing on the
+-- backgrounds) is reused as the hero on /shop, landing on the
 -- slide matching that page.
 alter table public.site_settings add column if not exists dashboard_slide_images jsonb not null default '{}'::jsonb;
 -- Unused — superseded by nav_hidden_items below, which now also drives
