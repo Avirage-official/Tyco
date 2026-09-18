@@ -1,0 +1,87 @@
+.pass {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.highlight {
+  outline: 2px solid var(--accent-2);
+  outline-offset: -2px;
+}
+
+.cover {
+  position: relative;
+  width: 100%;
+  /* A strip, not a hero: it identifies the pass at a glance in a list
+     without pushing the action below the fold. */
+  aspect-ratio: 5 / 2;
+  background: var(--surface-2);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-md);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.meta {
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+
+.holder {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+}
+
+.holderLabel {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-faint);
+}
+
+.holderName {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2xs) var(--space-sm);
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+  font-size: var(--text-xs);
+  color: var(--fg-faint);
+}
+
+.code b {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+}

@@ -49,3 +49,41 @@
   width: 16px;
   height: 16px;
 }
+
+/* Full-screen on a phone is deliberate — this is the hand-your-device-over
+   moment, and Wallet, Square and every POS handover screen take the whole
+   screen so a stranger holding the phone can't scroll away into the rest of
+   the app. On a desktop nobody hands a laptop across a counter: it's a
+   reading task, so it becomes an ordinary centred dialog sized to its
+   content (Material's dialog spec, Apple's HIG). */
+@media (min-width: 760px) {
+  .dialog {
+    /* inset:0 + margin:auto centres on both axes. height must be
+       fit-content, not auto: with both top and bottom pinned, an auto
+       height stretches to fill and then sits at max-height. */
+    inset: 0;
+    margin: auto;
+    width: min(520px, calc(100vw - 2 * var(--space-lg)));
+    height: fit-content;
+    max-height: min(85vh, 40rem);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-float);
+  }
+
+  /* A plain scrim, as Material's dialog spec has it — the page behind is
+     dimmed, not blurred, so nothing competes with the panel. */
+  .dialog::backdrop {
+    background: var(--scrim-strong);
+  }
+
+  .content {
+    height: auto;
+    max-height: min(85vh, 40rem);
+  }
+
+  .close {
+    padding: var(--space-sm) var(--space-md);
+    background: linear-gradient(180deg, var(--surface) 45%, transparent 100%);
+  }
+}
