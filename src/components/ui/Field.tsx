@@ -46,20 +46,41 @@ export function Input({
   helper,
   error,
   className,
+  trailing,
   id: idProp,
   ...rest
-}: FieldChrome & Omit<React.InputHTMLAttributes<HTMLInputElement>, "className">) {
+}: FieldChrome &
+  Omit<React.InputHTMLAttributes<HTMLInputElement>, "className"> & {
+    /** A control that sits inside the input's right edge — a password
+     *  reveal, a unit, a clear button. Purely decorative content should
+     *  carry aria-hidden. */
+    trailing?: React.ReactNode;
+  }) {
   const autoId = useId();
   const id = idProp ?? autoId;
+
+  const control = (
+    <input
+      id={id}
+      className={[styles.control, trailing ? styles.hasTrailing : "", error ? styles.invalid : ""]
+        .filter(Boolean)
+        .join(" ")}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={describedBy(id, helper, error)}
+      {...rest}
+    />
+  );
+
   return (
     <Wrap id={id} label={label} helper={helper} error={error} className={className}>
-      <input
-        id={id}
-        className={error ? `${styles.control} ${styles.invalid}` : styles.control}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(id, helper, error)}
-        {...rest}
-      />
+      {trailing ? (
+        <div className={styles.adorned}>
+          {control}
+          <span className={styles.trailing}>{trailing}</span>
+        </div>
+      ) : (
+        control
+      )}
     </Wrap>
   );
 }

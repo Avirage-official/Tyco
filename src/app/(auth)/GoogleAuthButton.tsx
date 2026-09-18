@@ -52,7 +52,12 @@ export function GoogleAuthButton({ next }: { next?: string }) {
   }
 
   return (
-    <div>
+    <div className={styles.google}>
+      {error && (
+        <p className={styles.alert} role="alert">
+          {error}
+        </p>
+      )}
       <Button
         type="button"
         variant="ghost"
@@ -64,7 +69,6 @@ export function GoogleAuthButton({ next }: { next?: string }) {
         <GoogleIcon />
         {loading ? "Redirecting…" : "Continue with Google"}
       </Button>
-      {error && <p className={styles.error}>{error}</p>}
     </div>
   );
 }

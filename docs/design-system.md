@@ -361,11 +361,37 @@ References: DICE ticket wallet, Apple Wallet passes.
 
 ### 10.9 Auth (`/login`, `/signup`)
 
-Reference: Airbnb login.
+References: Resy, Tock, Eventbrite, Mindbody — the split every venue-led
+business converges on. The photograph carries the brand so the form does
+not have to, which is what lets the form be a plain column of fields
+rather than a boxed widget floating mid-page.
 
-Single centred card on `--surface`, Google button first, "or" divider,
-email and password, inline errors, one primary button. The card fades up
-once. No changes to the auth logic.
+A shared `(auth)/layout.tsx` owns the composition:
+
+- **≥900px**: two equal halves. The slideshow fills the left edge to edge
+  and the brand line sits over its bottom corner; the form column is
+  centred in the right half, on the page background, with no card.
+- **Below that**: the same slideshow full-bleed behind the whole screen,
+  scrimmed, with the form riding an opaque ground that rises out of the
+  photograph. The brand line is desktop-only — on a phone the form's own
+  heading already says where you are, and the picture is what loses room
+  otherwise.
+- **No gallery uploaded**: a supported state, not a broken one. The panel
+  falls back to a flat `--surface` on a desk and is dropped entirely on a
+  phone, where the form simply centres.
+
+Photographs come from `site_settings.about_gallery`, the gallery an admin
+already curates in Settings → About; there is no second place to manage
+them. They crossfade every five seconds with a slow scale, both of which
+stop under `prefers-reduced-motion`.
+
+Form: Google button first, "or" divider, then the fields. A problem that
+belongs to one box ("Password should be at least 6 characters") is shown
+on that box via the shared `Input`; a problem with the attempt as a whole
+("Invalid login credentials" — which half was wrong is deliberately not
+disclosed) is announced above the fields. Passwords carry a reveal.
+`?next=` survives the switch between the two pages, and only a same-origin
+path is ever honoured. No changes to the auth logic.
 
 ### 10.10 About (`/about`)
 

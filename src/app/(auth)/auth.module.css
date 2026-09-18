@@ -1,84 +1,174 @@
-.wrap {
-  min-height: calc(100dvh - var(--nav-h));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-block: var(--space-2xl);
-}
+/* ==========================================================================
+   Sign in / create account
+   Two columns on a desk, one stack behind a photograph on a phone.
+   See (auth)/layout.tsx for why the split exists at all.
+   ========================================================================== */
 
-.card {
-  width: 100%;
-  max-width: 380px;
-  padding: var(--space-lg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--bg-raised);
-}
+.split {
+  /* The site header is sticky, so the split fills what is left of the
+     viewport under it. The mobile bar and the desktop nav are not the
+     same height. */
+  --auth-nav: 3.5rem;
 
-.title {
-  font-size: 1.8rem;
-}
-
-.subtitle {
-  margin-top: 0.4rem;
-  color: var(--fg-muted);
-  font-size: 0.92rem;
-}
-
-.form {
-  margin-top: var(--space-lg);
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  min-height: calc(100dvh - var(--auth-nav));
+  overflow: hidden;
+  /* Guarantees a band of photograph above the form on a phone, however
+     tall the form itself is. */
+  padding-top: 6rem;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+/* -- the photographic side -------------------------------------------- */
+
+.panel {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--surface);
 }
 
-.label {
-  font-size: 0.78rem;
+/* On a phone the form carries its own opaque ground, so the scrim is not
+   doing legibility work here — only settling the photograph into the dark
+   page. Heavy-handed and it reads as a smudge rather than a picture. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(33, 28, 24, 0.1) 0%,
+    rgba(33, 28, 24, 0.4) 100%
+  );
+}
+
+/* Desktop only: on a phone the form's own heading already says where you
+   are, and a second block of copy would be the first thing the picture
+   loses room for. */
+.panelCopy {
+  display: none;
+}
+
+.panelTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 2.4vw, 2.6rem);
   font-weight: 600;
-  color: var(--fg-muted);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  color: var(--fg);
 }
 
-.input {
-  height: 2.85rem;
-  padding-inline: var(--space-sm);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+.panelBody {
+  margin-top: var(--space-2xs);
+  max-width: 32ch;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--fg) 76%, transparent);
+}
+
+/* -- the form side ----------------------------------------------------- */
+
+.formCol {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding: var(--space-lg) var(--space-sm) var(--space-xl);
   background: var(--bg);
 }
 
-.input:focus {
-  outline: none;
-  border-color: var(--accent);
+/* The form's ground rises out of the photograph rather than cutting it
+   with a hard edge or a rounded sheet corner. */
+.formCol::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 5rem;
+  background: linear-gradient(to top, var(--bg), transparent);
+  pointer-events: none;
 }
 
-.error {
-  font-size: 0.85rem;
-  color: var(--accent);
+.form {
+  width: 100%;
+  max-width: 26rem;
+  margin-inline: auto;
 }
 
+/* No gallery uploaded yet: drop the photo treatment entirely on a phone
+   rather than leaving the form riding a blank grey band. */
+.split[data-bare="true"] {
+  padding-top: 0;
+}
+
+.split[data-bare="true"] .panel,
+.split[data-bare="true"] .formCol::before {
+  display: none;
+}
+
+.split[data-bare="true"] .formCol {
+  margin-block: auto;
+}
+
+/* -- page copy --------------------------------------------------------- */
+
+.title {
+  font-size: var(--text-h1);
+}
+
+.subtitle {
+  margin-top: var(--space-2xs);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
+.switch {
+  margin-top: var(--space-md);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
+.switch a {
+  color: var(--fg);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  text-decoration-color: var(--border-strong);
+  transition: text-decoration-color var(--dur-fast) var(--ease);
+}
+
+.switch a:hover {
+  text-decoration-color: var(--accent);
+}
+
+/* -- controls ---------------------------------------------------------- */
+
+.google {
+  margin-top: var(--space-md);
+}
+
+/* The mark sits at the left edge while the label stays optically centred —
+   the arrangement every provider's own brand guidance asks for. */
 .googleBtn {
-  display: inline-flex;
-  align-items: center;
+  position: relative;
   justify-content: center;
-  gap: 0.6rem;
+}
+
+.googleBtn svg {
+  position: absolute;
+  left: 1.1rem;
 }
 
 .divider {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   margin-block: var(--space-md);
-  color: var(--fg-muted);
-  font-size: 0.72rem;
-  font-weight: 600;
+  color: var(--fg-faint);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
 }
 
 .divider::before,
@@ -89,18 +179,153 @@
   background: var(--border);
 }
 
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.submit {
+  margin-top: var(--space-2xs);
+}
+
+/* Reveal control inside the password field. */
+.reveal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--fg-faint);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.reveal:hover,
+.reveal:focus-visible {
+  color: var(--fg);
+}
+
+.reveal svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* -- form-level messages -----------------------------------------------
+   A wrong password is not a property of the email box or the password box,
+   so it is announced above the fields instead of being pinned to one of
+   them. Field-scoped problems ("password too short") go on the field, via
+   the shared Input. */
+
+.alert {
+  margin-bottom: var(--space-sm);
+  padding: var(--space-2xs) var(--space-xs);
+  border-left: 2px solid var(--danger);
+  background: var(--accent-soft);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
 .notice {
-  font-size: 0.85rem;
-  color: var(--fg-muted);
+  margin-bottom: var(--space-sm);
+  padding: var(--space-2xs) var(--space-xs);
+  border-left: 2px solid var(--success);
+  background: var(--accent-2-soft);
+  font-size: var(--text-sm);
+  line-height: 1.5;
 }
 
-.switch {
-  margin-top: var(--space-md);
-  font-size: 0.88rem;
-  color: var(--fg-muted);
+.legal {
+  margin-top: var(--space-sm);
+  color: var(--fg-faint);
+  font-size: var(--text-xs);
+  line-height: 1.55;
 }
 
-.switch a {
-  color: var(--accent);
-  font-weight: 600;
+.legal a {
+  color: var(--fg-muted);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.legal a:hover {
+  color: var(--fg);
+}
+
+/* ==========================================================================
+   Desktop
+   ========================================================================== */
+
+@media (min-width: 860px) {
+  .split {
+    --auth-nav: 4rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .split {
+    flex-direction: row;
+    padding-top: 0;
+  }
+
+  .panel {
+    position: relative;
+    inset: auto;
+    flex: 1 1 50%;
+    min-width: 0;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  /* Half the width means the copy only has to clear the bottom of the
+     frame, not the whole of it. */
+  .scrim {
+    background: linear-gradient(
+      180deg,
+      rgba(33, 28, 24, 0.12) 0%,
+      rgba(33, 28, 24, 0.08) 45%,
+      rgba(33, 28, 24, 0.82) 100%
+    );
+  }
+
+  .panelCopy {
+    display: block;
+    position: relative;
+    z-index: 1;
+    padding: var(--space-lg);
+  }
+
+  .formCol {
+    flex: 1 1 50%;
+    min-width: 0;
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl) var(--space-lg);
+    background: none;
+  }
+
+  .formCol::before {
+    display: none;
+  }
+
+  /* With room for two columns the flat panel still earns its place: it
+     holds the brand line the form column does not carry. */
+  .split[data-bare="true"] .panel {
+    display: flex;
+  }
+
+  .split[data-bare="true"] .formCol {
+    margin-block: 0;
+  }
+}
+
+@media (min-width: 1280px) {
+  .formCol {
+    padding-inline: var(--space-xl);
+  }
+
+  .panelCopy {
+    padding: var(--space-xl);
+  }
 }

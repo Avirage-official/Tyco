@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Field";
 import { GoogleAuthButton } from "../GoogleAuthButton";
+import { PasswordInput } from "../PasswordInput";
+import { scopeOf, errorFor, type ErrorScope } from "../authErrors";
+import { safeNext } from "../next";
 import styles from "../auth.module.css";
 
 export function LoginForm({ next }: { next?: string }) {
@@ -12,6 +16,7 @@ export function LoginForm({ next }: { next?: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [scope, setScope] = useState<ErrorScope>("form");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -23,13 +28,13 @@ export function LoginForm({ next }: { next?: string }) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
+      setScope(scopeOf(error.message));
       setError(error.message);
       setLoading(false);
       return;
     }
 
-    const destination = next && next.startsWith("/") && !next.startsWith("//") ? next : "/account";
-    router.push(destination);
+    router.push(safeNext(next) ?? "/account");
     router.refresh();
   }
 
@@ -37,39 +42,37 @@ export function LoginForm({ next }: { next?: string }) {
     <>
       <GoogleAuthButton next={next} />
       <div className={styles.divider}>or</div>
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
+
+      <form onSubmit={handleSubmit} noValidate>
+        {error && scope === "form" && (
+          <p className={styles.alert} role="alert">
+            {error}
+          </p>
+        )}
+
+        <div className={styles.fields}>
+          <Input
+            label="Email"
             type="email"
             required
             autoComplete="email"
-            className={styles.input}
             value={email}
+            error={errorFor(scope, error, "email")}
             onChange={(e) => setEmail(e.target.value)}
           />
-        </div>
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            required
+
+          <PasswordInput
+            label="Password"
             autoComplete="current-password"
-            className={styles.input}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
+            error={errorFor(scope, error, "password")}
           />
+
+          <Button type="submit" full className={styles.submit} disabled={loading}>
+            {loading ? "Signing in…" : "Sign in"}
+          </Button>
         </div>
-        {error && <p className={styles.error}>{error}</p>}
-        <Button type="submit" full disabled={loading}>
-          {loading ? "Signing in…" : "Sign in"}
-        </Button>
       </form>
     </>
   );
