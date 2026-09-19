@@ -25,7 +25,7 @@ export default async function AccountPage() {
     .eq("id", user.id)
     .single();
 
-  const name = profile?.display_name ?? user.email?.split("@")[0] ?? "you";
+  const name = profile?.display_name ?? "there";
   const { data: isAdmin } = await supabase.rpc("is_admin");
 
   return (

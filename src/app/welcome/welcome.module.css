@@ -1,0 +1,417 @@
+/* ==========================================================================
+   Welcome — the three questions asked once, after an account is created.
+   Questions left, photograph right: the mirror of the sign-in split, so the
+   two flows are not mistaken for the same screen.
+   ========================================================================== */
+
+.split {
+  --welcome-nav: 3.5rem;
+
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - var(--welcome-nav));
+}
+
+/* -- the photograph ---------------------------------------------------- */
+
+/* On a phone it is a band, not a backdrop: there is a date field and a
+   country list on this screen, and photography behind live controls fights
+   them. Airbnb drops the picture here entirely; a band keeps the brand in
+   the room without crowding the interaction. */
+.panel {
+  position: relative;
+  order: -1;
+  flex: 0 0 22vh;
+  min-height: 9rem;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.panelImage {
+  object-fit: cover;
+  object-position: center;
+  /* A drift slow enough to read as stillness, not as an effect. It is the
+     only thing moving while someone thinks about a question. */
+  animation: drift 32s var(--ease) infinite alternate;
+}
+
+.panelScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(33, 28, 24, 0.1) 0%, rgba(33, 28, 24, 0.55) 100%);
+}
+
+@keyframes drift {
+  from {
+    transform: scale(1.04);
+  }
+  to {
+    transform: scale(1.12);
+  }
+}
+
+/* -- the question column ----------------------------------------------- */
+
+.column {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-lg) var(--space-sm) var(--space-md);
+}
+
+.flow {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 27rem;
+}
+
+/* On a phone the question sits directly under the photograph — centring it
+   in the leftover height strands it in the middle of nowhere. On a desk
+   there is height to spare, so it takes the optical middle instead. */
+.stage {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  /* Clears the pinned footer, so the last row of a long list can be
+     scrolled out from under it rather than sitting beneath it. */
+  padding-bottom: 6rem;
+}
+
+.step {
+  width: 100%;
+}
+
+.question {
+  font-size: clamp(1.7rem, 1.2rem + 2.2vw, 2.4rem);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.helper {
+  margin-top: var(--space-xs);
+  max-width: 34ch;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.error {
+  margin-top: var(--space-sm);
+  padding: var(--space-2xs) var(--space-xs);
+  border-left: 2px solid var(--danger);
+  background: var(--accent-soft);
+  font-size: var(--text-sm);
+}
+
+/* -- controls ----------------------------------------------------------- */
+
+/* Deliberately taller and quieter than the shared Input: it is the only
+   thing on the screen, so it reads as a line to write on rather than as a
+   widget in a form. */
+.textInput {
+  width: 100%;
+  margin-top: var(--space-md);
+  height: 3.4rem;
+  padding-inline: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--fg);
+  font-size: 1.1rem;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+
+.textInput::placeholder {
+  color: var(--fg-faint);
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.dob {
+  display: flex;
+  gap: var(--space-2xs);
+  margin-top: var(--space-md);
+  border: 0;
+}
+
+.dobPart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.dobYear {
+  flex: 1.5 1 0;
+}
+
+.dobLabel {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.dobInput {
+  width: 100%;
+  height: 3.4rem;
+  padding-inline: var(--space-xs);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--fg);
+  font-size: 1.1rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+
+.dobInput::placeholder {
+  color: var(--fg-faint);
+  font-size: 1rem;
+}
+
+.dobInput:focus {
+  outline: none;
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.dob[data-invalid] .dobInput {
+  border-color: var(--danger);
+}
+
+.country {
+  margin-top: var(--space-md);
+}
+
+.countryList {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+}
+
+.countryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-block: var(--space-xs);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  color: var(--fg-muted);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.countryRow:hover {
+  color: var(--fg);
+}
+
+.countryRow[data-selected="true"] {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.countryTick {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--accent-2);
+}
+
+.countryMore {
+  margin-top: var(--space-sm);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  text-decoration-color: var(--border-strong);
+}
+
+.countryMore:hover {
+  color: var(--fg);
+}
+
+.countrySelectWrap {
+  overflow: hidden;
+  margin-top: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.countrySelect {
+  width: 100%;
+  height: 3rem;
+  padding-inline: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--fg);
+}
+
+/* -- footer ------------------------------------------------------------- */
+
+/* Pinned on a phone: the country list is longer than the screen, and the
+   only action on the page must not scroll out of reach. The solid ground is
+   what stops list rows showing through it. */
+.footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  background: var(--bg);
+}
+
+.footer::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: var(--space-md);
+  background: linear-gradient(to top, var(--bg), transparent);
+  pointer-events: none;
+}
+
+/* A filling bar rather than "Step 2 of 3" or a numbered index — the design
+   system removed those, and a bar reads without being read. */
+.track {
+  height: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.trackFill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.back {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.back:hover:not(:disabled) {
+  color: var(--fg);
+}
+
+.back:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.continue {
+  min-width: 9rem;
+}
+
+/* -- the payoff --------------------------------------------------------- */
+
+.payoff {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 27rem;
+}
+
+.payoffLine {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 1.3rem + 2.4vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.payoffSub {
+  margin-top: var(--space-2xs);
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
+/* ==========================================================================
+   Desktop — two halves, photograph on the right.
+   ========================================================================== */
+
+@media (min-width: 860px) {
+  .split {
+    --welcome-nav: 4rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .split {
+    flex-direction: row;
+  }
+
+  .panel {
+    order: 0;
+    flex: 1 1 50%;
+    min-height: 0;
+  }
+
+  .panelScrim {
+    background: linear-gradient(180deg, rgba(33, 28, 24, 0.08) 0%, rgba(33, 28, 24, 0.3) 100%);
+  }
+
+  .column {
+    flex: 1 1 50%;
+    min-width: 0;
+    align-items: center;
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .flow {
+    min-height: 26rem;
+  }
+
+  .stage {
+    align-items: center;
+    padding-bottom: var(--space-lg);
+  }
+
+  .footer {
+    position: static;
+    padding-bottom: 0;
+    background: none;
+  }
+
+  .footer::before {
+    display: none;
+  }
+}
+
+@media (min-width: 1280px) {
+  .column {
+    padding-inline: var(--space-xl);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panelImage {
+    animation: none;
+  }
+}

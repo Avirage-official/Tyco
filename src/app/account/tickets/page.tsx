@@ -33,7 +33,7 @@ export default async function TicketsPage({
     .select("display_name")
     .eq("id", user.id)
     .maybeSingle();
-  const holderName = profile?.display_name ?? user.email?.split("@")[0] ?? "Member";
+  const holderName = profile?.display_name ?? "Member";
 
   const { data: tickets } = await supabase
     .from("event_tickets")

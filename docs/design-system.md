@@ -393,6 +393,47 @@ disclosed) is announced above the fields. Passwords carry a reveal.
 `?next=` survives the switch between the two pages, and only a same-origin
 path is ever honoured. No changes to the auth logic.
 
+### 10.9b Welcome (`/welcome`)
+
+References: Airbnb host onboarding, Typeform, Monzo.
+
+Three questions — name, date of birth, country — one per screen. A card with
+three stacked labelled inputs and a Submit button is the shape that reads as
+generated; a question given a whole screen can be asked as a sentence in
+display type instead of shrunk to a grey label.
+
+Questions left, photograph right — the mirror of the sign-in split, so the
+two flows are not mistaken for the same screen. Below 900px the photograph
+becomes a band across the top rather than a backdrop: there is a date field
+and a country list here, and photography behind live controls fights them.
+
+The photograph is the anchor and never moves; the question column travels.
+Each step leaves in the direction of travel and the next arrives from the
+opposite side, so Back reads as going back. Within a step the question,
+field and helper stagger in. Progress is a filling bar, never "Step 2 of 3"
+or a numbered index. A slow drift on the photograph is the only thing moving
+while someone thinks; it stops under `prefers-reduced-motion`.
+
+Two controls carry most of the weight:
+
+- **Date of birth is three boxes**, not `<input type="date">` — a native date
+  input renders differently in every browser and throws up a system modal on
+  a phone. They advance as they fill and step back on backspace.
+- **Country is a short list** of the markets Tyco serves, with the long list
+  behind "Somewhere else". A 200-row select is the wrong control for a
+  question nearly everyone answers the same way.
+
+Each step validates its own answer before it advances, so "31 February" is
+caught on the date screen rather than two screens later.
+
+It ends on the answer it bought: the questions clear, the name lands, and
+the member is handed to their account.
+
+The site footer is not rendered here (`FooterSlot`) — sitewide links under a
+single-task screen are an invitation to abandon it. The header stays.
+
+Required before the account area and before buying, not before browsing.
+
 ### 10.10 About (`/about`)
 
 Short hero image, mission copy at 65ch, three principles as plain rows, two

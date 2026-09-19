@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { requireOnboarded } from "@/lib/onboarding";
 import { createRevolutOrder } from "@/lib/checkout/revolut";
 
 /**
@@ -25,6 +26,7 @@ export async function startTicketCheckout(eventId: string, quantity: number, agr
   if (!user) {
     throw new Error("Sign in to buy tickets.");
   }
+  await requireOnboarded(sessionClient, user.id, "buy tickets");
 
   const supabase = createAdminClient();
 
