@@ -358,6 +358,29 @@ References: DICE ticket wallet, Apple Wallet passes.
   timeline under the code.
 - **Orders**: order card with items, total, and a horizontal progress
   stepper for fulfilment.
+- **Account** (`/account`): settings, not a hub. The four links it used to
+  hold — deals, tickets, orders, sign out — are already in the account
+  menu and the mobile sheet, so a page made of them was a menu pointing at
+  a menu. What replaces them is state the nav cannot give: a count of
+  tickets ready and deals to redeem, each linking through.
+
+  References: Airbnb Personal info, Google Account, Monzo. Sections in use
+  order — **You** (name, date of birth, country), **Signing in** (email,
+  password), **Leaving** — with each row edited in place: the row shows
+  the value and an Edit that expands only that row, and opening one closes
+  another, so there is never more than one row holding unsaved work. A
+  tick on the row confirms the save rather than a toast, because the
+  change happened there.
+
+  Hairlines between rows, never a card per section: a bordered box per
+  group is the generated-settings look and adds a seam without adding a
+  boundary the rows lack. Destructive actions last, separated by space
+  rather than a rule, and deleting asks for the word — a dialog that can
+  be dismissed by reflex is not a confirmation.
+
+  A rail beside the settings carries one happening and one deal. Four
+  posters stacked run taller than the settings and stop reading as a
+  suggestion; on a phone the rail follows the settings at full width.
 
 ### 10.9 Auth (`/login`, `/signup`)
 
