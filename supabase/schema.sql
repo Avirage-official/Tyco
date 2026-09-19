@@ -122,6 +122,98 @@ create trigger on_auth_user_created
   for each row execute procedure public.handle_new_user();
 
 -- ----------------------------------------------------------------------------
+-- Member profile: onboarding fields
+-- ----------------------------------------------------------------------------
+
+-- Held as a date, not an age. An age is a number that is wrong the moment
+-- after it is written; every read wants the current one, computed from this.
+alter table public.profiles add column if not exists date_of_birth date;
+
+-- ISO 3166-1 alpha-2 ("SG", "MY"). A code rather than free text, so it backs
+-- a picker and can be compared, instead of arriving as typed junk.
+alter table public.profiles add column if not exists country text;
+
+alter table public.profiles drop constraint if exists profiles_country_format;
+alter table public.profiles add constraint profiles_country_format
+  check (country is null or country ~ '^[A-Z]{2}$');
+
+-- A lower bound is all a CHECK can carry here: Postgres requires check
+-- expressions to be immutable and current_date is not, so "not in the
+-- future" is enforced by the trigger below instead.
+alter table public.profiles drop constraint if exists profiles_date_of_birth_sane;
+alter table public.profiles add constraint profiles_date_of_birth_sane
+  check (date_of_birth is null or date_of_birth > date '1900-01-01');
+
+create or replace function public.validate_profile_date_of_birth()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.date_of_birth is not null and new.date_of_birth > current_date then
+    raise exception 'date_of_birth cannot be in the future';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists check_profiles_date_of_birth on public.profiles;
+create trigger check_profiles_date_of_birth
+  before insert or update on public.profiles
+  for each row execute function public.validate_profile_date_of_birth();
+
+-- Marks the welcome step as done. Adding the column and stamping every row
+-- that already exists happen together, and ONLY the first time this runs.
+-- Re-running schema.sql later must not stamp members who have signed up
+-- since and not been through the step — that would skip their onboarding
+-- permanently, with no way to tell it had happened.
+do $$
+begin
+  if not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'profiles'
+      and column_name = 'onboarded_at'
+  ) then
+    alter table public.profiles add column onboarded_at timestamptz;
+    update public.profiles set onboarded_at = created_at;
+  end if;
+end;
+$$;
+
+-- Profiles were world-readable ("using (true)") back when the row held only
+-- a display name and an avatar. A date of birth is personal data, and the
+-- anon key that could read it ships inside the browser bundle — so the row
+-- is now readable only by the member it belongs to, or by an admin.
+--
+-- Safe to tighten: every read in the app is either `.eq("id", user.id)` for
+-- the signed-in member, or /admin/users, which is already behind
+-- requireAdmin() and whose client carries the admin's own session.
+drop policy if exists "profiles are viewable by everyone" on public.profiles;
+drop policy if exists "members read their own profile" on public.profiles;
+create policy "members read their own profile"
+  on public.profiles for select
+  using (auth.uid() = id or public.is_admin());
+
+-- A name is never derived from an email address again. The old fallback
+-- turned theplain1994@hotmail.com into "theplain", and then greeted the
+-- member by it on the account page and the homepage hero. A profile now
+-- starts nameless and the welcome step collects a real one. The metadata
+-- read stays so anything still sending display_name keeps working; a blank
+-- becomes null rather than an empty string.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.profiles (id, display_name)
+  values (new.id, nullif(trim(new.raw_user_meta_data ->> 'display_name'), ''));
+  return new;
+end;
+$$;
+
+-- ----------------------------------------------------------------------------
 -- Music feature removal — the app no longer has a music tab, so the entire
 -- catalogue/listener-state schema behind it (artists, albums, tracks, likes,
 -- follows, playlists) is dropped. Explicit drops rather than just deleting

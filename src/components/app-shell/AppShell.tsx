@@ -2,7 +2,7 @@ import { CartProvider } from "@/lib/cart/CartContext";
 import { createClient } from "@/lib/supabase/server";
 import { SiteHeader } from "./SiteHeader";
 import { MobileHeader } from "./MobileHeader";
-import { Footer } from "./Footer";
+import { FooterSlot } from "./FooterSlot";
 import { PageTransition } from "./PageTransition";
 import styles from "./AppShell.module.css";
 
@@ -30,7 +30,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       .select("display_name")
       .eq("id", user.id)
       .maybeSingle();
-    displayName = profile?.display_name ?? user.email?.split("@")[0] ?? null;
+    displayName = profile?.display_name ?? null;
   }
 
   const shell = {
@@ -45,7 +45,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       <MobileHeader {...shell} />
       <main className={styles.main}>
         <PageTransition>{children}</PageTransition>
-        <Footer hiddenItems={shell.hiddenItems} />
+        <FooterSlot hiddenItems={shell.hiddenItems} />
       </main>
     </CartProvider>
   );

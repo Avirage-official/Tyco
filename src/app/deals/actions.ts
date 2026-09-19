@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { requireOnboarded } from "@/lib/onboarding";
 import { createRevolutOrder } from "@/lib/checkout/revolut";
 
 /**
@@ -23,6 +24,7 @@ export async function startDealCheckout(dealId: string, agreedToNoRefundPolicy: 
   if (!user) {
     throw new Error("Sign in to redeem deals.");
   }
+  await requireOnboarded(sessionClient, user.id, "redeem a deal");
 
   const supabase = createAdminClient();
 

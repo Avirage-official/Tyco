@@ -186,6 +186,12 @@ export interface Database {
           username: string | null;
           display_name: string | null;
           avatar_url: string | null;
+          /** ISO 8601 date. Stored rather than an age, which goes stale. */
+          date_of_birth: string | null;
+          /** ISO 3166-1 alpha-2, uppercase. */
+          country: string | null;
+          /** Null until the member has been through the welcome step. */
+          onboarded_at: string | null;
           created_at: string;
           updated_at: string;
         },
@@ -194,6 +200,9 @@ export interface Database {
           username?: string | null;
           display_name?: string | null;
           avatar_url?: string | null;
+          date_of_birth?: string | null;
+          country?: string | null;
+          onboarded_at?: string | null;
           created_at?: string;
           updated_at?: string;
         }

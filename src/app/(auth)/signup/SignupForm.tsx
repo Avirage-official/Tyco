@@ -13,7 +13,6 @@ import styles from "../auth.module.css";
 
 export function SignupForm({ next }: { next?: string }) {
   const router = useRouter();
-  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -35,10 +34,7 @@ export function SignupForm({ next }: { next?: string }) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { display_name: displayName },
-        emailRedirectTo: callbackUrl.toString(),
-      },
+      options: { emailRedirectTo: callbackUrl.toString() },
     });
 
     if (error) {
@@ -76,15 +72,6 @@ export function SignupForm({ next }: { next?: string }) {
         )}
 
         <div className={styles.fields}>
-          <Input
-            label="Name"
-            type="text"
-            autoComplete="name"
-            helper="How you'll be greeted, and the name staff see when you redeem."
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-          />
-
           <Input
             label="Email"
             type="email"

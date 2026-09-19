@@ -48,7 +48,7 @@ export default async function Home() {
       .select("display_name")
       .eq("id", user.id)
       .maybeSingle();
-    const name = profile?.display_name ?? user.email?.split("@")[0] ?? "there";
+    const name = profile?.display_name ?? "there";
 
     const dashboardData = await getDashboardData(supabase, name);
     return <Dashboard {...dashboardData} />;
