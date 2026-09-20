@@ -15,7 +15,10 @@ export type NavItem = {
 export const primaryNav: NavItem[] = [
   { href: "/deals", label: "Deals", navKey: "deals" },
   { href: "/happenings", label: "Happenings", navKey: "happenings" },
-  { href: "/journal", label: "Journal", navKey: "journal" },
+  // navKey stays "journal": it is the stored key in
+  // site_settings.nav_hidden_items, and renaming it would silently un-hide
+  // the section for anyone who had hidden it.
+  { href: "/listen", label: "Listen", navKey: "journal" },
   { href: "/shop", label: "Shop", navKey: "shop" },
   { href: "/about", label: "About", navKey: "about" },
 ];

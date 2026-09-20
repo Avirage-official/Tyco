@@ -1,6 +1,6 @@
 import { Marketing } from "@/components/home/Marketing";
 import { Dashboard, type DashboardProps } from "@/components/home/Dashboard";
-import type { ReleasePreview } from "@/components/home/JournalStrip";
+import type { ReleasePreview } from "@/components/home/ListenStrip";
 import { getSwipeDashboardData } from "@/lib/home/swipe-data";
 import { getDealCatalog } from "@/lib/deals/catalog";
 import { getEventCatalog } from "@/lib/events/catalog";

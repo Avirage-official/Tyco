@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
     // Order matters: the more specific /studio/deals must be matched
     // before /studio itself.
     return [
+      { source: "/journal", destination: "/listen", permanent: true },
       { source: "/studio/deals", destination: "/deals", permanent: true },
       { source: "/studio", destination: "/happenings", permanent: true },
     ];

@@ -1,0 +1,301 @@
+/* ==========================================================================
+   Listen — new music, on a rail held in the middle of the screen.
+   Reference: COLORS Studios. Borrowed: square tiles, the rail bleeding off
+   both edges, the four anchored text zones, a backdrop blurred past
+   recognition, and the refusal to put anything else on the page. The
+   typeface and the colours are Tyco's.
+   ========================================================================== */
+
+.stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* Fills what the sticky header leaves, so the rail lands in the middle
+     of the screen rather than under a title. */
+  min-height: calc(100dvh - 3.5rem);
+  overflow: hidden;
+}
+
+/* -- the room the tiles sit in ------------------------------------------ */
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--bg);
+}
+
+/* Scaled up before it is blurred: a blur samples past the element's edge
+   and would otherwise draw a pale border all the way round. */
+.backdropImage {
+  position: absolute;
+  inset: -8%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(64px) saturate(1.5) brightness(0.9);
+  transform: scale(1.1);
+}
+
+/* Enough to sit the tiles on, not so much that the backdrop stops being
+   a photograph — it was invisible at the first pass. */
+.backdropScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg) 62%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 24%, transparent) 48%,
+    color-mix(in srgb, var(--bg) 72%, transparent) 100%
+  );
+}
+
+/* -- the rail ------------------------------------------------------------ */
+
+/* Native scroll-snap, not a carousel package: drag, swipe, trackpad,
+   keyboard and the scrollbar all work because the browser is the one
+   scrolling. The arrows only nudge scrollLeft. */
+.track {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--space-sm);
+  padding-inline: var(--space-sm);
+  padding-block: var(--space-md);
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.track:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: -2px;
+}
+
+/* -- the tile ------------------------------------------------------------ */
+
+.tile {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(78vw, 22rem);
+  aspect-ratio: 1;
+  scroll-snap-align: start;
+  overflow: hidden;
+  background: var(--tile-bg);
+  color: var(--tile-ink);
+  transition: transform var(--dur) var(--ease);
+}
+
+.tile:hover {
+  transform: translateY(-4px);
+}
+
+/* The whole face is the play target, so the tile is one hit area rather
+   than a small button someone has to find. */
+.face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+}
+
+.play {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  transition:
+    opacity var(--dur) var(--ease),
+    letter-spacing var(--dur) var(--ease);
+}
+
+.play svg {
+  width: 15px;
+  height: 15px;
+}
+
+.face:hover .play,
+.face:focus-visible .play {
+  opacity: 1;
+  letter-spacing: 0.2em;
+}
+
+/* Corners, as on the reference: date up top, credit along the bottom.
+   pointer-events off so they never steal the click from the face. */
+.date,
+.credit {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.date {
+  top: var(--space-sm);
+  left: var(--space-sm);
+  opacity: 0.75;
+}
+
+.credit {
+  left: var(--space-sm);
+  right: var(--space-sm);
+  bottom: var(--space-sm);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.artist {
+  min-width: 0;
+  max-width: 68%;
+  font-size: var(--text-sm);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.channel {
+  flex-shrink: 0;
+  max-width: 30%;
+  text-align: right;
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.embed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* -- arrows -------------------------------------------------------------- */
+
+.controls {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2xs);
+  padding: 0 var(--space-sm) var(--space-md);
+}
+
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--fg);
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background var(--dur-fast) var(--ease),
+    opacity var(--dur-fast) var(--ease);
+}
+
+.arrow svg {
+  width: 18px;
+  height: 18px;
+  transform: rotate(180deg);
+}
+
+.arrowNext svg {
+  transform: none;
+}
+
+.arrow:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+.arrow:disabled {
+  opacity: 0.3;
+}
+
+/* -- the archive --------------------------------------------------------- */
+
+.archive {
+  padding-block: var(--space-2xl);
+  background: var(--bg);
+}
+
+.archiveTitle {
+  margin-bottom: var(--space-md);
+  font-size: var(--text-h2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: var(--space-md);
+}
+
+.grid .tile {
+  width: auto;
+}
+
+.grid .tile:hover {
+  transform: none;
+}
+
+.empty {
+  padding-block: var(--space-2xl);
+}
+
+/* ==========================================================================
+   Wider screens
+   ========================================================================== */
+
+@media (min-width: 860px) {
+  .stage {
+    min-height: calc(100dvh - 4rem);
+  }
+
+  .track,
+  .controls {
+    padding-inline: var(--space-md);
+  }
+
+  .track {
+    scroll-padding-inline: var(--space-md);
+  }
+
+  .tile {
+    width: min(42vw, 28rem);
+  }
+}
+
+@media (min-width: 1200px) {
+  .tile {
+    width: 26rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile:hover {
+    transform: none;
+  }
+}

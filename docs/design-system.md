@@ -48,7 +48,7 @@ touched:
 |---|---|---|
 | Numbered indexes on nav links and section labels ("01 —") | `DesktopNav`, `SwipeDashboard`, `WhoWeAreHero` | Plain labels |
 | Uppercase red eyebrow above every heading | `.eyebrow` utility, most pages | Headings carry their own hierarchy; eyebrows only where a section genuinely needs a category label |
-| Marquee strips as section dividers | `Marquee.tsx` on Happenings, Shop, Journal | Whitespace and section headings |
+| Marquee strips as section dividers | `Marquee.tsx` on Happenings, Shop, Listen | Whitespace and section headings |
 | Full-viewport horizontal swipe carousel | `SwipeDashboard` on Home, Happenings, Shop | Vertical card rows |
 | Forced grayscale on photos plus red multiply blend | `EventHero`, `EventCard`, `DealCard`, `SwipeDashboard`, `FeaturedShop` | Photos in colour with a light bottom scrim only where text overlaps |
 | Film-grain noise on `body` | `globals.css` | Flat background |
@@ -228,7 +228,7 @@ All motion goes through `motion/react` and the shared variants file. Rules:
 
 References: Airbnb (structure), DICE (mobile).
 
-- **Desktop**: wordmark left; centre rail with Deals, Happenings, Journal,
+- **Desktop**: wordmark left; centre rail with Deals, Happenings, Listen,
   Shop (when enabled), About; right side holds the cart and either
   Login / Sign up or an avatar menu with Your deals, Your tickets, Your
   orders, Account, Sign out. Active link underline animates with
@@ -263,7 +263,7 @@ References: Fever and DICE for structure, Airbnb for card rows.
    venue and price. Hidden when empty.
 4. **Who we are**: photo slideshow on the left, short copy and "Our story"
    link on the right. Moves below the fold.
-5. **From the Journal**: existing release strip, restyled to the shared card.
+5. **Listen**: the release strip, linking through to the rail.
 
 Motion: hero copy staggers in once, card rows fade-up on scroll.
 
@@ -336,15 +336,43 @@ Same skeleton as the deal detail: media, two columns, sticky ticket card
 Below: description, organiser, venue with map link when a location exists,
 and "More dates" as a row of event cards.
 
-### 10.7 Journal (`/journal`)
+### 10.7 Listen (`/listen`)
 
-References: Resident Advisor news, Bandcamp Daily.
+Reference: COLORS Studios' Listen page. Borrowed: square tiles on a rail
+held in the middle of the screen and bleeding off both edges, the four
+anchored text zones, a backdrop blurred past recognition, and the refusal
+to put anything else on the page — no title, no filter chips, no blurbs.
+The typeface and the palette are Tyco's; copying theirs would make the
+page a knockoff of a brand people recognise.
 
-1. **Header** and a chip row: All, Releases, News, Happenings, Shop.
-2. **Lead item**: the most recent entry as a wide card with a large
-   thumbnail.
-3. **Grid**: two columns desktop, one mobile. Release cards keep the inline
-   YouTube play. Event and product entries link to their detail pages.
+Music only. `feed_items` still holds `news`, but nothing publishes it yet
+and mixing it in is what made the old page a dumping ground: it carried
+releases, news, events and products, three of which already had their own
+sections.
+
+**The tile** is flat colour, not the artwork, because the artwork is a
+YouTube thumbnail and those nearly always have the artist and track
+already printed on them — the tile would say the same words twice in two
+fonts. The thumbnail earns its place as the backdrop instead, where blur
+turns the mess into atmosphere and the colour shifts as the rail moves.
+
+Colour comes from a six-swatch palette used **only here**, assigned by
+hashing the item id so a release keeps its colour forever with nothing to
+pick in admin. Each swatch carries its own ink, because auto-assigning a
+background without one gives unreadable tiles on the light colours.
+
+Four zones, all uppercase in the body face: date top-left, Play centred,
+artist – track bottom-left, channel bottom-right. The channel is dropped
+when it merely repeats the artist. YouTube titles are stripped of their
+packaging — `(Official Music Video)`, `[4K]` — before they are split on
+the first dash into artist and track.
+
+**The rail is native CSS scroll-snap**, not a carousel package: drag,
+swipe, trackpad, keyboard and the scrollbar all work because the browser
+is the one scrolling, and the arrows only nudge `scrollLeft`.
+
+Below it, **Earlier** — the same tile in a grid, so a release from three
+months ago is findable without dragging the rail across sixty items.
 
 ### 10.8 Account (`/account`, `/account/tickets`, `/account/deals`, `/account/orders`)
 
@@ -495,7 +523,7 @@ Each step is one pull request and leaves the site fully working.
 3. **Deals** list and the new deal detail route, with redirects.
 4. **Happenings** list and the new event detail route, with redirects.
 5. **Home**, both states.
-6. **Journal**, **Account**, **Auth**, **About**.
+6. **Listen**, **Account**, **Auth**, **About**.
 7. **Shop**, product and cart, when the section is switched back on.
 
 ## 13. Content requirements

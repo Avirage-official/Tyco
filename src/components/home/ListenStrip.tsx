@@ -7,7 +7,7 @@ import { IconArrowRight } from "@/components/icons";
 import { MotionLink } from "@/lib/motion/MotionLink";
 import { fadeUpContainer, fadeUpItem, revealViewport } from "@/lib/motion/variants";
 import { formatDate } from "@/lib/format";
-import styles from "./JournalStrip.module.css";
+import styles from "./ListenStrip.module.css";
 
 export type ReleasePreview = {
   id: string;
@@ -20,7 +20,7 @@ export type ReleasePreview = {
 
 function ReleaseCard({ release }: { release: ReleasePreview }) {
   return (
-    <MotionLink href="/journal" className={styles.card} variants={fadeUpItem}>
+    <MotionLink href="/listen" className={styles.card} variants={fadeUpItem}>
       <span className={styles.cover} aria-hidden>
         {release.cover_url && (
           <span className={styles.coverImg} style={{ backgroundImage: `url(${release.cover_url})` }} />
@@ -40,7 +40,7 @@ function ReleaseCard({ release }: { release: ReleasePreview }) {
   );
 }
 
-export function JournalStrip({ releases }: { releases: ReleasePreview[] }) {
+export function ListenStrip({ releases }: { releases: ReleasePreview[] }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
 
   if (releases.length === 0) return null;
@@ -54,14 +54,14 @@ export function JournalStrip({ releases }: { releases: ReleasePreview[] }) {
   }
 
   return (
-    <section className={`container ${styles.wrap}`} aria-label="Journal">
+    <section className={`container ${styles.wrap}`} aria-label="Listen">
       <div className={styles.head}>
         <div>
-          <p className="eyebrow">The Journal</p>
+          <p className="eyebrow">Listen</p>
           <h2 className={styles.heading}>New from the scene</h2>
         </div>
-        <LinkButton href="/journal" variant="ghost" className={styles.headCta}>
-          See the Journal
+        <LinkButton href="/listen" variant="ghost" className={styles.headCta}>
+          Hear it all
         </LinkButton>
       </div>
 
