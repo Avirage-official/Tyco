@@ -87,12 +87,86 @@
   scroll-snap-align: start;
   overflow: hidden;
   background: var(--tile-bg);
-  color: var(--tile-ink);
+  /* Always paper: the type now sits over a photograph, not over the flat
+     swatch, so the per-swatch ink no longer decides legibility. */
+  color: var(--fg);
   transition: transform var(--dur) var(--ease);
 }
 
 .tile:hover {
   transform: translateY(-4px);
+}
+
+/* -- the artwork ---------------------------------------------------------
+   The artwork is here so a visitor can see who they are looking at; a flat
+   colour alone told them nothing. It arrives desaturated under the tile's
+   own colour, multiplied over it, which keeps a wall of mismatched YouTube
+   thumbnails reading as one set instead of a search results page — and
+   knocks back any title an artist baked into their own artwork so it does
+   not fight the title the tile prints.
+
+   `isolation` keeps the multiply inside the tile; without it the blend
+   reaches the blurred backdrop behind the rail. */
+.art {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.artImage {
+  object-fit: cover;
+  object-position: center;
+  /* Lifted before the colour is multiplied over it: multiply only ever
+     darkens, so a photograph that was already dark comes out as mud and
+     takes the tile's colour down with it. */
+  filter: grayscale(1) brightness(1.45) contrast(0.92);
+  transform: scale(1.02);
+  transition:
+    filter var(--dur-slow) var(--ease),
+    transform 700ms var(--ease);
+}
+
+.artTint {
+  position: absolute;
+  inset: 0;
+  background: var(--tile-bg);
+  mix-blend-mode: multiply;
+  transition: opacity var(--dur-slow) var(--ease);
+}
+
+/* Pointing at a tile lifts the colour off and the real photograph comes
+   back — which is the moment someone is deciding whether to play it. */
+.tile:hover .artTint,
+.tile:focus-within .artTint {
+  opacity: 0.15;
+}
+
+.tile:hover .artImage,
+.tile:focus-within .artImage {
+  filter: grayscale(0) contrast(1);
+  transform: scale(1.06);
+}
+
+/* A phone has no hover, so the colour would never lift there and the
+   artwork would only ever be seen through it. Eased off at rest on touch
+   instead — enough tone to hold the set together, enough photograph to
+   recognise who is on it. */
+@media (hover: none) {
+  .artTint {
+    opacity: 0.72;
+  }
+}
+
+/* Text sat straight on a photograph is a coin toss. Two soft bands, top
+   and bottom, so the date and the credit hold on any artwork. */
+.shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.34) 0%, transparent 22%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.44) 0%, transparent 32%);
 }
 
 /* The whole face is the play target, so the tile is one hit area rather
@@ -253,6 +327,10 @@
   gap: var(--space-md);
 }
 
+.gridCell {
+  min-width: 0;
+}
+
 .grid .tile {
   width: auto;
 }
@@ -297,5 +375,10 @@
 @media (prefers-reduced-motion: reduce) {
   .tile:hover {
     transform: none;
+  }
+
+  .tile:hover .artImage,
+  .tile:focus-within .artImage {
+    transform: scale(1.02);
   }
 }

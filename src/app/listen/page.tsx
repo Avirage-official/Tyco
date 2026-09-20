@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { createClient } from "@/lib/supabase/server";
-import { ListenRail, type Release } from "./ListenRail";
+import { ListenRail } from "./ListenRail";
+import type { Release } from "./types";
 import { ListenArchive } from "./ListenArchive";
 import styles from "./listen.module.css";
 

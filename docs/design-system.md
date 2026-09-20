@@ -350,11 +350,18 @@ and mixing it in is what made the old page a dumping ground: it carried
 releases, news, events and products, three of which already had their own
 sections.
 
-**The tile** is flat colour, not the artwork, because the artwork is a
-YouTube thumbnail and those nearly always have the artist and track
-already printed on them — the tile would say the same words twice in two
-fonts. The thumbnail earns its place as the backdrop instead, where blur
-turns the mess into atmosphere and the colour shifts as the rail moves.
+**The tile** carries the artwork, desaturated and lifted, with its own
+colour multiplied over it. Flat colour alone was tried first and told a
+visitor nothing about who they were looking at, which is the whole job of
+a discovery page; the tint is what keeps a wall of mismatched YouTube
+thumbnails reading as one set rather than a search results page, and it
+knocks back any title an artist baked into their own artwork so it does
+not fight the title the tile prints. The base is brightened before the
+multiply, since multiply only darkens and an already-dark photograph
+comes out as mud. Pointing at a tile lifts the colour off and the real
+photograph returns; on touch, where there is no hover, the tint eases off
+at rest instead. The same thumbnail, blurred past recognition, is also
+the backdrop behind the rail, and the room changes colour as it moves.
 
 Colour comes from a six-swatch palette used **only here**, assigned by
 hashing the item id so a release keeps its colour forever with nothing to

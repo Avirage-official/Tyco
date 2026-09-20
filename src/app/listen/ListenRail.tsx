@@ -4,25 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { IconArrowRight } from "@/components/icons";
 import { EASE_IN_OUT } from "@/lib/motion/variants";
-import { colourFor, splitArtistTrack } from "@/lib/feed/releases";
-import { extractYouTubeId } from "@/lib/feed/youtube-embed";
+import { ListenTile } from "./ListenTile";
+import type { Release } from "./types";
 import styles from "./listen.module.css";
 
-export type Release = {
-  id: string;
-  title: string;
-  coverUrl: string | null;
-  channel: string | null;
-  date: string | null;
-  href: string | null;
-};
-
-function shortDate(iso: string | null) {
-  if (!iso) return null;
-  const d = new Date(iso);
-  const month = d.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
-  return `${month} ${d.getUTCDate()}`.toUpperCase();
-}
+const SIZES = "(min-width: 1200px) 26rem, (min-width: 860px) 42vw, 78vw";
 
 /**
  * A horizontal rail of square tiles, scrolled with native CSS scroll-snap
@@ -33,7 +19,6 @@ function shortDate(iso: string | null) {
 export function ListenRail({ releases }: { releases: Release[] }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  const [playing, setPlaying] = useState<string | null>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
 
@@ -50,8 +35,7 @@ export function ListenRail({ releases }: { releases: Release[] }) {
     let best = Infinity;
     Array.from(track.children).forEach((child, i) => {
       const el = child as HTMLElement;
-      const centre = el.offsetLeft + el.offsetWidth / 2;
-      const distance = Math.abs(centre - middle);
+      const distance = Math.abs(el.offsetLeft + el.offsetWidth / 2 - middle);
       if (distance < best) {
         best = distance;
         nearest = i;
@@ -62,8 +46,6 @@ export function ListenRail({ releases }: { releases: Release[] }) {
 
   useEffect(() => {
     sync();
-    const track = trackRef.current;
-    if (!track) return;
     const onResize = () => sync();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
@@ -108,68 +90,9 @@ export function ListenRail({ releases }: { releases: Release[] }) {
         role="region"
         aria-label="Releases"
       >
-        {releases.map((release) => {
-          const { artist, track } = splitArtistTrack(release.title, release.channel);
-          // The channel is usually the artist's own, so printing both puts
-          // the same name on the tile twice.
-          const channel =
-            release.channel && release.channel.trim().toLowerCase() !== artist.trim().toLowerCase()
-            ? release.channel
-            : null;
-          const colour = colourFor(release.id);
-          const videoId = extractYouTubeId(release.href);
-          const isPlaying = playing === release.id;
-
-          return (
-            <article
-              key={release.id}
-              className={styles.tile}
-              style={{ "--tile-bg": colour.bg, "--tile-ink": colour.ink } as React.CSSProperties}
-            >
-              {isPlaying && videoId ? (
-                <iframe
-                  className={styles.embed}
-                  src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`}
-                  title={`${artist} — ${track}`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <>
-                  {videoId ? (
-                    <button
-                      type="button"
-                      className={styles.face}
-                      onClick={() => setPlaying(release.id)}
-                      aria-label={`Play ${artist} — ${track}`}
-                    >
-                      <span className={styles.play}>Play</span>
-                    </button>
-                  ) : (
-                    <a
-                      className={styles.face}
-                      href={release.href ?? undefined}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <span className={styles.play}>
-                        Listen <IconArrowRight aria-hidden />
-                      </span>
-                    </a>
-                  )}
-
-                  <span className={styles.date}>{shortDate(release.date)}</span>
-                  <span className={styles.credit}>
-                    <span className={styles.artist}>
-                      {artist ? `${artist} – ${track}` : track}
-                    </span>
-                    {channel && <span className={styles.channel}>{channel}</span>}
-                  </span>
-                </>
-              )}
-            </article>
-          );
-        })}
+        {releases.map((release) => (
+          <ListenTile key={release.id} release={release} sizes={SIZES} />
+        ))}
       </div>
 
       <div className={styles.controls}>
