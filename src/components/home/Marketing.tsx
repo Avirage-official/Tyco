@@ -5,7 +5,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { WhoWeAreHero } from "@/components/home/WhoWeAreHero";
 import { VideoHero } from "@/components/home/VideoHero";
 import { DiscoveryRow } from "@/components/home/DiscoveryRow";
-import { JournalStrip, type ReleasePreview } from "@/components/home/JournalStrip";
+import { ListenStrip, type ReleasePreview } from "@/components/home/ListenStrip";
 import { DealCard } from "@/app/deals/DealCard";
 import { EventCard } from "@/app/happenings/EventCard";
 import type { DealSummary } from "@/lib/deals/catalog";
@@ -76,7 +76,7 @@ export function Marketing({
 
       <WhoWeAreHero slides={slides} />
 
-      <JournalStrip releases={releases} />
+      <ListenStrip releases={releases} />
     </>
   );
 }

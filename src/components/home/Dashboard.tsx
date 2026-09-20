@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { VideoHero } from "@/components/home/VideoHero";
 import { SwipeDashboard, type DealPreview } from "@/components/home/SwipeDashboard";
 import type { ShopItem } from "@/components/home/FeaturedShop";
-import { JournalStrip, type ReleasePreview } from "@/components/home/JournalStrip";
+import { ListenStrip, type ReleasePreview } from "@/components/home/ListenStrip";
 import { fadeUpItem } from "@/lib/motion/variants";
 import type { DashboardSlideImages, DashboardSlideVisibility, EventSlide } from "@/lib/supabase/types";
 import styles from "./Dashboard.module.css";
@@ -51,7 +51,7 @@ export function Dashboard({
         hiddenSlides={hiddenSlides}
       />
 
-      <JournalStrip releases={releases} />
+      <ListenStrip releases={releases} />
     </>
   );
 }
