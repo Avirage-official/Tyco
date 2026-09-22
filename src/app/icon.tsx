@@ -13,13 +13,13 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#211c18",
+          background: "#0b0b0c",
           borderRadius: 6,
           position: "relative",
           fontFamily: "serif",
         }}
       >
-        <div style={{ display: "flex", color: "#f4ecdc", fontSize: 20, fontWeight: 700 }}>
+        <div style={{ display: "flex", color: "#f6f5f7", fontSize: 20, fontWeight: 700 }}>
           T
         </div>
         <div

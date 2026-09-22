@@ -13,11 +13,11 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#211c18",
+          background: "#0b0b0c",
           position: "relative",
         }}
       >
-        <div style={{ display: "flex", color: "#f4ecdc", fontSize: 96, fontWeight: 700 }}>
+        <div style={{ display: "flex", color: "#f6f5f7", fontSize: 96, fontWeight: 700 }}>
           T
         </div>
         <div

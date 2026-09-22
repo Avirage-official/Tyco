@@ -133,7 +133,7 @@
   height: 44px;
   border-radius: 50%;
   right: -6px;
-  background: rgba(33, 28, 24, 0.75);
+  background: rgba(6, 6, 8, 0.75);
   border: 1px solid var(--border);
   color: var(--paper);
   transition: background 220ms var(--ease), border-color 220ms var(--ease);
