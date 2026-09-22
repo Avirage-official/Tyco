@@ -10,11 +10,11 @@ export async function GET() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#211c18",
+          background: "#0b0b0c",
           position: "relative",
         }}
       >
-        <div style={{ display: "flex", color: "#f4ecdc", fontSize: 100, fontWeight: 700 }}>
+        <div style={{ display: "flex", color: "#f6f5f7", fontSize: 100, fontWeight: 700 }}>
           T
         </div>
         <div

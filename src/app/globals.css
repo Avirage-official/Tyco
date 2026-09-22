@@ -7,51 +7,60 @@
 
 :root {
   /* -- base palette --------------------------------------------------- */
-  --ink: #211c18;            /* page background */
-  --ink-soft: #2c2622;       /* raised surface: cards, sheets, nav */
-  --ink-softer: #3a3229;     /* second raised level: inputs on cards, hover */
-  --border: #4a4037;         /* 1px lines; use sparingly */
-  --border-strong: #6a5d51;  /* focus rings, selected outlines */
+  --ink: #0b0b0c;            /* page background */
+  --ink-soft: #161618;       /* raised surface: cards, sheets, nav */
+  --ink-softer: #232326;     /* second raised level: inputs on cards, hover */
+  --border: #34343a;         /* 1px lines; use sparingly */
+  --border-strong: #55555e;  /* focus rings, selected outlines */
 
   /* -- text ------------------------------------------------------------ */
-  --fg: #f4ecdc;             /* primary text on dark */
-  --fg-muted: #b9ad98;       /* secondary text, meta */
-  --fg-faint: #8a7f6d;       /* placeholders, disabled */
+  --fg: #f6f5f7;             /* primary text on dark */
+  --fg-muted: #a6a4ad;       /* secondary text, meta */
+  --fg-faint: #76747e;       /* placeholders, disabled */
 
-  /* -- brand accent: primary actions, brand marks ---------------------- */
-  --red: #d63a2a;
-  --red-hover: #e9503f;
-  --red-pressed: #b52f21;
-  --red-soft: rgba(214, 58, 42, 0.16);
-  --on-red: #fff7ec;
+  /* -- brand accent: primary actions, brand marks ----------------------
+     Baker-Miller Pink. Mixed in 1979 for a naval correctional facility —
+     chosen to do something to the people in a room rather than to look
+     good, which is about the only colour in common use that can be said
+     of. The brand is named for it, so it is the only colour the site
+     spends: everything else is black, grey and paper.
 
-  /* -- complementary accent: availability, success, info --------------- */
-  --teal: #3fb8a8;
-  --teal-hover: #5fd0c0;
-  --teal-pressed: #2f9a8c;
-  --teal-soft: rgba(63, 184, 168, 0.16);
-  --on-teal: #0f1a18;
+     It is a light colour, so anything sitting ON it takes dark type. */
+  --pink: #ff91af;
+  --pink-hover: #ffaac2;
+  --pink-pressed: #ec7699;
+  --pink-soft: rgba(255, 145, 175, 0.16);
+  --on-pink: #14080d;
+
+  /* -- complementary accent: availability, success, info ---------------
+     Cooled off from the old warm teal: against a neutral black and a
+     saturated pink, a warm green reads as dirt. */
+  --teal: #4fd6c0;
+  --teal-hover: #6fe6d3;
+  --teal-pressed: #34b39f;
+  --teal-soft: rgba(79, 214, 192, 0.16);
+  --on-teal: #06120f;
 
   /* -- semantic aliases ------------------------------------------------ */
   --bg: var(--ink);
   --surface: var(--ink-soft);
   --surface-2: var(--ink-softer);
-  --accent: var(--red);
-  --accent-hover: var(--red-hover);
-  --accent-pressed: var(--red-pressed);
-  --accent-soft: var(--red-soft);
-  --on-accent: var(--on-red);
+  --accent: var(--pink);
+  --accent-hover: var(--pink-hover);
+  --accent-pressed: var(--pink-pressed);
+  --accent-soft: var(--pink-soft);
+  --on-accent: var(--on-pink);
   --accent-2: var(--teal);
   --accent-2-hover: var(--teal-hover);
   --accent-2-pressed: var(--teal-pressed);
   --accent-2-soft: var(--teal-soft);
   --on-accent-2: var(--on-teal);
-  --danger: var(--red);
+  --danger: var(--pink);
   --success: var(--teal);
 
   /* Overlays for text on photos. Always the ink RGB; never a hex copy. */
-  --scrim-weak: rgba(33, 28, 24, 0.35);
-  --scrim-strong: rgba(33, 28, 24, 0.8);
+  --scrim-weak: rgba(6, 6, 8, 0.35);
+  --scrim-strong: rgba(6, 6, 8, 0.82);
 
   /* -- legacy aliases ---------------------------------------------------
      Kept so pages that haven't been migrated to the new components still
@@ -62,8 +71,8 @@
   --on-ink: var(--fg);
   --bg-raised: var(--surface);
   --accent-strong: var(--accent-pressed);
-  --red-bright: var(--red-hover);
-  --red-deep: var(--red-pressed);
+  --red-bright: var(--pink-hover);
+  --red-deep: var(--pink-pressed);
 
   /* -- type ------------------------------------------------------------
      Fraunces (display) and Jost (body/UI), both loaded in layout.tsx.
@@ -94,7 +103,7 @@
   --radius-lg: 20px;
   --radius-pill: 999px;
 
-  --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.55);
 
   --shell-max: 1180px;
   --shell-max-wide: 1440px;

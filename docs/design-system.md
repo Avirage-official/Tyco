@@ -61,53 +61,62 @@ touched:
 
 ## 4. Colour
 
-Dark theme, kept. The base stays the warm charcoal already in production.
-The change is a second, complementary accent: red stays the brand and CTA
-colour, and a teal joins it for states that should not shout (availability,
-success, informational badges, secondary highlights). Red and teal sit
-opposite on the wheel, so they separate cleanly at a glance.
+Dark theme, on neutral black. The base was a warm charcoal; it was quietly
+tinting every photograph on the site brown, and against the brand colour it
+read as dirt.
+
+The brand colour is **Baker-Miller Pink** — mixed in 1979 for a naval
+correctional facility, chosen to do something to the people in a room
+rather than to look good. It is about the only colour in common use that
+can be said of, and the brand is named for it. So it is the only colour
+the site spends: everything else is black, grey and paper, and pink means
+"this is the thing to press".
+
+Pink is light, so anything sitting **on** it takes dark type, not paper.
+Teal stays for states that should not shout (availability, success,
+informational badges), cooled off from its old warm mix.
 
 ```css
 :root {
   /* base */
-  --ink:          #211c18;   /* page background */
-  --ink-soft:     #2c2622;   /* raised surface (cards, sheets, nav) */
-  --ink-softer:   #3a3229;   /* second raised level (inputs on cards, hover) */
-  --border:       #4a4037;   /* 1px lines; use sparingly */
-  --border-strong:#6a5d51;   /* focus rings, selected outlines */
+  --ink:          #0b0b0c;   /* page background */
+  --ink-soft:     #161618;   /* raised surface (cards, sheets, nav) */
+  --ink-softer:   #232326;   /* second raised level (inputs on cards, hover) */
+  --border:       #34343a;   /* 1px lines; use sparingly */
+  --border-strong:#55555e;   /* focus rings, selected outlines */
 
   /* text */
-  --fg:           #f4ecdc;   /* primary text on dark */
-  --fg-muted:     #b9ad98;   /* secondary text, meta */
-  --fg-faint:     #8a7f6d;   /* placeholders, disabled */
+  --fg:           #f6f5f7;   /* primary text on dark */
+  --fg-muted:     #a6a4ad;   /* secondary text, meta */
+  --fg-faint:     #76747e;   /* placeholders, disabled */
 
-  /* brand accent (primary actions, brand marks) */
-  --red:          #d63a2a;
-  --red-hover:    #e9503f;
-  --red-pressed:  #b52f21;
-  --red-soft:     rgba(214, 58, 42, 0.16);
-  --on-red:       #fff7ec;
+  /* brand accent (primary actions, brand marks) — Baker-Miller Pink */
+  --pink:         #ff91af;
+  --pink-hover:   #ffaac2;
+  --pink-pressed: #ec7699;
+  --pink-soft:    rgba(255, 145, 175, 0.16);
+  --on-pink:      #14080d;   /* pink is light; type on it goes dark */
 
   /* complementary accent (availability, success, info, secondary emphasis) */
-  --teal:         #3fb8a8;
-  --teal-hover:   #5fd0c0;
-  --teal-pressed: #2f9a8c;
-  --teal-soft:    rgba(63, 184, 168, 0.16);
-  --on-teal:      #0f1a18;
+  --teal:         #4fd6c0;
+  --teal-hover:   #6fe6d3;
+  --teal-pressed: #34b39f;
+  --teal-soft:    rgba(79, 214, 192, 0.16);
+  --on-teal:      #06120f;
 
   /* semantic aliases: components use these, never the raw names above */
   --bg:            var(--ink);
   --surface:       var(--ink-soft);
   --surface-2:     var(--ink-softer);
-  --accent:        var(--red);
-  --accent-hover:  var(--red-hover);
-  --accent-soft:   var(--red-soft);
-  --on-accent:     var(--on-red);
+  --accent:        var(--pink);
+  --accent-hover:  var(--pink-hover);
+  --accent-soft:   var(--pink-soft);
+  --on-accent:     var(--on-pink);
   --accent-2:      var(--teal);
   --accent-2-hover:var(--teal-hover);
   --accent-2-soft: var(--teal-soft);
   --on-accent-2:   var(--on-teal);
-  --danger:        var(--red);
+  --danger:        var(--pink);
   --success:       var(--teal);
 
   /* overlays for text on photos: rgba of --ink, never a hex copy */
@@ -363,9 +372,10 @@ photograph returns; on touch, where there is no hover, the tint eases off
 at rest instead. The same thumbnail, blurred past recognition, is also
 the backdrop behind the rail, and the room changes colour as it moves.
 
-Colour comes from a six-swatch palette used **only here**, assigned by
-hashing the item id so a release keeps its colour forever with nothing to
-pick in admin. Each swatch carries its own ink, because auto-assigning a
+Colour comes from a six-swatch palette used **only here** — built around
+the two colours the brand spends, pink and black, plus four that sit with
+them rather than compete — assigned by hashing the item id so a release
+keeps its colour forever with nothing to pick in admin. Each swatch carries its own ink, because auto-assigning a
 background without one gives unreadable tiles on the light colours.
 
 Four zones, all uppercase in the body face: date top-left, Play centred,

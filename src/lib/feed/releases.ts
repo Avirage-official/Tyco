@@ -5,17 +5,21 @@
  */
 
 /**
- * Saturated enough to carry a whole tile, warm enough to sit with the ink
- * and paper. Used only on Listen — the rest of the site stays on the two
- * brand accents.
+ * Built around the two colours the brand actually spends — Baker-Miller
+ * pink and black — plus four that sit with them rather than compete. The
+ * old set was led by the brand red, which now clashes with the pink it
+ * was replaced by.
+ *
+ * Each carries its own ink: a background assigned automatically without
+ * one leaves unreadable tiles on the light swatches.
  */
 export const LISTEN_COLOURS = [
-  { bg: "#d63a2a", ink: "#fff7ec" }, // brand red
-  { bg: "#3fb8a8", ink: "#0f1a18" }, // brand teal
-  { bg: "#e0a92a", ink: "#231a05" }, // amber
-  { bg: "#2f5fd6", ink: "#f2f5ff" }, // cobalt
-  { bg: "#c2407e", ink: "#fff0f6" }, // magenta
-  { bg: "#7d8b2e", ink: "#f7fbe8" }, // olive
+  { bg: "#ff91af", ink: "#14080d" }, // Baker-Miller pink
+  { bg: "#111114", ink: "#f6f5f7" }, // ink
+  { bg: "#3355ff", ink: "#f2f5ff" }, // cobalt
+  { bg: "#c8f04a", ink: "#14180a" }, // acid
+  { bg: "#ece7dd", ink: "#14080d" }, // bone
+  { bg: "#5b2a4a", ink: "#ffe9f2" }, // plum
 ] as const;
 
 export type ListenColour = (typeof LISTEN_COLOURS)[number];
